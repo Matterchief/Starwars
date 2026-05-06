@@ -461,8 +461,8 @@
     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8L3N2Zz4=')] opacity-50 pointer-events-none mix-blend-overlay"></div>
     <div class="max-w-3xl w-full text-center relative z-10 animate-pulse">
         <svg class="w-32 h-32 text-red-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-        <h1 class="display-font text-5xl md:text-7xl font-black text-red-500 uppercase tracking-widest mb-4 glow-text-hud" style="text-shadow: 0 0 30px rgba(220,38,38,0.8);">CRITICAL ALERT</h1>
-        <p id="holonet-message" class="text-white text-xl md:text-3xl font-bold datapad-font uppercase tracking-widest mb-12">SYSTEM BREACH DETECTED</p>
+        <h1 id="holonet-title" class="display-font text-5xl md:text-7xl font-black text-red-500 uppercase tracking-widest mb-4 glow-text-hud" style="text-shadow: 0 0 30px rgba(220,38,38,0.8);">INCOMING ALERT</h1>
+        <p id="holonet-message" class="text-white text-xl md:text-3xl font-bold datapad-font uppercase tracking-widest mb-12">SYSTEM NOTIFICATION</p>
         <button onclick="dismissAlert()" class="border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-black px-8 py-3 font-bold uppercase tracking-widest datapad-font transition-all text-xl active:scale-95">Acknowledge</button>
     </div>
 </div>
@@ -4117,17 +4117,27 @@
     }
 
     function showHolonetAlert(msg, alertColor) {
-        document.getElementById('holonet-message').innerText = msg;
         const alertDiv = document.getElementById('holonet-alert');
+        const titleEl = document.getElementById('holonet-title');
+        const msgEl = document.getElementById('holonet-message');
         const icon = alertDiv.querySelector('svg');
-        const title = alertDiv.querySelector('h1');
         const btn = alertDiv.querySelector('button');
+        
+        // Parse Ship Alert Message if possible
+        if (msg.includes('SHIP ALERT:')) {
+            const parts = msg.replace('⚠ SHIP ALERT: ', '').split(' — ');
+            titleEl.innerText = parts[0] || 'SHIP ALERT';
+            msgEl.innerText = parts[1] || '';
+        } else {
+            titleEl.innerText = 'INCOMING ALERT';
+            msgEl.innerText = msg;
+        }
         
         // Apply color theme
         const c = alertColor || '#dc2626'; // default red
         alertDiv.style.background = `color-mix(in srgb, ${c} 15%, rgba(2,6,23,0.92))`;
         if (icon) icon.style.color = c;
-        if (title) { title.style.color = c; title.style.textShadow = `0 0 30px ${c}80`; }
+        if (titleEl) { titleEl.style.color = c; titleEl.style.textShadow = `0 0 30px ${c}80`; }
         if (btn) { btn.style.borderColor = c; btn.style.color = c; }
         
         alertDiv.classList.remove('hidden');
