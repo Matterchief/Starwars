@@ -1250,7 +1250,7 @@
     let state = {
         activeSlot: "slot1",
         name: "", customTitle: "", cls: "", level: 1, alignment: 1, skin: "rebellion", scan: 30, static: 10, flicker: 5,
-        favorites: { armory: [], spells: [] }, spellLevel: "All", spellMine: false, armoryCat: "All", viewmode: "standard", uiscale: "md",
+        favorites: { armory: [], spells: [] }, spellLevel: "All", spellMine: false, spellReady: false, armoryCat: "All", viewmode: "standard", uiscale: "md",
         beginnerMode: false,
         editMode: false,
         stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
@@ -1704,18 +1704,33 @@
 
         let html = '';
         if (hasChar) {
-            html += `<button class="chip chip-mine ${state.spellMine?'active':''}" onclick="toggleMine()">★ My Powers</button>`;
+            html += `<button class="chip chip-ready ${state.spellReady?'active':''}" onclick="toggleReady()">⚡ Deployable</button>`;
+            html += `<button class="chip chip-mine ${state.spellMine?'active':''}" onclick="toggleMine()">📖 Class Path</button>`;
         }
-        html += `<button class="chip chip-fav ${state.spellLevel==='Favorites' && !state.spellMine ?'active':''}" onclick="setSpellLevel('Favorites')">★ Saved</button>`;
+        html += `<button class="chip chip-fav ${state.spellLevel==='Favorites' && !state.spellMine && !state.spellReady ?'active':''}" onclick="setSpellLevel('Favorites')">★ Saved</button>`;
         levels.forEach(l => {
-            const active = !state.spellMine && state.spellLevel === l;
+            const active = !state.spellMine && !state.spellReady && state.spellLevel === l;
             html += `<button class="chip ${active?'active':''}" onclick="setSpellLevel('${l}')">${l}</button>`;
         });
         c.innerHTML = html;
     }
     
-    function setSpellLevel(l) { state.spellLevel = l; state.spellMine = false; saveState(); renderHolocronFilters(); renderHolocron(); }
-    function toggleMine() { state.spellMine = !state.spellMine; if (state.spellMine) state.spellLevel = "All"; saveState(); renderHolocronFilters(); renderHolocron(); }
+    function setSpellLevel(l) { 
+        state.spellLevel = l; 
+        state.spellMine = false; 
+        state.spellReady = false; 
+        saveState(); renderHolocronFilters(); renderHolocron(); 
+    }
+    function toggleMine() { 
+        state.spellMine = !state.spellMine; 
+        if (state.spellMine) { state.spellLevel = "All"; state.spellReady = false; }
+        saveState(); renderHolocronFilters(); renderHolocron(); 
+    }
+    function toggleReady() { 
+        state.spellReady = !state.spellReady; 
+        if (state.spellReady) { state.spellLevel = "All"; state.spellMine = false; }
+        saveState(); renderHolocronFilters(); renderHolocron(); 
+    }
 
     const lvlOrder = { "Cantrip":0, "1st":1,"2nd":2,"3rd":3,"4th":4,"5th":5 };
 
@@ -1727,7 +1742,7 @@
 
         let items = spellData.map((item, originalIndex) => ({ ...item, originalIndex }));
 
-        if (state.spellMine && state.cls) {
+        if ((state.spellMine || state.spellReady) && state.cls) {
             const code = classCodeMap[state.cls];
             const maxLvl = maxSpellLevel(state.cls, parseInt(state.level)||1);
             if (state.cls === "Monk" || code === null) {
@@ -1735,8 +1750,11 @@
             } else {
                 items = items.filter(s => {
                     if (!s.classes.includes(code)) return false;
-                    const sl = lvlOrder[s.lvl];
-                    return sl <= maxLvl;
+                    if (state.spellReady) {
+                        const sl = lvlOrder[s.lvl];
+                        return sl <= maxLvl;
+                    }
+                    return true;
                 });
             }
         } else if (state.spellLevel === "Favorites") {
@@ -2043,14 +2061,14 @@
     };
 
     const crSpeciesOptions = [
-        {id:'human', name:'Human', sw:'Human', bonus:{choose2:true}, speed:30, traits:['Versatile: +1 to two ability scores of your choice','Extra Skill proficiency','Extra Language']},
-        {id:'twilek', name:"Half-Elf (Twi'lek)", sw:"Twi'lek", bonus:{cha:2,choose1:true}, speed:30, traits:['+2 CHA, +1 to one other score','Darkvision 60ft','Fey Ancestry (Adv vs Charm)','Two extra skill proficiencies']},
-        {id:'wookiee', name:'Half-Orc (Wookiee)', sw:'Wookiee', bonus:{str:2,con:1}, speed:30, traits:['+2 STR, +1 CON','Darkvision 60ft','Savage Attacks (extra crit die)','Relentless Endurance (drop to 1 HP once)']},
-        {id:'droid', name:'Warforged (Droid)', sw:'Droid', bonus:{con:2,choose1:true}, speed:30, traits:['+2 CON, +1 to one other','Integrated Protection (+1 AC)','No need to eat, drink, or breathe','Poison resistance']},
-        {id:'trandoshan', name:'Dragonborn (Trandoshan)', sw:'Trandoshan', bonus:{str:2,cha:1}, speed:30, traits:['+2 STR, +1 CHA','Breath Weapon (Acid/Fire)','Damage Resistance','Claws: 1d6 slashing unarmed']},
-        {id:'chiss', name:'High Elf (Chiss)', sw:'Chiss', bonus:{dex:2,int:1}, speed:30, traits:['+2 DEX, +1 INT','Darkvision 60ft','Keen Senses (Perception prof)','Extra cantrip (INT-based)']},
-        {id:'rodian', name:'Halfling (Rodian)', sw:'Rodian', bonus:{dex:2,cha:1}, speed:25, traits:['+2 DEX, +1 CHA','Lucky (reroll 1s on d20)','Brave (Adv vs Frightened)','Naturally Stealthy']},
-        {id:'zabrak', name:'Tiefling (Zabrak/Dathomirian)', sw:'Zabrak', bonus:{cha:2,int:1}, speed:30, traits:['+2 CHA, +1 INT','Darkvision 60ft','Hellish Resistance (fire)','Infernal Legacy (Thaumaturgy cantrip)']}
+        {id:'human', dnd:'Human', sw:'Human', bonus:{choose2:true}, speed:30, traits:['Versatile: +1 to two ability scores of your choice','Extra Skill proficiency','Extra Language']},
+        {id:'twilek', dnd:'Half-Elf', sw:"Twi'lek", bonus:{cha:2,choose1:true}, speed:30, traits:['+2 CHA, +1 to one other score','Darkvision 60ft','Fey Ancestry (Adv vs Charm)','Two extra skill proficiencies']},
+        {id:'wookiee', dnd:'Half-Orc', sw:'Wookiee', bonus:{str:2,con:1}, speed:30, traits:['+2 STR, +1 CON','Darkvision 60ft','Savage Attacks (extra crit die)','Relentless Endurance (drop to 1 HP once)']},
+        {id:'droid', dnd:'Warforged', sw:'Droid', bonus:{con:2,choose1:true}, speed:30, traits:['+2 CON, +1 to one other','Integrated Protection (+1 AC)','No need to eat, drink, or breathe','Poison resistance']},
+        {id:'trandoshan', dnd:'Dragonborn', sw:'Trandoshan', bonus:{str:2,cha:1}, speed:30, traits:['+2 STR, +1 CHA','Breath Weapon (Acid/Fire)','Damage Resistance','Claws: 1d6 slashing unarmed']},
+        {id:'chiss', dnd:'High Elf', sw:'Chiss', bonus:{dex:2,int:1}, speed:30, traits:['+2 DEX, +1 INT','Darkvision 60ft','Keen Senses (Perception prof)','Extra cantrip (INT-based)']},
+        {id:'rodian', dnd:'Halfling', sw:'Rodian', bonus:{dex:2,cha:1}, speed:25, traits:['+2 DEX, +1 CHA','Lucky (reroll 1s on d20)','Brave (Adv vs Frightened)','Naturally Stealthy']},
+        {id:'zabrak', dnd:'Tiefling', sw:'Zabrak', bonus:{cha:2,int:1}, speed:30, traits:['+2 CHA, +1 INT','Darkvision 60ft','Hellish Resistance (fire)','Infernal Legacy (Thaumaturgy cantrip)']}
     ];
 
     const crRangerData = {
@@ -2098,7 +2116,35 @@
             {group:'Weapon', options:[{id:'crossbow', name:'Hold-out Blaster & 20 bolts (Light Crossbow, 1d8 Energy)'},{id:'simple', name:'Vibro-dagger (Dagger, 1d4 Piercing)'}]},
             {group:'Force Focus', options:[{id:'pouch', name:'Utility Belt (Component Pouch) — pockets of crystals, herbs, and reagents'},{id:'focus', name:'Holocron Shard (Arcane Focus) — a fragment of an ancient Force artifact'}]},
             {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
+        ],
+        Cleric: [
+            {group:'Armor', options:[{id:'scale', name:'Durasteel Scale Mail (AC 14+DEX max 2)'},{id:'chain', name:'Armored Flight Suit (Chain Shirt, AC 13+DEX max 2)'}]},
+            {group:'Weapon', options:[{id:'mace', name:'Shock Baton (Mace, 1d6 Bludgeon)'},{id:'quarterstaff', name:'Electrostaff (Quarterstaff, 1d8 Bludgeon)'}]},
+            {group:'Shield', options:[{id:'shield', name:'Energy Shield (+2 AC)'},{id:'none', name:'No Shield'}]},
+            {group:'Pack', options:[{id:'priest', name:'Mystic Field Kit (Priest\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
         ]
+    };
+
+    const crClericData = {
+        dnd: 'Cleric', sw: 'Force Mystic / Consular', hitDie: 'd8', primary: 'WIS',
+        saves: ['wis', 'cha'], armorProf: 'Light, Medium armor, Shields', weaponProf: 'Simple weapons',
+        skillChoices: ['history','insight','medicine','persuasion','religion'],
+        numSkills: 2,
+        subclasses: [
+            {id:'life', name:'Path of the Sage', dnd:'Life Domain', desc:'You are a master of the living Force, focusing on healing and preservation.',
+             feature:{name:"Disciple of Life", desc:'Whenever you use a Force power of 1st level or higher to restore hit points, the target regains additional HP equal to 2 + the power\'s level.'}},
+            {id:'light', name:'Path of the Seer', dnd:'Light Domain', desc:'You channel the pure radiance of the Light Side, banishing darkness and exposing threats.',
+             feature:{name:"Warding Flare", desc:'When you are attacked by a creature within 30 feet that you can see, you can use your reaction to impose disadvantage on the attack roll.'}}
+        ],
+        levels: {
+            1: {features:['Force Sensitivity (Spellcasting): You channel the Force through wisdom and empathy (WIS). 3 cantrips known.','Divine Domain (Mystic Path): Choose your focus — Sage or Seer.']},
+            2: {features:['Force Channeling (Channel Divinity): Twice per short rest, you can unleash a powerful burst of Force energy.','Harness Force Energy: Regain an expended 1st-level power slot as an action.']},
+            3: {features:['2nd-level Force powers unlocked.','Aura of Vitality / Aid.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4th cantrip known.']},
+            5: {features:['3rd-level Force powers unlocked (Force Sever, Revivify).','Destroy Droids (Destroy Undead): When you use Force Channeling (Turn Droids), you can destroy droids of CR 1/2 or lower.']},
+            6: {features:['Force Channeling (3/rest).','Subclass Feature: Gain an archetype ability.']},
+            7: {features:['4th-level Force powers unlocked (Force Stasis, Banishment).']}
+        }
     };
 
     const crSorcererData = {
@@ -2132,10 +2178,52 @@
     };
 
     function getActiveClassData() {
-        return crState.cls === 'Sorcerer' ? crSorcererData : crRangerData;
+        if (crState.cls === 'Sorcerer') return crSorcererData;
+        if (crState.cls === 'Cleric') return crClericData;
+        return crRangerData;
     }
     function getActiveEquipment() {
         return crEquipmentChoices[crState.cls] || crEquipmentChoices.Ranger;
+    }
+
+    function getCrStatTotal(stat) {
+        const base = crState.baseStats[stat] || 10;
+        const bonus = crState.speciesBonuses[stat] || 0;
+        return base + bonus;
+    }
+
+    function crSelectSpecies(id) {
+        crState.species = id;
+        crState.speciesBonuses = {};
+        const sp = crSpeciesOptions.find(s=>s.id === id);
+        if (sp && sp.bonus) {
+            Object.keys(sp.bonus).forEach(k => {
+                if (k !== 'choose2' && k !== 'choose1') {
+                    crState.speciesBonuses[k] = sp.bonus[k];
+                }
+            });
+        }
+        renderCreatorWizard();
+    }
+
+    function crToggleBonus(stat, limit) {
+        const sp = crSpeciesOptions.find(s => s.id === crState.species);
+        if (!sp) return;
+        const staticStats = Object.keys(sp.bonus).filter(k => k !== 'choose1' && k !== 'choose2');
+        
+        let flexActive = 0;
+        for (let s in crState.speciesBonuses) {
+            if (!staticStats.includes(s)) flexActive++;
+        }
+
+        if (crState.speciesBonuses[stat]) {
+            if (!staticStats.includes(stat)) delete crState.speciesBonuses[stat];
+        } else {
+            if (flexActive < limit) {
+                crState.speciesBonuses[stat] = 1;
+            }
+        }
+        renderCreatorWizard();
     }
     
     function openCreator() {
@@ -2228,7 +2316,7 @@
                 crSpeciesOptions.forEach(sp => {
                     const active = crState.species === sp.id ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
                     html += `
-                    <div class="border rounded p-3 cursor-pointer transition-colors ${active}" onclick="crState.species='${sp.id}'; renderCreatorWizard();">
+                    <div class="border rounded p-3 cursor-pointer transition-colors ${active}" onclick="crSelectSpecies('${sp.id}')">
                         <div class="flex justify-between items-center mb-2">
                             <span class="font-bold text-lg text-white display-font">${sp.sw}</span>
                             <span class="text-[10px] uppercase text-slate-500 datapad-font tracking-widest">${sp.dnd} Equivalent</span>
@@ -2244,7 +2332,8 @@
                 
                 const classOptions = [
                     {key:'Ranger', data: crRangerData},
-                    {key:'Sorcerer', data: crSorcererData}
+                    {key:'Sorcerer', data: crSorcererData},
+                    {key:'Cleric', data: crClericData}
                 ];
                 
                 html += `<div class="grid gap-3 mb-4">`;
@@ -2295,17 +2384,48 @@
 
                 html += `<div class="grid grid-cols-2 gap-3 mb-4">`;
                 ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(stat => {
+                    const base = crState.baseStats[stat];
+                    const bonus = crState.speciesBonuses[stat] || 0;
+                    const total = base + bonus;
                     html += `
-                    <div class="bg-slate-900 border border-slate-700 rounded p-3 flex justify-between items-center">
-                        <span class="text-white font-bold uppercase tracking-widest text-sm">${stat}</span>
-                        <input type="number" value="${crState.baseStats[stat]}" onchange="crState.baseStats['${stat}'] = parseInt(this.value)||10" class="w-16 bg-slate-950 border border-slate-600 text-emerald-400 rounded p-1 text-lg font-mono text-center">
+                    <div class="bg-slate-900 border border-slate-700 rounded p-3 flex flex-col gap-1">
+                        <div class="flex justify-between items-center">
+                            <span class="text-white font-bold uppercase tracking-widest text-[10px]">${stat}</span>
+                            <span class="text-emerald-400 font-mono text-xl">${total}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" value="${base}" onchange="crState.baseStats['${stat}'] = parseInt(this.value)||10; renderCreatorWizard();" class="w-12 bg-slate-950 border border-slate-800 text-white rounded p-1 text-xs font-mono text-center">
+                            <span class="text-[9px] text-slate-500 uppercase">Base</span>
+                            ${bonus > 0 ? `<span class="text-[9px] text-emerald-500 font-bold ml-auto">+${bonus} Species</span>` : ''}
+                        </div>
                     </div>`;
                 });
                 html += `</div>`;
-                
-                html += `<div class="flex gap-2">
-                    <button onclick="crWizardApplyArray()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs uppercase tracking-widest py-2 rounded border border-slate-600 transition-colors">Standard Array</button>
-                </div>`;
+
+                if (sp && (sp.bonus.choose1 || sp.bonus.choose2)) {
+                    const count = sp.bonus.choose2 ? 2 : 1;
+                    html += `
+                    <div class="bg-slate-900/80 border border-slate-800 rounded p-4 mb-4">
+                        <h4 class="text-white text-xs font-bold uppercase tracking-widest mb-3">Choose ${count} Extra Species Bonus${count>1?'es':''}</h4>
+                        <div class="flex flex-wrap gap-2">
+                    `;
+                    ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(stat => {
+                        const isStatic = sp.bonus[stat];
+                        if (isStatic) return;
+
+                        const isSelected = crState.speciesBonuses[stat] === 1;
+                        const active = isSelected ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-600';
+                        html += `<button onclick="crToggleBonus('${stat}', ${count})" class="px-3 py-1 border rounded text-[10px] uppercase font-bold transition-all ${active}">${stat}</button>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                html += `
+                <div class="flex gap-2 mb-4">
+                    <button onclick="crWizardApplyArray()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-[10px] uppercase font-bold p-2 rounded border border-slate-600">Standard Array</button>
+                    <button onclick="crState.baseStats={str:10,dex:10,con:10,int:10,wis:10,cha:10}; crState.speciesBonuses={}; renderCreatorWizard();" class="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-400 text-[10px] uppercase font-bold p-2 rounded border border-slate-800">Reset</button>
+                </div>
+                `;
             }
             else if (crStep === 4) { // FEATURES & SUBCLASS
                 const cd = getActiveClassData();
@@ -2457,6 +2577,8 @@
     function crWizardApplyArray() {
         if (crState.cls === 'Sorcerer') {
             crState.baseStats = {str:8,dex:13,con:14,int:10,wis:12,cha:15};
+        } else if (crState.cls === 'Cleric') {
+            crState.baseStats = {str:10,dex:12,con:14,int:8,wis:15,cha:13};
         } else {
             crState.baseStats = {str:10,dex:15,con:14,int:8,wis:13,cha:12};
         }
@@ -2475,32 +2597,42 @@
         renderCreatorWizard();
     }
 
+    function getCrStatTotal(stat) {
+        let total = crState.baseStats[stat] || 10;
+        const sp = crSpeciesOptions.find(s=>s.id===crState.species);
+        if (sp && sp.bonus) {
+            if (sp.bonus[stat]) total += sp.bonus[stat];
+        }
+        if (crState.speciesBonuses[stat]) total += 1;
+        return total;
+    }
+
     function crWizardFinalize() {
-        const nameEl = document.getElementById('cr-wizard-name');
-        if(nameEl) crState.name = nameEl.value;
-        
+        const nameInput = document.getElementById('cr-wizard-name');
+        if (nameInput) crState.name = nameInput.value;
+        if (!crState.name) { alert("Please enter a callsign."); return; }
+
         const cd = getActiveClassData();
-        state.name = crState.name || "Unknown Operative";
+        const sp = crSpeciesOptions.find(s=>s.id===crState.species);
+
+        state.name = crState.name;
         state.cls = cd.dnd; 
         state.level = crState.level;
         
-        state.stats = { ...crState.baseStats };
-        const sp = crSpeciesOptions.find(s=>s.id===crState.species);
-        if(sp && sp.bonus) {
-            if(sp.bonus.str) state.stats.str += sp.bonus.str;
-            if(sp.bonus.dex) state.stats.dex += sp.bonus.dex;
-            if(sp.bonus.con) state.stats.con += sp.bonus.con;
-            if(sp.bonus.int) state.stats.int += sp.bonus.int;
-            if(sp.bonus.wis) state.stats.wis += sp.bonus.wis;
-            if(sp.bonus.cha) state.stats.cha += sp.bonus.cha;
-            if(sp.bonus.choose1) state.stats.con += 1;
-            if(sp.bonus.choose2) { state.stats.dex += 1; state.stats.con += 1; }
-        }
+        state.stats = {
+            str: getCrStatTotal('str'),
+            dex: getCrStatTotal('dex'),
+            con: getCrStatTotal('con'),
+            int: getCrStatTotal('int'),
+            wis: getCrStatTotal('wis'),
+            cha: getCrStatTotal('cha')
+        };
         
         // HP calculation based on class hit die
         const conMod = Math.floor((state.stats.con - 10) / 2);
-        const hitDieMax = crState.cls === 'Sorcerer' ? 6 : 10;
-        const hitDieAvg = crState.cls === 'Sorcerer' ? 4 : 6;
+        const hitDieMax = parseInt(cd.hitDie.slice(1)) || 8;
+        const hitDieAvg = Math.floor(hitDieMax/2) + 1;
+        
         let hp = hitDieMax + conMod;
         if(state.level > 1) {
             hp += (hitDieAvg + conMod) * (state.level - 1);
@@ -2511,14 +2643,17 @@
         state.speed = sp ? sp.speed : 30;
         if (crState.cls === 'Ranger' && state.level >= 6) state.speed += 5;
         
-        // AC: Ranger gets armor, Sorcerer is unarmored
+        // AC
         const dexMod = Math.floor((state.stats.dex - 10) / 2);
         if (crState.cls === 'Sorcerer') {
-            state.ac = 10 + dexMod; // unarmored
+            state.ac = 10 + dexMod; 
+        } else if (crState.cls === 'Cleric') {
+            state.ac = 13 + Math.min(dexMod, 2); // Armored Flight Suit (Chain Shirt)
         } else {
-            state.ac = 11 + dexMod; // leather default
+            state.ac = 11 + dexMod; // leather
         }
         
+        if (!state.proficiencies) state.proficiencies = { saves: [], skills: {} };
         state.proficiencies.saves = [...cd.saves];
         state.proficiencies.skills = {};
         crState.selectedSkills.forEach(s => state.proficiencies.skills[s] = 1);
