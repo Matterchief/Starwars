@@ -1096,19 +1096,37 @@
                     </svg>
                 </div>
                 <!-- Selected Planet Info Panel -->
-                <div id="starmap-info-panel" class="mt-3 bg-slate-900/80 border border-indigo-900/40 rounded-lg p-3 hidden">
-                    <div class="flex justify-between items-start gap-3">
-                        <div class="flex-1 min-w-0">
-                            <h3 id="starmap-info-name" class="text-white font-bold text-lg display-font leading-tight truncate"></h3>
-                            <p id="starmap-info-desc" class="text-slate-400 text-xs mt-1 leading-snug"></p>
-                            <div class="flex items-center gap-3 mt-2">
-                                <span id="starmap-info-coords" class="text-[10px] text-slate-500 font-mono"></span>
-                                <span id="starmap-info-jumps" class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest bg-indigo-900/30 px-1.5 py-0.5 rounded"></span>
-                            </div>
+                <!-- Selected Planet Info Panel -->
+                <div id="starmap-info-panel" class="mt-3 bg-slate-900 border border-indigo-900/40 rounded-lg hidden overflow-hidden transition-all duration-500">
+                    <div id="starmap-planet-bg" class="h-24 w-full bg-gradient-to-br from-indigo-900 to-slate-900 relative">
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <div class="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-slate-900 to-transparent">
+                            <h3 id="starmap-info-name" class="text-white font-bold text-xl display-font uppercase tracking-widest glow-text-white"></h3>
                         </div>
-                        <div class="shrink-0 flex flex-col gap-2">
-                            <button id="starmap-jump-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs shadow-[0_0_10px_rgba(79,70,229,0.5)]">Plot & Jump</button>
-                            <button id="starmap-dm-btn" class="hidden bg-red-900/50 hover:bg-red-800 border border-red-500 text-red-200 px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs">Override</button>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex-1 space-y-3">
+                                <p id="starmap-info-desc" class="text-slate-300 text-xs leading-relaxed italic"></p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                                        <div class="text-[8px] text-slate-500 uppercase font-black mb-0.5">Primary Environment</div>
+                                        <div id="starmap-info-env" class="text-[10px] text-indigo-300 font-bold uppercase truncate"></div>
+                                    </div>
+                                    <div class="bg-slate-950/50 p-2 rounded border border-slate-800">
+                                        <div class="text-[8px] text-slate-500 uppercase font-black mb-0.5">Atmospheric Scan</div>
+                                        <div id="starmap-info-climate" class="text-[10px] text-emerald-400 font-bold uppercase truncate"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 pt-1">
+                                    <span id="starmap-info-coords" class="text-[10px] text-slate-500 font-mono"></span>
+                                    <span id="starmap-info-jumps" class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest bg-indigo-900/30 px-1.5 py-0.5 rounded"></span>
+                                </div>
+                            </div>
+                            <div class="shrink-0 flex flex-col gap-2">
+                                <button id="starmap-jump-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded font-bold uppercase tracking-widest datapad-font transition-all text-xs shadow-[0_0_20px_rgba(79,70,229,0.3)]">Initiate Jump</button>
+                                <button id="starmap-dm-btn" class="hidden bg-red-950 border border-red-900 text-red-500 px-5 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-all text-[9px] hover:bg-red-900 hover:text-white">Override</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1156,6 +1174,7 @@
 
             <!-- DM TAB: ENEMIES -->
             <div id="dm-tab-enemies" class="dm-sub-tab hidden">
+                <div id="dm-vessel-status-container" class="mb-6"></div>
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="text-red-500 text-[9px] uppercase font-bold tracking-widest">// Vector Authorization</h3>
                     <button onclick="addEnemyShip()" class="bg-red-950/50 border border-red-900 text-red-400 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-red-900 transition-colors">+ Deploy Asset</button>
@@ -4222,83 +4241,7 @@
         renderDMEnemies();
     }
 
-    function updateEnemy(idx, field, val) {
-        state.enemies[idx][field] = val;
-        db.ref('shared/enemies').set(state.enemies);
-        renderDMEnemies();
-    }
 
-    function removeEnemy(idx) {
-        state.enemies.splice(idx, 1);
-        db.ref('shared/enemies').set(state.enemies);
-        renderDMEnemies();
-    }
-
-    function renderDMEnemies() {
-        const container = document.getElementById('dm-enemies-container');
-        if (!container) return;
-        
-        container.innerHTML = (state.enemies || []).map((e, i) => `
-            <div class="bg-slate-900 border border-red-900/40 rounded p-4 space-y-4">
-                <div class="flex justify-between items-center border-b border-red-900/20 pb-2">
-                    <input type="text" value="${e.name}" onchange="updateEnemy(${i}, 'name', this.value)" class="bg-transparent text-white font-bold uppercase display-font border-none focus:ring-0 w-2/3">
-                    <button onclick="removeEnemy(${i})" class="text-red-500 text-[10px] uppercase font-bold">Purge Vector</button>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Affiliation</label>
-                        <select onchange="updateEnemy(${i}, 'affiliation', this.value)" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
-                            <option value="Imperial" ${e.affiliation==='Imperial'?'selected':''}>Imperial</option>
-                            <option value="Pirate" ${e.affiliation==='Pirate'?'selected':''}>Pirate</option>
-                            <option value="Civilian" ${e.affiliation==='Civilian'?'selected':''}>Civilian</option>
-                            <option value="Unknown" ${e.affiliation==='Unknown'?'selected':''}>Unknown</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Class</label>
-                        <select onchange="updateEnemy(${i}, 'class', this.value)" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
-                            <option value="Fighter" ${e.class==='Fighter'?'selected':''}>Fighter</option>
-                            <option value="Freighter" ${e.class==='Freighter'?'selected':''}>Freighter</option>
-                            <option value="Destroyer" ${e.class==='Destroyer'?'selected':''}>Destroyer</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-[9px] text-slate-500 uppercase block mb-1">Armor Class (AC)</label>
-                    <input type="number" value="${e.ac}" onchange="updateEnemy(${i}, 'ac', parseInt(this.value))" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
-                </div>
-
-                <div>
-                    <label class="text-[9px] text-red-400 uppercase block mb-2">Detection Stage: ${e.stage}</label>
-                    <input type="range" min="1" max="3" step="1" value="${e.stage}" oninput="updateEnemy(${i}, 'stage', parseInt(this.value))" class="w-full">
-                    <div class="flex justify-between text-[8px] text-slate-600 mt-1">
-                        <span>Far Contact</span>
-                        <span>Long Range</span>
-                        <span>Tactical Lock</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Hull Integrity</label>
-                        <div class="flex gap-2">
-                            <input type="number" value="${e.hpCur}" onchange="updateEnemy(${i}, 'hpCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
-                            <input type="number" value="${e.hpMax}" onchange="updateEnemy(${i}, 'hpMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded opacity-50">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Shield Output</label>
-                        <div class="flex gap-2">
-                            <input type="number" value="${e.shCur}" onchange="updateEnemy(${i}, 'shCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
-                            <input type="number" value="${e.shMax}" onchange="updateEnemy(${i}, 'shMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded opacity-50">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
 
     function switchShipTab(id) {
         document.querySelectorAll('.ship-tab').forEach(el => el.classList.add('hidden'));
@@ -4337,21 +4280,26 @@
     }
 
     const planetsList = [
-        { name: "Coruscant", x: 50, y: 50, desc: "Galactic capital and massive ecumenopolis." },
-        { name: "Tatooine", x: 80, y: 15, desc: "Harsh desert world controlled by Hutts." },
-        { name: "Hoth", x: 10, y: 20, desc: "Remote, icy wasteland." },
-        { name: "Endor", x: 30, y: 10, desc: "Forested moon home to Ewoks." },
-        { name: "Naboo", x: 60, y: 30, desc: "Lush world with human and Gungan societies." },
-        { name: "Kashyyyk", x: 65, y: 55, desc: "Forest planet of massive wroshyr trees." },
-        { name: "Mandalore", x: 70, y: 70, desc: "Outer Rim world of legendary warriors." },
-        { name: "Mustafar", x: 15, y: 80, desc: "Volcanic world rich in minerals." },
-        { name: "Kamino", x: 90, y: 90, desc: "Aquatic planet known for cloning facilities." },
-        { name: "Geonosis", x: 85, y: 10, desc: "Rocky planet and droid manufacturing hub." },
-        { name: "Alderaan (Asteroids)", x: 45, y: 45, desc: "Former core world, now an asteroid field." },
-        { name: "Yavin 4", x: 35, y: 75, desc: "Jungle moon containing ancient temples." },
-        { name: "Lothal", x: 25, y: 65, desc: "Outer Rim plains world with strong Force ties." },
-        { name: "Dathomir", x: 80, y: 85, desc: "Dark, red-lit planet of Nightsisters." },
-        { name: "Exegol", x: 5, y: 95, desc: "Hidden Sith redoubt in the Unknown Regions." }
+        { name: "Coruscant", x: 50, y: 50, desc: "Galactic capital and massive ecumenopolis.", env: "Urban / Ecumenopolis", climate: "Controlled / Temperate", color: "from-amber-900 to-slate-900" },
+        { name: "Tatooine", x: 80, y: 15, desc: "Harsh desert world controlled by Hutts.", env: "Desert / Wasteland", climate: "Arid / Dual Suns", color: "from-orange-900 to-yellow-900" },
+        { name: "Hoth", x: 10, y: 20, desc: "Remote, icy wasteland.", env: "Glacial / Tundra", climate: "Frozen / Sub-Zero", color: "from-blue-900 to-slate-100/10" },
+        { name: "Endor", x: 30, y: 10, desc: "Forested moon home to Ewoks.", env: "Forest / Jungle", climate: "Temperate / Humid", color: "from-emerald-900 to-green-950" },
+        { name: "Naboo", x: 60, y: 30, desc: "Lush world with human and Gungan societies.", env: "Plains / Swamps / Oceans", climate: "Temperate / Ideal", color: "from-teal-900 to-emerald-950" },
+        { name: "Kashyyyk", x: 65, y: 55, desc: "Forest planet of massive wroshyr trees.", env: "Jungle / Arboreal", climate: "Humid / Tropical", color: "from-green-900 to-amber-950" },
+        { name: "Mandalore", x: 70, y: 70, desc: "Outer Rim world of legendary warriors.", env: "Waste / Biodomes", climate: "Hostile / Dry", color: "from-slate-800 to-red-950" },
+        { name: "Concord Dawn", x: 75, y: 68, desc: "Agricultural world and home to the Mandalorian Protectors.", env: "Plains / Fractured Moon", climate: "Temperate / Fertile", color: "from-amber-700 to-emerald-900" },
+        { name: "Dxun", x: 62, y: 72, desc: "The Demon Moon of Onderon; site of legendary jungle warfare.", env: "Predatory Jungle", climate: "Dense / Hostile", color: "from-green-950 to-red-950" },
+        { name: "Malachor V", x: 42, y: 88, desc: "Site of the cataclysmic final battle of the Mandalorian Wars.", env: "Cracked / Stormy", climate: "Lethal / Unstable", color: "from-purple-950 to-slate-950" },
+        { name: "Cathar", x: 55, y: 42, desc: "World of the feline Cathar; devastated during the Mandalorian Crusades.", env: "Savannah / Steppes", climate: "Arid / Warm", color: "from-yellow-800 to-orange-950" },
+        { name: "Althir", x: 82, y: 50, desc: "Key sector and site of major naval conflict in the Outer Rim.", env: "Oceanic / Rocky", climate: "Stormy / Cold", color: "from-blue-950 to-slate-900" },
+        { name: "Mustafar", x: 15, y: 80, desc: "Volcanic world rich in minerals.", env: "Lava / Volcanic", climate: "Extreme / Molten", color: "from-red-900 to-orange-950" },
+        { name: "Kamino", x: 90, y: 90, desc: "Aquatic planet known for cloning facilities.", env: "Global Ocean", climate: "Stormy / Raining", color: "from-cyan-900 to-blue-950" },
+        { name: "Geonosis", x: 85, y: 10, desc: "Rocky planet and droid manufacturing hub.", env: "Canyons / Spires", climate: "Hot / Arid", color: "from-red-800 to-amber-900" },
+        { name: "Alderaan (Asteroids)", x: 45, y: 45, desc: "Former core world, now an asteroid field.", env: "Debris Field", climate: "Vacuum", color: "from-slate-700 to-slate-950" },
+        { name: "Yavin 4", x: 35, y: 75, desc: "Jungle moon containing ancient temples.", env: "Ancient Jungle", climate: "Tropical", color: "from-emerald-800 to-yellow-950" },
+        { name: "Lothal", x: 25, y: 65, desc: "Outer Rim plains world with strong Force ties.", env: "Grassy Plains", climate: "Temperate", color: "from-emerald-700 to-blue-900" },
+        { name: "Dathomir", x: 80, y: 85, desc: "Dark, red-lit planet of Nightsisters.", env: "Red Forest / Swamp", climate: "Eerie / Toxic", color: "from-red-950 to-purple-950" },
+        { name: "Exegol", x: 5, y: 95, desc: "Hidden Sith redoubt in the Unknown Regions.", env: "Barren / Stormy", climate: "Deadly / Constant Lightning", color: "from-slate-900 to-blue-950" }
     ];
 
     function calculateJumps(fromName, toName) {
@@ -4467,9 +4415,16 @@
         // Fill info panel
         document.getElementById('starmap-info-name').innerText = planet.name;
         document.getElementById('starmap-info-desc').innerText = planet.desc;
-        document.getElementById('starmap-info-coords').innerText = `X:${planet.x}  Y:${planet.y}`;
-        document.getElementById('starmap-info-jumps').innerText = isCurrent ? 'DOCKED' : jumps + ' HYPER-JUMPS';
+        document.getElementById('starmap-info-env').innerText = planet.env || 'Unknown';
+        document.getElementById('starmap-info-climate').innerText = planet.climate || 'Unstable';
+        document.getElementById('starmap-info-coords').innerText = `SECTOR: ${planet.x}, ${planet.y}`;
+        document.getElementById('starmap-info-jumps').innerText = isCurrent ? 'ORBITAL LOCK' : jumps + ' JUMPS';
         
+        const bg = document.getElementById('starmap-planet-bg');
+        if (bg) {
+            bg.className = `h-24 w-full bg-gradient-to-br ${planet.color || 'from-indigo-900 to-slate-900'} relative transition-all duration-700`;
+        }
+
         const jumpBtn = document.getElementById('starmap-jump-btn');
         const dmBtn = document.getElementById('starmap-dm-btn');
         
@@ -4856,7 +4811,9 @@
         let html = '';
         Object.entries(partyData).forEach(([slotId, data]) => {
             if (!data || slotId === 'slot4') return;
-            const hpPct = Math.min(100, Math.max(0, (data.hp.current / data.hp.max) * 100));
+            const hpCur = (data.hp && data.hp.current) || 0;
+            const hpMax = (data.hp && data.hp.max) || 1;
+            const hpPct = Math.min(100, Math.max(0, (hpCur / hpMax) * 100));
             const hpColor = hpPct < 30 ? 'bg-red-500' : hpPct < 60 ? 'bg-amber-500' : 'bg-emerald-500';
             
             html += `
@@ -4877,7 +4834,7 @@
                     <div class="mb-4 relative">
                         <div class="flex justify-between text-[9px] uppercase font-bold text-slate-500 mb-1.5">
                             <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${hpPct < 30 ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}"></span> Bio-Vitals Scan</span>
-                            <span class="${data.hp.current < data.hp.max * 0.3 ? 'text-red-500 animate-pulse font-black' : 'text-slate-300'} font-mono">${data.hp.current} / ${data.hp.max} HP</span>
+                            <span class="${hpCur < hpMax * 0.3 ? 'text-red-500 animate-pulse font-black' : 'text-slate-300'} font-mono">${hpCur} / ${hpMax} HP</span>
                         </div>
                         <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-[1px]">
                             <div class="h-full ${hpColor} transition-all duration-700 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)]" style="width: ${hpPct}%"></div>
@@ -5087,15 +5044,13 @@
                 </div>
             </div>
         `;
-
-        renderDMEnemies();
     }
 
-    function renderDMEnemies() {
-        const container = document.getElementById('dm-enemies-container');
+    function renderDMVesselStatus() {
+        const container = document.getElementById('dm-vessel-status-container');
         if (!container) return;
         
-        let vesselConfig = `
+        container.innerHTML = `
             <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-lg mb-6 relative overflow-hidden">
                 <div class="absolute inset-0 bg-blue-500/5 pointer-events-none"></div>
                 <h4 class="text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-blue-900/30 pb-1 flex items-center gap-2">
@@ -5106,7 +5061,7 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="text-[9px] text-slate-500 uppercase block mb-1">Designation</label>
-                        <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font text-xs" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                        <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font text-xs" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
                     </div>
                     <div>
                         <label class="text-[9px] text-slate-500 uppercase block mb-1">Bridge Status</label>
@@ -5123,22 +5078,27 @@
                     <div>
                         <label class="text-[9px] text-emerald-500 uppercase font-bold block mb-1">Hull Integrity</label>
                         <div class="flex gap-2">
-                            <input type="number" value="${state.ship ? state.ship.hullCur : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-                            <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-800 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                            <input type="number" value="${state.ship ? state.ship.hullCur : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-800 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
                         </div>
                     </div>
                     <div>
                         <label class="text-[9px] text-blue-400 uppercase font-bold block mb-1">Shield Energy</label>
                         <div class="flex gap-2">
-                            <input type="number" value="${state.ship ? state.ship.shieldsCur : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-                            <input type="number" value="${state.ship ? state.ship.shieldsMax : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-900 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                            <input type="number" value="${state.ship ? state.ship.shieldsCur : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${state.ship ? state.ship.shieldsMax : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-900 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
 
-        const enemiesHtml = (state.enemies || []).map((e, i) => `
+    function renderDMEnemies() {
+        const container = document.getElementById('dm-enemies-container');
+        if (!container) return;
+        
+        container.innerHTML = (state.enemies || []).map((e, i) => `
             <div class="bg-slate-900 border border-red-900/40 rounded p-4 space-y-4 relative overflow-hidden group">
                 <div class="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 <div class="flex justify-between items-center border-b border-red-900/20 pb-2 relative">
@@ -5194,8 +5154,6 @@
                 </div>
             </div>
         `).join('');
-
-        container.innerHTML = vesselConfig + enemiesHtml;
     }
 
     function updateEnemy(idx, field, val) {
@@ -5503,19 +5461,26 @@
     const PASSCODE = "IG-88";
 
     function checkGateway() {
-        const input = document.getElementById('gateway-input').value;
+        const inputEl = document.getElementById('gateway-input');
+        const input = inputEl.value.trim().toUpperCase();
         const err = document.getElementById('gateway-error');
-        if (input.trim().toUpperCase() === PASSCODE) {
+        
+        if (input === PASSCODE || input === "ORGY") { // Support both for convenience
             localStorage.setItem('sw5e_gateway_auth', 'true');
             const gateway = document.getElementById('security-gateway');
             gateway.style.opacity = '0';
+            
+            // If they entered the DM code directly, maybe we can shortcut them?
+            // For now, just let them in to the profile selector
+            
             checkProfileOnLoad();
             setTimeout(() => {
                 gateway.style.display = 'none';
             }, 500);
         } else {
             err.style.opacity = '1';
-            document.getElementById('gateway-input').value = "";
+            inputEl.value = "";
+            inputEl.focus();
             setTimeout(() => { err.style.opacity = '0'; }, 2000);
         }
     }
@@ -5535,7 +5500,10 @@
     function selectProfile(slot) {
         if (slot === 'dm') {
             const pass = prompt("Enter Protocol Override Code:");
-            if (pass !== "ORGY") { alert("Access Denied."); return; }
+            if (!pass || pass.toUpperCase() !== "ORGY") { 
+                alert("Access Denied: Invalid Override Signature."); 
+                return; 
+            }
             localStorage.setItem('sw5e_profile', 'dm');
             
             // 1. Load general state first
