@@ -370,6 +370,26 @@
         .scale-btn { flex: 1; text-align: center; padding: 8px 0; border: 1px solid #475569; color: #94a3b8; border-radius: 4px; font-weight: bold; transition: all 0.2s; cursor: pointer;}
         .scale-btn.active { background: color-mix(in srgb, var(--hud) 15%, transparent); border-color: var(--hud); color: var(--hud); }
 
+        .dm-tab-btn { 
+            padding: 8px 12px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; text-transform: uppercase;
+            font-weight: bold; letter-spacing: 0.1em; color: rgba(239, 68, 68, 0.5); border-radius: 4px;
+            transition: all 0.2s; cursor: pointer; border: 1px solid transparent; text-align: center;
+        }
+        .dm-tab-btn.active { 
+            background: rgba(153, 27, 27, 0.15); border-color: rgba(153, 27, 27, 0.5); color: #f87171;
+            box-shadow: 0 0 10px rgba(153, 27, 27, 0.2);
+        }
+        .dm-dice-btn {
+            background: #0f172a; border: 1px solid rgba(153, 27, 27, 0.3); color: #f87171;
+            padding: 1rem; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; transition: all 0.2s; cursor: pointer;
+        }
+        .dm-dice-btn:hover {
+            background: rgba(153, 27, 27, 0.2); border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        .dm-dice-btn:active { transform: scale(0.95); }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .main-tab { animation: fadeIn 0.2s ease-out; }
         .db-tab { animation: fadeIn 0.15s ease-out; }
@@ -384,10 +404,23 @@
             z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; transition: opacity 0.2s; pointer-events: none;
         }
-        #dice-hud.active { opacity: 1; pointer-events: auto; }
+        #dice-hud.active { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
         .dice-number { font-family: 'Share Tech Mono', monospace; font-size: 6rem; color: #fff; text-shadow: 0 0 20px var(--hud); line-height: 1; }
-        .dice-crit { color: #22c55e !important; text-shadow: 0 0 20px #22c55e !important; }
-        .dice-fail { color: #ef4444 !important; text-shadow: 0 0 20px #ef4444 !important; }
+        .dice-crit { color: #34d399 !important; text-shadow: 0 0 80px rgba(52,211,153,0.6) !important; }
+        .dice-fail { color: #f87171 !important; text-shadow: 0 0 80px rgba(248,113,113,0.6) !important; }
+
+        /* --- GAME LOG TRAY --- */
+        #game-log-tray {
+            position: fixed; top: 0; right: -350px; width: 350px; height: 100%;
+            background: rgba(2,6,23,0.98); backdrop-filter: blur(16px);
+            z-index: 14000; border-left: 1px solid var(--hud-deep);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column;
+            box-shadow: -10px 0 50px rgba(0,0,0,0.8);
+        }
+        #game-log-tray.open { right: 0; }
+        .tray-header { padding: 1.5rem 1rem; border-bottom: 1px solid rgba(38,198,218,0.1); background: rgba(38,198,218,0.02); }
+        .log-line-card { background: rgba(15,23,42,0.6); border: 1px solid rgba(38,198,218,0.1); border-radius: 4px; padding: 0.75rem; margin-bottom: 0.5rem; }
 
         /* --- BOOT SEQUENCE --- */
         #boot-screen {
@@ -467,6 +500,30 @@
     </div>
 </div>
 
+<!-- Game Log Tray -->
+<div id="game-log-tray" class="flex flex-col">
+    <div class="tray-header flex justify-between items-center">
+        <div>
+            <h2 class="display-font text-lg font-black text-hud uppercase tracking-widest">Tactical Feed</h2>
+            <div class="text-[8px] text-slate-500 uppercase tracking-[0.2em] mt-0.5">Live Alliance Telemetry</div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="if(confirm('Clear Log?')) db.ref('shared/gamelog').remove()" class="text-slate-600 hover:text-red-500 transition-colors p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+            <button onclick="toggleGameLogTray()" class="text-hud hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
+    <div id="game-log-container" class="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-2">
+        <div class="text-slate-700 text-center text-[10px] py-10 uppercase tracking-widest datapad-font">No combat data sync.</div>
+    </div>
+    <div class="p-4 border-t border-hud/10 bg-black/20">
+        <div class="text-[8px] text-hud/40 uppercase tracking-widest font-mono text-center">Encrypted Uplink Active // End of Feed</div>
+    </div>
+</div>
+
 <!-- Ship Log Readout Overlay -->
 <div id="ship-log-overlay" class="fixed inset-0 bg-[#020617]/95 z-[12500] hidden flex-col items-center justify-center p-8 backdrop-blur-xl transition-opacity duration-500 opacity-0 overflow-hidden">
     <div class="absolute inset-0 scanline-effect pointer-events-none opacity-20"></div>
@@ -518,14 +575,17 @@
 
 <!-- Dice Roller HUD -->
 <div id="dice-hud" onclick="closeDiceHUD()">
-    <div class="text-hud display-font uppercase tracking-widest mb-2 text-center px-4" id="dice-label">Rolling...</div>
-    <div class="flex items-center gap-4 mb-4">
-        <div class="text-3xl text-slate-400 font-mono" id="dice-base">d20</div>
-        <div class="text-3xl text-slate-400 font-mono">+</div>
-        <div class="text-3xl text-slate-400 font-mono" id="dice-mod">5</div>
+    <div class="absolute inset-0 scanline-effect opacity-10 pointer-events-none"></div>
+    <div class="text-center p-12 relative z-10 w-full h-full flex flex-col items-center justify-center">
+        <div id="dice-label" class="text-hud uppercase font-bold tracking-[0.6em] text-sm mb-16 opacity-40 datapad-font">Transmitting Tactical Roll</div>
+        <div id="dice-result" class="text-white font-black display-font leading-none select-none transition-all duration-300" style="font-size: 18rem; text-shadow: 0 0 100px rgba(255,255,255,0.05);">--</div>
+        <div class="flex items-center justify-center gap-10 mt-12 w-full max-w-lg">
+            <div class="h-[1px] flex-1 bg-hud/10"></div>
+            <div class="text-hud font-mono text-2xl uppercase tracking-[0.3em] font-bold">MOD: <span id="dice-mod">+0</span></div>
+            <div class="h-[1px] flex-1 bg-hud/10"></div>
+        </div>
+        <div class="mt-20 text-[10px] text-slate-600 uppercase tracking-widest datapad-font animate-pulse">Syncing with Alliance Net...</div>
     </div>
-    <div class="dice-number" id="dice-result">--</div>
-    <div class="text-[10px] text-slate-500 uppercase tracking-widest mt-8 opacity-50">Tap to dismiss</div>
 </div>
 
 <div class="vignette"></div>
@@ -547,6 +607,11 @@
                 </div>
             </div>
             <div class="text-right flex items-center gap-2 shrink-0 ml-2">
+                <!-- Game Log Tray Toggle -->
+                <button onclick="toggleGameLogTray()" class="text-hud hover:text-white p-1.5 bg-slate-900 rounded border border-hud-soft shadow-lg transition-colors group relative" style="border-color: var(--hud-deep);">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    <div class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-slate-950 animate-pulse opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
                 <!-- View Toggle Button (Only visible in Database) -->
                 <button onclick="toggleViewMode()" id="btn-view-toggle" class="hidden text-hud hover:text-white p-1.5 bg-slate-900 rounded border border-hud-soft shadow-lg transition-colors" style="border-color: var(--hud-deep);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -574,6 +639,7 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
+                    <button onclick="levelUp()" id="btn-level-up" class="hidden text-xs bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded border border-emerald-900/50 uppercase font-bold tracking-widest datapad-font hover:bg-emerald-600/40 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]">Level Up</button>
                     <button onclick="openCreator()" class="text-xs bg-theme text-slate-900 px-2 py-1 rounded border border-theme uppercase font-bold tracking-widest datapad-font shadow-theme flex items-center gap-1" style="background-color: var(--hud);">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                         Create Character
@@ -591,6 +657,10 @@
                         <span class="stat-value text-emerald-400" id="char-hp-cur">10</span>
                         <span class="text-slate-500 font-mono text-sm">/</span>
                         <span class="text-slate-400 font-mono text-sm" id="char-hp-max">10</span>
+                    </div>
+                    <div id="spell-slots-container" class="hidden bg-slate-900/50 rounded border border-slate-800 p-3 mt-4">
+                        <h3 class="text-hud font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-slate-700 pb-1">Force Power Matrix</h3>
+                        <div id="slots-list" class="space-y-3"></div>
                     </div>
                 </div>
                 <!-- Armor -->
@@ -643,6 +713,9 @@
 
             <!-- Rest Mechanics -->
             <div class="flex gap-2 mb-6" id="rest-container">
+                <button onclick="executeRest('short')" class="flex-1 bg-slate-900/80 border border-hud-soft hover:bg-slate-800 text-hud py-2 rounded text-[10px] uppercase tracking-widest font-bold datapad-font transition-colors">
+                    Field Medic (Short Rest)
+                </button>
                 <button onclick="executeRest('long')" class="flex-1 bg-slate-900/80 border border-emerald-900/50 hover:bg-emerald-900/30 text-emerald-400 py-2 rounded text-[10px] uppercase tracking-widest font-bold datapad-font transition-colors">
                     Bacta Tank (Long Rest)
                 </button>
@@ -725,12 +798,46 @@
 
                 <!-- Right: Actions & Gear (Loadout Integration) -->
                 <div>
-                    <h3 class="text-white font-bold uppercase tracking-widest text-sm mb-3 pl-1 border-l-2 border-hud">// Actions & Requisitions</h3>
-                    <div id="char-loadout-empty" class="text-center p-6 border border-slate-800 border-dashed rounded-lg text-slate-500 hidden">
-                        <p class="datapad-font uppercase tracking-widest text-xs">No Gear Equipped</p>
-                        <p class="text-[10px] mt-2 opacity-70">Access the Database to star (★) weapons and powers.</p>
+                    <div class="flex border-b border-slate-800 mb-4 bg-slate-950/30 rounded-t-lg overflow-hidden">
+                        <button onclick="switchLoadoutTab('inventory')" id="loadout-tab-inv" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 border-hud text-white">Arsenal</button>
+                        <button onclick="switchLoadoutTab('abilities')" id="loadout-tab-abi" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-300">Matrix</button>
+                        <button onclick="switchLoadoutTab('features')" id="loadout-tab-fea" class="flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-300">Traits</button>
                     </div>
-                    <div id="char-loadout-container" class="grid-container"></div>
+
+                    <!-- INVENTORY TAB -->
+                    <div id="loadout-inventory-view" class="">
+                        <div class="flex justify-between items-center mb-3 pr-1">
+                            <h3 class="text-white font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-hud">Tactical Arsenal</h3>
+                            <button onclick="switchMainTab('database'); switchDbTab('armory');" class="bg-slate-800 hover:bg-slate-700 text-hud text-[9px] font-bold uppercase px-2 py-1 rounded border border-hud-soft transition-all shadow-lg">+ Add Item</button>
+                        </div>
+                        <div id="char-inventory-container" class="space-y-2"></div>
+                        <div id="char-inventory-empty" class="text-center p-6 border border-slate-800 border-dashed rounded-lg text-slate-500 hidden">
+                            <p class="datapad-font uppercase tracking-widest text-[10px]">No Gear Registered</p>
+                        </div>
+                    </div>
+
+                    <!-- ABILITIES TAB -->
+                    <div id="loadout-abilities-view" class="hidden">
+                        <div class="flex justify-between items-center mb-3 pr-1">
+                            <h3 class="text-white font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-indigo-500">Known Matrix</h3>
+                            <button onclick="switchMainTab('database'); switchDbTab('holocron');" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 text-[9px] font-bold uppercase px-2 py-1 rounded border border-indigo-900/50 transition-all shadow-lg">+ Learn Power</button>
+                        </div>
+                        <div id="char-abilities-container" class="space-y-2"></div>
+                        <div id="char-abilities-empty" class="text-center p-6 border border-slate-800 border-dashed rounded-lg text-slate-500 hidden">
+                            <p class="datapad-font uppercase tracking-widest text-[10px]">Matrix Empty</p>
+                        </div>
+                    </div>
+
+                    <!-- FEATURES TAB -->
+                    <div id="loadout-features-view" class="hidden">
+                        <div class="flex justify-between items-center mb-3 pr-1">
+                            <h3 class="text-white font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-emerald-500">Dossier Highlights</h3>
+                        </div>
+                        <div id="char-features-container" class="space-y-2 pb-4"></div>
+                        <div id="char-features-empty" class="text-center p-6 border border-slate-800 border-dashed rounded-lg text-slate-500 hidden">
+                            <p class="datapad-font uppercase tracking-widest text-[10px]">No Traits Recorded</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -831,12 +938,16 @@
                 <div class="absolute inset-0" style="background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;"></div>
                 
                 <div class="relative w-48 h-48" id="ship-visual-container">
-                    <!-- Shield Arcs -->
+                    <!-- Tactical Grid -->
+                    <div class="absolute inset-0 border border-slate-800/50 rounded-full" style="background: radial-gradient(circle, transparent 30%, rgba(15,23,42,0.4) 100%);"></div>
+                    <div class="absolute top-1/2 left-0 w-full h-px bg-slate-800/30"></div>
+                    <div class="absolute top-0 left-1/2 w-px h-full bg-slate-800/30"></div>
+                    
+                    <!-- Single Shield Ring -->
                     <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                        <path id="shield-front" d="M 20 20 Q 50 -10 80 20" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
-                        <path id="shield-back" d="M 20 80 Q 50 110 80 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
-                        <path id="shield-port" d="M 20 20 Q -10 50 20 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
-                        <path id="shield-starboard" d="M 80 20 Q 110 50 80 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
+                        <circle id="shield-ring" cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="282.7" stroke-dashoffset="0" class="transition-all duration-500" opacity="0.6"/>
+                        <!-- Enemy Contacts Injected Here -->
+                        <g id="tactical-contacts"></g>
                     </svg>
                     <!-- Ship Body (Injected dynamically) -->
                     <div id="ship-svg-wrapper" class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -846,17 +957,25 @@
                         </svg>
                     </div>
                     <!-- VFX Overlays -->
-                    <svg id="ship-vfx" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
-                        <!-- Lasers, sweeps, etc injected here -->
-                    </svg>
+                    <svg id="ship-vfx" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100"></svg>
                     
-                    <!-- HP Badges -->
-                    <div id="hp-badge-front" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
-                    <div id="hp-badge-back" class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
-                    <div id="hp-badge-port" class="absolute top-1/2 -left-6 -translate-y-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
-                    <div id="hp-badge-starboard" class="absolute top-1/2 -right-6 -translate-y-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
-                    
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-950/80 border border-emerald-900 text-emerald-400 text-xs font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10" id="ship-hull-badge">100 HP</div>
+                    <div class="absolute top-4 left-1/2 -translate-x-1/2 flex gap-4">
+                        <div class="bg-slate-900/80 border border-blue-900 text-blue-400 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 shadow-[0_0_10px_rgba(59,130,246,0.3)]" id="ship-shield-badge">50/50 SHIELDS</div>
+                        <div class="bg-slate-950/80 border border-emerald-900 text-emerald-400 text-xs font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10" id="ship-hull-badge">100 HP</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enemy Scanners -->
+            <div id="enemy-scanner-panel" class="mb-4 space-y-2 hidden">
+                <h3 class="text-[9px] uppercase tracking-[0.3em] font-bold text-red-500 mb-2 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-red-600 rounded-full animate-ping"></span>
+                    Hostile Vector Tracking
+                </h3>
+                <div id="enemy-list-container" class="grid grid-cols-1 gap-2">
+                    <!-- Enemy ships rendered here -->
+                </div>
+            </div>
                 </div>
             </div>
 
@@ -981,18 +1100,79 @@
 
         <!-- MAIN TAB: DM MODE -->
         <div id="main-dm" class="main-tab hidden">
-            <div class="mb-4 border-b pb-2 border-red-900">
-                <h2 class="display-font text-2xl font-black text-red-500 tracking-wide uppercase">Living Force Dashboard</h2>
-                <p class="text-red-400/70 text-xs mt-1 uppercase datapad-font tracking-widest">DM Control Protocol Active</p>
+            <div class="mb-4 border-b pb-2 border-red-900 flex justify-between items-end">
+                <div>
+                    <h2 class="display-font text-2xl font-black text-red-600 tracking-wide uppercase">Tactical Command Center</h2>
+                    <p class="text-red-500/50 text-[10px] mt-1 uppercase datapad-font tracking-[0.2em]">DM Level Access Protocol // Authorized Personnel Only</p>
+                </div>
+                <button onclick="exitDMMode()" class="bg-red-950 border border-red-700 hover:bg-red-800 text-red-200 px-3 py-1 rounded text-[10px] uppercase tracking-widest datapad-font transition-colors mb-1">Secure Logout</button>
             </div>
-            <div class="bg-red-950/20 border border-red-900/50 p-4 rounded text-red-200 text-sm mb-4">
-                <p class="mb-2"><strong>Warning:</strong> You are currently bypassing standard player restrictions. Any changes made here immediately affect the local app state.</p>
-                <button onclick="exitDMMode()" class="bg-red-900 hover:bg-red-800 text-white px-3 py-1 rounded text-xs uppercase tracking-widest datapad-font transition-colors mt-2">Relinquish Control</button>
+
+            <!-- DM Sub-Nav -->
+            <div class="flex gap-1 mb-6 bg-slate-950/80 p-1 rounded border border-red-900/30">
+                <button onclick="switchDMTab('controls')" id="dm-nav-controls" class="dm-tab-btn active flex-1">State Injection</button>
+                <button onclick="switchDMTab('telemetry')" id="dm-nav-telemetry" class="dm-tab-btn flex-1">Squad Vitals</button>
+                <button onclick="switchDMTab('dice')" id="dm-nav-dice" class="dm-tab-btn flex-1">Odds Engine</button>
+                <button onclick="switchDMTab('enemies')" id="dm-nav-enemies" class="dm-tab-btn flex-1">Threats</button>
             </div>
-            
-            <h3 class="text-red-400 font-bold uppercase tracking-widest text-sm mb-3 pl-1 border-l-2 border-red-500">// Direct State Manipulation</h3>
-            <div id="dm-controls-container" class="grid-container pb-6">
-                <!-- DM inputs will be rendered here -->
+
+            <!-- DM TAB: CONTROLS -->
+            <div id="dm-tab-controls" class="dm-sub-tab">
+                <div class="grid grid-cols-1 gap-4 mb-4">
+                    <div class="bg-slate-900/40 border border-slate-800 p-3 rounded">
+                        <h3 class="text-slate-400 text-[9px] uppercase font-bold tracking-widest mb-3 border-b border-slate-800 pb-1">// Global Directives</h3>
+                        <div id="dm-controls-container" class="grid grid-cols-2 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DM TAB: ENEMIES -->
+            <div id="dm-tab-enemies" class="dm-sub-tab hidden">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-red-500 text-[9px] uppercase font-bold tracking-widest">// Vector Authorization</h3>
+                    <button onclick="addEnemyShip()" class="bg-red-950/50 border border-red-900 text-red-400 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-red-900 transition-colors">+ Deploy Asset</button>
+                </div>
+                <div id="dm-enemies-container" class="space-y-3 pb-6"></div>
+            </div>
+
+            <!-- DM TAB: TELEMETRY -->
+            <div id="dm-tab-telemetry" class="dm-sub-tab hidden">
+                <h3 class="text-slate-400 text-[9px] uppercase font-bold tracking-widest mb-3">// Operative Bio-Signals</h3>
+                <div id="dm-telemetry-container" class="space-y-2 pb-6"></div>
+            </div>
+
+            <!-- DM TAB: DICE -->
+            <div id="dm-tab-dice" class="dm-sub-tab hidden">
+                <div class="bg-slate-950/80 border border-red-900/30 rounded-lg p-4 mb-4">
+                    <h3 class="text-red-500 text-[9px] uppercase font-bold tracking-widest mb-4 border-b border-red-900/20 pb-2">// RNG Seed Injection</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="rollDMDice(20)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D20</span>
+                            <div class="text-lg">⬢</div>
+                        </button>
+                        <button onclick="rollDMDice(12)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D12</span>
+                            <div class="text-lg">⬡</div>
+                        </button>
+                        <button onclick="rollDMDice(10)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D10</span>
+                            <div class="text-lg">⬧</div>
+                        </button>
+                        <button onclick="rollDMDice(8)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D8</span>
+                            <div class="text-lg">⬥</div>
+                        </button>
+                        <button onclick="rollDMDice(6)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D6</span>
+                            <div class="text-lg">■</div>
+                        </button>
+                        <button onclick="rollDMDice(4)" class="dm-dice-btn py-3">
+                            <span class="text-[8px] opacity-50 block mb-1">D4</span>
+                            <div class="text-lg">▲</div>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="rollDice('CUSTOM DM ROLL', 0)" class="w-full bg-red-950/30 border border-red-900 text-red-500 py-3 rounded uppercase font-bold tracking-[0.2em] text-[10px] hover:bg-red-900/50 transition-all">Force Magnitude Check</button>
             </div>
         </div>
 
@@ -1134,6 +1314,9 @@
                 </div>
                 
                 <div class="pb-10 space-y-3">
+                    <button onclick="levelUp()" class="w-full py-3 datapad-font uppercase tracking-[0.2em] text-sm border rounded transition-all bg-emerald-950/20 border-emerald-900/50 text-emerald-400 hover:bg-emerald-900/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                        Level Up Operative
+                    </button>
                     <button onclick="switchProfile()" class="w-full py-2 datapad-font uppercase tracking-widest text-sm border rounded transition-colors" style="border-color: var(--hud-deep); color: var(--hud); background: rgba(15,23,42,0.5);">
                         Switch Profile
                     </button>
@@ -1268,6 +1451,7 @@
             speed: 800, hyperdrive: 2.0, crew: 2,
             cargo: [ "10x Ration Packs", "50L Tibanna Gas", "Spare Fusion Cell" ]
         },
+        enemies: [],
         bountiesStatus: {}
     };
 
@@ -1309,6 +1493,14 @@
     function initFirebaseListeners() {
         if (!db) return;
         try {
+            db.ref('shared/enemies').on('value', snap => {
+                const val = snap.val();
+                if (val) state.enemies = val;
+                else state.enemies = [];
+                renderEnemies();
+                if(state.isDM) renderDMEnemies();
+            });
+
             db.ref('shared/ship').on('value', snap => {
                 const data = snap.val();
                 if (data && !isEqual(state.ship, data)) { 
@@ -1352,6 +1544,36 @@
                     lastShipLogTime = data.timestamp;
                     showShipLog(data.text, data.mode);
                 }
+            });
+            db.ref('shared/gamelog').limitToLast(30).on('value', snap => {
+                const data = snap.val();
+                const container = document.getElementById('game-log-container');
+                if (!container) return;
+                if (!data) {
+                    container.innerHTML = `<div class="text-slate-700 text-center text-[10px] py-10 uppercase tracking-widest datapad-font">No combat data sync.</div>`;
+                    return;
+                }
+                const logs = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+                container.innerHTML = logs.map(l => `
+                    <div class="log-line-card flex justify-between items-center group hover:border-hud-soft transition-colors">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-bold text-hud uppercase tracking-widest">${l.name}</span>
+                                <span class="text-[8px] text-slate-600 font-mono">${new Date(l.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <div class="text-white text-xs uppercase tracking-tight font-bold">${l.label}</div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col items-end opacity-40">
+                                <span class="text-[8px] uppercase">Roll</span>
+                                <span class="text-[10px] font-mono">${(l.result - l.mod) || '?'}</span>
+                            </div>
+                            <div class="text-2xl font-mono ${l.result >= 20 ? 'text-emerald-400 glow-text-hud font-black' : l.result === 1 ? 'text-red-500' : 'text-white'}">
+                                ${l.result}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             });
             db.ref('shared/customBounties').on('value', snap => {
                 const data = snap.val();
@@ -1412,6 +1634,24 @@
         { id: "mohc", name: "General Rom Mohc", role: "Target", desc: "Imperial officer behind the Dark Trooper project. High value Rebel target.", location: "Arc Hammer", reward: "100,000 cr", defaultStatus: "Active" },
         { id: "mara", name: "Mara Jade", role: "Target", desc: "The Emperor's Hand. Force-sensitive operative hunting remaining Jedi and Rebel leaders.", location: "Classified", reward: "Unknown", defaultStatus: "Active" }
     ];
+
+    function canLearnPower(spell, character) {
+        if (!character.cls || character.cls === 'None') return false;
+        const code = classCodeMap[character.cls];
+        if (!code) return false;
+        
+        // Cantrips are level 0
+        const spellLvl = lvlOrder[spell.lvl] || 0;
+        const maxLvl = maxSpellLevel(character.cls, parseInt(character.level) || 1);
+        
+        const isClassMatch = spell.classes.includes(code);
+        const isLevelMatch = spellLvl <= maxLvl;
+        
+        return {
+            allowed: isClassMatch && isLevelMatch,
+            reason: !isClassMatch ? `Class Mismatch (${character.cls})` : (!isLevelMatch ? `Level Too Low (Max: ${maxLvl})` : null)
+        };
+    }
 
     // --- COMPREHENSIVE DATABASES ---
     const classMilestones = {
@@ -1525,64 +1765,74 @@
             case "Sorcerer": case "Wizard": case "Cleric": case "Druid": case "Bard": return full(lvl);
             case "Paladin": case "Ranger": case "Artificer": return Math.max(half(lvl), cls==="Artificer"?(lvl>=2?1:0):0);
             case "Warlock": return warlock(lvl);
-            case "Fighter": case "Rogue": return third(lvl); 
             case "Monk": return 0;
             default: return 0;
         }
     }
 
     const spellData = [
-        { lvl: "Cantrip", dnd: "Fire Bolt", sw: "Force Combustion", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Fire. Agitate molecules in the air through the Force until they violently ignite.", fullDesc: "You channel the Force to hyper-agitate molecules at a distant point, causing a sudden, violent combustion. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage." },
-        { lvl: "Cantrip", dnd: "Mage Hand", sw: "Force Pull/Push (Minor)", classes: ["Sor", "Wiz", "Brd", "War"], cast: "1 Action", range: "30 ft", dur: "1 Minute", comp: "Somatic", desc: "Telekinetically manipulate small objects up to 30ft away.", fullDesc: "You create an invisible, telekinetic grip at a point you choose within range. You can use your action to manipulate an object, open an unlocked door, or retrieve an item. Can't carry more than 10 lbs." },
-        { lvl: "Cantrip", dnd: "Ray of Frost", sw: "Force Chill / Cryo", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Cold, slows movement. Drain thermal energy via the dark side.", fullDesc: "You draw the thermal energy out of a target using the dark side of the Force. Make a ranged spell attack. On a hit, it takes 1d8 cold damage, and its speed is reduced by 10 feet until the start of your next turn." },
-        { lvl: "Cantrip", dnd: "Vicious Mockery", sw: "Mind Trick (Doubt)", classes: ["Brd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "1d4 Psychic, Disadv. Plant deep fear directly into a weak mind.", fullDesc: "You unleash a string of words laced with subtle Force compulsion, planting deep doubt. Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll it makes." },
-        { lvl: "Cantrip", dnd: "Eldritch Blast", sw: "Focused Force Push", classes: ["War"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Force. Unerring telekinetic blasts. Multiple beams = rapid combo strikes.", fullDesc: "You hurl a concentrated, invisible beam of pure kinetic Force energy. Make a ranged spell attack. On a hit, the target takes 1d10 force damage. The spell creates more beams at higher levels." },
-        { lvl: "Cantrip", dnd: "Shocking Grasp", sw: "Minor Force Lightning", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Lightning. Prevents reactions. Short-circuit a droid.", fullDesc: "Lightning arcs from your fingertips. Make a melee spell attack against a target. You have advantage if the target is wearing metal (or is a Droid). On a hit, 1d8 lightning damage, and it can't take reactions." },
-        { lvl: "Cantrip", dnd: "Guidance", sw: "Force Premonition", classes: ["Clr", "Drd", "Art"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 min", comp: "Somatic", desc: "Add 1d4 to a check. Briefly glimpse the immediate future.", fullDesc: "You touch one willing creature and grant them a brief flash of foresight through the Force. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check." },
-        { lvl: "Cantrip", dnd: "Sacred Flame", sw: "Force Judgment", classes: ["Clr"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 Radiant, ignores cover. A righteous burst of Light Side energy.", fullDesc: "Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw." },
-        { lvl: "Cantrip", dnd: "Mending", sw: "Tech Repair", classes: ["Brd", "Clr", "Drd", "Sor", "Wiz", "Art"], cast: "1 Minute", range: "Touch", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "Restore a single break or tear. Field repair on damaged equipment.", fullDesc: "This spell repairs a single break or tear in an object you touch, such as a broken commlink, a torn flight suit, or a leaking power cell. As long as the break or tear is no larger than 1 foot in any dimension, you mend it, leaving no trace of the former damage." },
+        { lvl: "Cantrip", dnd: "Fire Bolt", sw: "Force Combustion", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Fire. Agitate molecules in the air through the Force.", fullDesc: "You channel the Force to hyper-agitate molecules. Make a ranged spell attack. On a hit, 1d10 fire damage. Damage increases at level 5 (2d10), 11 (3d10), and 17 (4d10)." },
+        { lvl: "Cantrip", dnd: "Mage Hand", sw: "Force Pull/Push (Minor)", type: "Utility", classes: ["Sor", "Wiz", "Brd", "War"], cast: "1 Action", range: "30 ft", dur: "1 Minute", comp: "Somatic", desc: "Telekinetically manipulate objects up to 30ft away.", fullDesc: "You create an invisible, telekinetic grip. You can use your action to manipulate an object, open a door, or retrieve an item. Max 10 lbs." },
+        { lvl: "Cantrip", dnd: "Ray of Frost", sw: "Force Chill / Cryo", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Cold, slows movement. Drain thermal energy.", fullDesc: "Make a ranged spell attack. On a hit, 1d8 cold damage, and its speed is reduced by 10 feet. Damage scales at higher levels." },
+        { lvl: "Cantrip", dnd: "Vicious Mockery", sw: "Mind Trick (Doubt)", type: "Save", saveStat: "WIS", classes: ["Brd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "1d4 Psychic, Disadv. Plant fear in a weak mind.", fullDesc: "Target must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on its next attack roll." },
+        { lvl: "Cantrip", dnd: "Eldritch Blast", sw: "Focused Force Push", type: "Attack", classes: ["War"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Force. Unerring telekinetic blasts.", fullDesc: "Make a ranged spell attack. On a hit, 1d10 force damage. Creates more beams at level 5, 11, and 17." },
+        { lvl: "Cantrip", dnd: "Shocking Grasp", sw: "Minor Force Lightning", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Lightning. Prevents reactions. Short-circuit a droid.", fullDesc: "Melee spell attack. Advantage if target is metal/Droid. On hit, 1d8 lightning damage, and no reactions until next turn." },
+        { lvl: "Cantrip", dnd: "Guidance", sw: "Force Premonition", type: "Utility", classes: ["Clr", "Drd", "Art"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 min", comp: "Somatic", desc: "Add 1d4 to a check. Glimpse the immediate future.", fullDesc: "Target rolls a d4 and adds it to one ability check of its choice." },
+        { lvl: "Cantrip", dnd: "Sacred Flame", sw: "Force Judgment", type: "Save", saveStat: "DEX", classes: ["Clr"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 Radiant, ignores cover. Light Side energy.", fullDesc: "Target must succeed on a Dexterity saving throw or take 1d8 radiant damage. No benefit from cover." },
+        { lvl: "Cantrip", dnd: "Mending", sw: "Tech Repair", type: "Utility", classes: ["Brd", "Clr", "Drd", "Sor", "Wiz", "Art"], cast: "1 Minute", range: "Touch", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "Restore a single break or tear. Field repair gear.", fullDesc: "Repairs a single break or tear in an object. Max 1 foot dimension." },
         
-        { lvl: "1st", dnd: "Magic Missile", sw: "Force Barrage", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 darts, 1d4+1 Force. Unerring, rapid telekinetic strikes.", fullDesc: "You create three glowing darts of pure telekinetic Force energy. Each dart hits a creature of your choice. A dart deals 1d4 + 1 force damage. The darts all strike simultaneously, and automatically hit." },
-        { lvl: "1st", dnd: "Shield", sw: "Force Barrier / Deflector", classes: ["Sor", "Wiz", "War"], cast: "1 Reaction", range: "Self", dur: "1 Round", comp: "Somatic", desc: "+5 AC reaction. Form a localized telekinetic wall to block incoming blaster bolts.", fullDesc: "An invisible barrier of Force energy appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from Magic Missile." },
-        { lvl: "1st", dnd: "Cure Wounds", sw: "Force Heal", classes: ["Brd", "Clr", "Drd", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "1d8 + Mod Healing. Channel the living Force to rapidly knit flesh and bone together.", fullDesc: "A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This healing has no effect on undead or Droids." },
-        { lvl: "1st", dnd: "Healing Word", sw: "Force Revitalize", classes: ["Brd", "Clr", "Drd"], cast: "1 Bonus Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "1d4 + Mod. A surge of Force energy across the battlefield.", fullDesc: "A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier." },
-        { lvl: "1st", dnd: "Thunderwave", sw: "Force Repulse", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cube)", dur: "Instantaneous", comp: "Somatic", desc: "2d8 Thunder. 15ft cube. A violent, outward telekinetic burst throwing enemies back.", fullDesc: "A wave of violent kinetic Force sweeps out from you. Each creature in a 15-foot cube must make a Constitution saving throw. On a failed save, takes 2d8 thunder (bludgeoning) damage and is pushed 10 feet." },
-        { lvl: "1st", dnd: "Charm Person", sw: "Jedi Mind Trick", classes: ["Brd", "Drd", "Sor", "Wiz", "War"], cast: "1 Action", range: "30 ft", dur: "1 Hour", comp: "Somatic, Verbal", desc: "Wis save. Target treats you as friendly. 'These aren't the droids you're looking for.'", fullDesc: "You wave your hand and speak a subtle command. Attempt to charm a humanoid you can see. Wisdom saving throw. If it fails, it is charmed by you until the spell ends, treating you as a friendly acquaintance." },
-        { lvl: "1st", dnd: "Hunter's Mark", sw: "Bounty Tracker HUD", classes: ["Rng"], cast: "1 Bonus Action", range: "90 ft", dur: "Concentration, 1 hr", comp: "None", desc: "Bonus Action. Deal extra 1d6 damage to target. Thermal tracking lock-on.", fullDesc: "You lock onto a target using your helmet's HUD or a planted micro-tracker. You deal an extra 1d6 damage to the target whenever you hit it with a weapon attack, and have advantage on Survival/Perception to find it." },
-        { lvl: "1st", dnd: "Command", sw: "Dominate Mind", classes: ["Clr", "Pal", "Brd", "War"], cast: "1 Action", range: "60 ft", dur: "1 Round", comp: "Verbal", desc: "One-word command they must obey. Pure Force compulsion.", fullDesc: "You speak a one-word command to a creature you can see within range. The target must succeed on a Wisdom saving throw or follow the command on its next turn." },
-        { lvl: "1st", dnd: "Bless", sw: "Battle Meditation (Minor)", classes: ["Clr", "Pal"], cast: "1 Action", range: "30 ft", dur: "Concentration, up to 1 minute", comp: "Verbal, Somatic", desc: "+1d4 to attacks/saves for 3 allies. Aura of Force confidence.", fullDesc: "You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw." },
-        { lvl: "1st", dnd: "Burning Hands", sw: "Flamethrower Burst", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "3d6 Fire. 15 ft cone. Wrist-mounted flame projector.", fullDesc: "As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one." },
+        { lvl: "1st", dnd: "Magic Missile", sw: "Force Barrage", type: "Auto", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 darts, 1d4+1 Force. Unerring telekinetic strikes.", fullDesc: "Three glowing darts of Force energy. Each hits automatically. 1d4 + 1 force damage each." },
+        { lvl: "1st", dnd: "Shield", sw: "Force Barrier / Deflector", type: "Utility", classes: ["Sor", "Wiz", "War"], cast: "1 Reaction", range: "Self", dur: "1 Round", comp: "Somatic", desc: "+5 AC reaction. Localized telekinetic wall.", fullDesc: "Invisible barrier grants +5 AC until start of next turn. Blocks Magic Missile." },
+        { lvl: "1st", dnd: "Cure Wounds", sw: "Force Heal", type: "Utility", classes: ["Brd", "Clr", "Drd", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "2d8 + Mod Healing. Channel the living Force to knit flesh.", fullDesc: "Target regains 2d8 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d8 to 2d8)." },
+        { lvl: "1st", dnd: "Healing Word", sw: "Force Revitalize", type: "Utility", classes: ["Brd", "Clr", "Drd"], cast: "1 Bonus Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "2d4 + Mod. Rapid Force surge.", fullDesc: "Target regains 2d4 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d4 to 2d4)." },
+        { lvl: "1st", dnd: "Thunderwave", sw: "Force Repulse", type: "Save", saveStat: "CON", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cube)", dur: "Instantaneous", comp: "Somatic", desc: "2d8 Thunder. 15ft cube. Violent outward burst.", fullDesc: "15-foot cube. Constitution saving throw. Fail: 2d8 thunder damage and pushed 10 feet. Success: Half damage, no push." },
+        { lvl: "1st", dnd: "Charm Person", sw: "Jedi Mind Trick", type: "Save", saveStat: "WIS", classes: ["Brd", "Drd", "Sor", "Wiz", "War"], cast: "1 Action", range: "30 ft", dur: "1 Hour", comp: "Somatic, Verbal", desc: "Wis save. Target treats you as friendly.", fullDesc: "Wisdom saving throw. Advantage if you are fighting it. If it fails, it is charmed until spell ends." },
+        { lvl: "1st", dnd: "Hunter's Mark", sw: "Bounty Tracker HUD", type: "Utility", classes: ["Rng"], cast: "1 Bonus Action", range: "90 ft", dur: "Concentration, 1 hr", comp: "None", desc: "Bonus Action. Deal extra 1d6 damage to target.", fullDesc: "Lock onto target. Deal extra 1d6 damage when you hit with weapon. (2024 Update: No longer grants advantage on tracking, but base damage remains)." },
+        { lvl: "1st", dnd: "Command", sw: "Dominate Mind", type: "Save", saveStat: "WIS", classes: ["Clr", "Pal", "Brd", "War"], cast: "1 Action", range: "60 ft", dur: "1 Round", comp: "Verbal", desc: "One-word command they must obey.", fullDesc: "Wisdom saving throw or follow the command on its next turn." },
+        { lvl: "1st", dnd: "Bless", sw: "Battle Meditation (Minor)", type: "Utility", classes: ["Clr", "Pal"], cast: "1 Action", range: "30 ft", dur: "Concentration, up to 1 minute", comp: "Verbal, Somatic", desc: "+1d4 to attacks/saves for 3 allies.", fullDesc: "Up to three creatures add 1d4 to attack rolls and saving throws." },
+        { lvl: "1st", dnd: "Burning Hands", sw: "Flamethrower Burst", type: "Save", saveStat: "DEX", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "3d6 Fire. 15 ft cone. Wrist-mounted flame projector.", fullDesc: "Dexterity saving throw. 3d6 fire damage on fail, half on success." },
+        { lvl: "1st", dnd: "Guiding Bolt", sw: "Force Flare", type: "Attack", classes: ["Clr"], cast: "1 Action", range: "120 ft", dur: "1 Round", comp: "Somatic, Verbal", desc: "4d6 Radiant. Next attack has Advantage.", fullDesc: "Make a ranged spell attack. On hit, 4d6 radiant damage. The next attack roll against this target has advantage." },
+        { lvl: "1st", dnd: "Inflict Wounds", sw: "Force Rend", type: "Attack", classes: ["Clr"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "3d10 Necrotic. Telekinetically tear tissue.", fullDesc: "Make a melee spell attack. On hit, 3d10 necrotic damage. (2024 Update: Damage increased to 3d10)." },
+        { lvl: "1st", dnd: "Chaos Bolt", sw: "Unstable Force Bolt", type: "Attack", classes: ["Sor"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic, Verbal", desc: "2d8+1d6 variable damage. Can leap.", fullDesc: "Make a ranged spell attack. Choose damage type (Acid, Cold, Fire, Force, Lightning, Poison, Psychic, or Thunder). If you roll the same number on both d8s, the bolt leaps to another target." },
+        { lvl: "1st", dnd: "Entangle", sw: "Force Bind (Root)", type: "Save", saveStat: "STR", classes: ["Drd"], cast: "1 Action", range: "90 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Str save. Restrain targets in 20ft square.", fullDesc: "Force roots sprout from the ground. Strength saving throw or be restrained." },
         
-        { lvl: "2nd", dnd: "Hold Person", sw: "Force Stasis / Choke", classes: ["Brd", "Clr", "Drd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Wis save. Paralyzes humanoid. Grip them in an invisible, telekinetic hold they cannot break.", fullDesc: "You reach out and clench your fist, trapping a humanoid within range in a crushing telekinetic grip. The target must succeed on a Wisdom saving throw or be paralyzed for the duration." },
-        { lvl: "2nd", dnd: "Invisibility", sw: "Force Cloak / Stealth Field", classes: ["Brd", "Sor", "Wiz", "Art", "War"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 hr", comp: "Somatic", desc: "Target becomes invisible. Cloud the minds of observers, or activate a light-bending belt.", fullDesc: "A creature you touch becomes invisible until the spell ends. The spell ends for a target that attacks or casts a spell." },
-        { lvl: "2nd", dnd: "Scorching Ray", sw: "Force Rend / Flamethrower", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 rays, 2d6 Fire each. Telekinetically tear at targets or sweep a Mandalorian flamethrower.", fullDesc: "You create three arcs of lethal Force energy (or bursts of flame). Make a ranged spell attack for each ray. On a hit, the target takes 2d6 fire (or slashing/kinetic) damage." },
-        { lvl: "2nd", dnd: "Shatter", sw: "Force Crush / Thermal Imploder", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "3d8 Thunder. 10ft radius. Crippling localized crush.", fullDesc: "A sudden loud ringing noise, painfully intense, erupts from a point of your choice within range. Each creature in a 10-foot-radius sphere must make a Constitution saving throw. A creature takes 3d8 thunder damage on a failed save." },
-        { lvl: "2nd", dnd: "Misty Step", sw: "Force Dash", classes: ["Sor", "Wiz", "War"], cast: "1 Bonus Action", range: "Self", dur: "Instantaneous", comp: "Somatic", desc: "Bonus action teleport 30ft. Move faster than the eye can track.", fullDesc: "Briefly surround yourself in a blur of Force speed, teleporting up to 30 feet to an unoccupied space that you can see." },
-        { lvl: "2nd", dnd: "Spiritual Weapon", sw: "Telekinetic Lightsaber", classes: ["Clr"], cast: "1 Bonus Action", range: "60 ft", dur: "1 Minute", comp: "Somatic", desc: "Bonus action. 1d8+Mod Force. A floating saber swinging telekinetically.", fullDesc: "You ignite a secondary, floating lightsaber that hovers within range. You can make a melee spell attack against a creature within 5 feet. On a hit, takes force damage equal to 1d8 + your spellcasting ability modifier." },
-        { lvl: "2nd", dnd: "Blur", sw: "Force Speed Cloud", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Self", dur: "Concentration, up to 1 minute", comp: "Verbal", desc: "Disadvantage on attacks vs you. Move so fast your outline blurs.", fullDesc: "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight." },
-        { lvl: "2nd", dnd: "Heat Metal", sw: "Armor Overheat", classes: ["Brd", "Drd", "Art"], cast: "1 Action", range: "60 ft", dur: "Concentration, up to 1 minute", comp: "Verbal, Somatic, Material", desc: "2d8 Fire/turn. Drop or burn. Remote-overload power cell or Force-heat plasteel.", fullDesc: "Choose a manufactured metal object, such as a metal weapon or a suit of heavy or medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 fire damage when you cast the spell. Until the spell ends, you can use a bonus action on each of your subsequent turns to cause this damage again." },
-        { lvl: "2nd", dnd: "", sw: "Sith Alchemy / Drain", classes: ["Sor", "Wiz", "War"], cast: "1 Action", range: "30 ft", dur: "Instantaneous", comp: "Somatic", desc: "Star Wars exclusive. Drain life force to heal yourself.", fullDesc: "You channel the dark side to rip the life force from a target. Target makes a Constitution saving throw, taking 3d6 necrotic damage on a failure, and you heal for half the damage dealt." },
+        { lvl: "2nd", dnd: "Hold Person", sw: "Force Stasis / Choke", type: "Save", saveStat: "WIS", classes: ["Brd", "Clr", "Drd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Wis save. Paralyzes humanoid. Invisible Force grip.", fullDesc: "Wisdom saving throw or be paralyzed. Repeat save at end of each turn." },
+        { lvl: "2nd", dnd: "Invisibility", sw: "Force Cloak / Stealth Field", type: "Utility", classes: ["Brd", "Sor", "Wiz", "Art", "War"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 hr", comp: "Somatic", desc: "Target becomes invisible. Cloud minds.", fullDesc: "Invisible until it attacks or casts a spell." },
+        { lvl: "2nd", dnd: "Scorching Ray", sw: "Force Rend / Flamethrower", type: "Attack", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 rays, 2d6 Fire each. Telekinetically tear targets.", fullDesc: "Three rays. Ranged spell attack for each. 2d6 fire damage each. (2024 Update: Damage scales by +2 rays for higher slots)." },
+        { lvl: "2nd", dnd: "Shatter", sw: "Force Crush / Thermal Imploder", type: "Save", saveStat: "CON", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "3d8 Thunder. 10ft radius. Crippling localized crush.", fullDesc: "Constitution saving throw. 3d8 thunder damage on fail, half on success." },
+        { lvl: "2nd", dnd: "Misty Step", sw: "Force Dash", type: "Utility", classes: ["Sor", "Wiz", "War"], cast: "1 Bonus Action", range: "Self", dur: "Instantaneous", comp: "Somatic", desc: "Bonus action teleport 30ft.", fullDesc: "Teleport 30 feet to an unoccupied space you can see." },
+        { lvl: "2nd", dnd: "Spiritual Weapon", sw: "Telekinetic Lightsaber", type: "Attack", classes: ["Clr"], cast: "1 Bonus Action", range: "60 ft", dur: "1 Minute", comp: "Somatic", desc: "Bonus action. 1d8+Mod Force. Floating saber.", fullDesc: "Bonus action melee spell attack. 1d8 + mod force damage. (2024 Update: Now requires Concentration)." },
+        { lvl: "2nd", dnd: "Blur", sw: "Force Speed Cloud", type: "Utility", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Self", dur: "Concentration, 1 min", comp: "Verbal", desc: "Disadvantage on attacks vs you.", fullDesc: "Attacks against you have disadvantage if the attacker relies on sight." },
+        { lvl: "2nd", dnd: "Heat Metal", sw: "Armor Overheat", type: "Save", saveStat: "CON", classes: ["Brd", "Drd", "Art"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "2d8 Fire/turn. Force-heat plasteel.", fullDesc: "Target metal object. 2d8 fire damage if held/worn. Con save vs disadvantage." },
+        { lvl: "2nd", dnd: "", sw: "Sith Alchemy / Drain", type: "Save", saveStat: "CON", classes: ["Sor", "Wiz", "War"], cast: "1 Action", range: "30 ft", dur: "Instantaneous", comp: "Somatic", desc: "Drain life force to heal yourself.", fullDesc: "Constitution saving throw. Fail: 3d6 necrotic damage, heal for half. Success: Half damage, no heal." },
+        { lvl: "2nd", dnd: "Mirror Image", sw: "Force Illusions", type: "Utility", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "Self", dur: "1 Minute", comp: "Somatic", desc: "3 duplicates. Harder to hit.", fullDesc: "Create three illusory duplicates. When attacked, roll to see if they hit an image instead. (2024 Update: Images now increase your AC by 1 + your spellcasting mod)." },
+        { lvl: "2nd", dnd: "Spike Growth", sw: "Razor Force Shards", type: "Utility", classes: ["Drd", "Rng"], cast: "1 Action", range: "150 ft", dur: "Concentration, 10 min", comp: "Somatic", desc: "20ft radius. 2d4 damage per 5ft moved.", fullDesc: "Area becomes difficult terrain. When a creature moves into or within the area, it takes 2d4 piercing damage for every 5 feet it travels." },
         
-        { lvl: "3rd", dnd: "Fireball", sw: "Force Storm / Heavy Detonator", classes: ["Sor", "Wiz"], cast: "1 Action", range: "150 ft", dur: "Instantaneous", comp: "Somatic", desc: "8d6 Fire. 20ft radius. Massive telekinetic devastation, or military-grade explosive.", fullDesc: "You hurl a compressed ball of volatile energy. Each creature in a 20-foot-radius sphere must make a Dexterity saving throw. A target takes 8d6 fire damage on a failed save, or half as much damage on a successful one." },
-        { lvl: "3rd", dnd: "Fly", sw: "Force Levitation / Jetpack", classes: ["Sor", "Wiz", "Art", "War"], cast: "1 Action", range: "Touch", dur: "Concentration, 10 min", comp: "Somatic", desc: "60ft fly speed. Defy gravity through pure Force, or ignite your Z-6 Jetpack.", fullDesc: "You touch a willing creature. The target gains a flying speed of 60 feet for the duration." },
-        { lvl: "3rd", dnd: "Haste", sw: "Battle Meditation / Speed", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "30 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Doubles speed, +2 AC, extra action. Tap deeply into the combat flow.", fullDesc: "Until the spell ends, the target's speed is doubled, it gains a +2 bonus to AC, it has advantage on Dexterity saving throws, and it gains an additional action on each of its turns." },
-        { lvl: "3rd", dnd: "Counterspell", sw: "Force Absorb / Deflection", classes: ["Sor", "Wiz", "War"], cast: "1 Reaction", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "Reaction. Interrupt cast. Catching raw Force energy or telekinetically crushing a detonator.", fullDesc: "You attempt to interrupt a creature in the process of casting a spell. If the creature is casting a spell of 3rd level or lower, its spell fails." },
-        { lvl: "3rd", dnd: "Lightning Bolt", sw: "Sith Lightning", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (100ft line)", dur: "Instantaneous", comp: "Somatic", desc: "8d6 Lightning. 100ft line. Unleash the pure, hateful energy of the dark side.", fullDesc: "A stroke of dark side lightning forming a line 100 feet long and 5 feet wide blasts out from you. Each creature in the line must make a Dexterity saving throw." },
-        { lvl: "3rd", dnd: "Dispel Magic", sw: "Force Sever / Slice Override", classes: ["Brd", "Clr", "Drd", "Pal", "Sor", "Wiz", "War", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "End ongoing effects. Cut a target off from the Force, or reboot a system.", fullDesc: "Choose one creature, object, or magical effect within range. Any spell of 3rd level or lower on the target ends." },
-        { lvl: "3rd", dnd: "Revivify", sw: "Bacta Tank Field Module", classes: ["Clr", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Verbal, Somatic, Material", desc: "Return creature dead ≤1 min to 1 HP. Emergency cardiac shock + bacta flush.", fullDesc: "You touch a creature that has died within the last minute. That creature returns to life with 1 hit point. This spell can't return to life a creature that has died of old age, nor can it restore any missing body parts." },
-        { lvl: "3rd", dnd: "Slow", sw: "Force Drag", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, up to 1 minute", comp: "Verbal, Somatic, Material", desc: "6 creatures, halved speed and one action only. Crush them under telekinetic weight.", fullDesc: "You alter time around up to six creatures of your choice in a 40-foot cube within range. Each target must succeed on a Wisdom saving throw or be affected by this spell for the duration. An affected target's speed is halved, it takes a −2 penalty to AC and Dexterity saving throws, and it can't use reactions." },
-
-        { lvl: "4th", dnd: "Wall of Fire", sw: "Plasma Barrier", classes: ["Drd", "Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic, Material", desc: "5d8 Fire. 60 ft wall. Force-channeled fire wall or deployed plasma emitter.", fullDesc: "You create a wall of fire (plasma) on a solid surface. When the wall appears, each creature in its area takes 5d8 fire damage on a failed Dex save, or half as much on a successful one." },
-        { lvl: "4th", dnd: "Polymorph", sw: "Beast Bond Transformation", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 hr", comp: "Verbal, Somatic, Material", desc: "Transform target into beast. Living-Force consciousness merge or bio-engineering serum.", fullDesc: "This spell transforms a creature that you can see within range into a new form. The transformation lasts for the duration, or until the target drops to 0 hit points or dies." },
-        { lvl: "4th", dnd: "Greater Invisibility", sw: "Phase-Shift Cloak", classes: ["Brd", "Sor", "Wiz"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Invisible while attacking. Advanced light-bending or perfect Force concealment.", fullDesc: "You or a creature you touch becomes invisible until the spell ends. Anything the target is wearing or carrying is invisible as long as it is on the target's person." },
-        { lvl: "4th", dnd: "Banishment", sw: "Force Exile", classes: ["Clr", "Pal", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic, Material", desc: "Send target to another plane. Hurl them through a Force-rift.", fullDesc: "You attempt to send one creature that you can see within range to another plane of existence. The target must succeed on a Charisma saving throw or be banished." },
-        { lvl: "4th", dnd: "Dimension Door", sw: "Force Phase", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "500 ft", dur: "Instantaneous", comp: "Verbal", desc: "Teleport 500 ft + 1 ally. Briefly slip into the Force itself.", fullDesc: "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. You can bring one willing creature." },
+        { lvl: "3rd", dnd: "Fireball", sw: "Force Storm / Heavy Detonator", type: "Save", saveStat: "DEX", classes: ["Sor", "Wiz"], cast: "1 Action", range: "150 ft", dur: "Instantaneous", comp: "Somatic", desc: "8d6 Fire. 20ft radius. Massive devastation.", fullDesc: "20-foot-radius sphere. Dexterity saving throw. 8d6 fire damage on fail, half on success." },
+        { lvl: "3rd", dnd: "Fly", sw: "Force Levitation / Jetpack", type: "Utility", classes: ["Sor", "Wiz", "Art", "War"], cast: "1 Action", range: "Touch", dur: "Concentration, 10 min", comp: "Somatic", desc: "60ft fly speed. Defy gravity.", fullDesc: "Target gains 60 feet flying speed for the duration." },
+        { lvl: "3rd", dnd: "Haste", sw: "Battle Meditation / Speed", type: "Utility", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "30 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Doubles speed, +2 AC, extra action.", fullDesc: "Speed doubled, +2 AC, extra action (Attack, Dash, Disengage, Hide, Use Object)." },
+        { lvl: "3rd", dnd: "Counterspell", sw: "Force Absorb / Deflection", type: "Save", saveStat: "CON", classes: ["Sor", "Wiz", "War"], cast: "1 Reaction", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "Reaction. Interrupt cast.", fullDesc: "(2024 Update: Target makes a Constitution saving throw. On a failure, the spell fails and the slot is expended)." },
+        { lvl: "3rd", dnd: "Lightning Bolt", sw: "Sith Lightning", type: "Save", saveStat: "DEX", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (100ft line)", dur: "Instantaneous", comp: "Somatic", desc: "8d6 Lightning. 100ft line.", fullDesc: "100-foot-long, 5-foot-wide line. Dexterity saving throw. 8d6 lightning damage on fail, half on success." },
+        { lvl: "3rd", dnd: "Dispel Magic", sw: "Force Sever / Slice Override", type: "Utility", classes: ["Brd", "Clr", "Drd", "Pal", "Sor", "Wiz", "War", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "End ongoing effects.", fullDesc: "End spells of 3rd level or lower on target. (2024 Update: Now always works on 3rd level or lower, no check needed)." },
+        { lvl: "3rd", dnd: "Revivify", sw: "Bacta Tank Field Module", type: "Utility", classes: ["Clr", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "Return creature dead ≤1 min to 1 HP.", fullDesc: "Return dead creature to 1 HP. Does not work on Droids/Undead." },
+        { lvl: "3rd", dnd: "Slow", sw: "Force Drag", type: "Save", saveStat: "WIS", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "6 creatures, halved speed and one action.", fullDesc: "Wisdom saving throw. Affected targets have halved speed, -2 AC/Dex saves, no reactions, one action only." },
+        { lvl: "3rd", dnd: "Beacon of Hope", sw: "Force Bastion", type: "Utility", classes: ["Clr"], cast: "1 Action", range: "30 ft", dur: "Concentration, 1 min", comp: "Somatic, Verbal", desc: "Adv on Wis/Death saves. Max healing.", fullDesc: "Targets have advantage on Wisdom saving throws and death saving throws, and regain the maximum number of hit points possible from any healing." },
         
-        { lvl: "5th", dnd: "Cone of Cold", sw: "Cryo-Detonator Wave", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (60ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic, Material", desc: "8d8 Cold. 60 ft cone. Mass thermal drain through the dark side.", fullDesc: "A blast of cold air erupts from your hands. Each creature in a 60-foot cone must make a Constitution saving throw. A creature takes 8d8 cold damage on a failed save, or half as much on a successful one." },
-        { lvl: "5th", dnd: "Hold Monster", sw: "Force Stasis (Greater)", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "90 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic, Material", desc: "Paralyze any creature. The legendary frozen-in-place Force grip.", fullDesc: "Choose a creature that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration." },
-        { lvl: "5th", dnd: "Telekinesis", sw: "Force Lift / Crush", classes: ["Sor", "Wiz"], cast: "1 Action", range: "60 ft", dur: "Concentration, 10 min", comp: "Verbal, Somatic", desc: "Move creatures and objects up to 1000 lbs. The Vader treatment.", fullDesc: "You gain the ability to move or manipulate creatures or objects by thought. When you cast the spell, and as your action each round for the duration, you can exert your will on one creature or object." },
-        { lvl: "5th", dnd: "Mass Cure Wounds", sw: "Battlefield Bacta Burst", classes: ["Brd", "Clr", "Drd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "3d8+Mod healing to 6 creatures. Aerosol bacta cloud or Light wave.", fullDesc: "A wave of healing energy washes out from a point of your choice within range. Choose up to six creatures in a 30-foot-radius sphere centered on that point. Each target regains hit points equal to 3d8 + your spellcasting ability modifier." },
-        { lvl: "5th", dnd: "Dominate Person", sw: "Mind Control (Major)", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Take complete control of a humanoid. Overwhelming Force dominance.", fullDesc: "You attempt to beguile a humanoid that you can see within range. It must succeed on a Wisdom saving throw or be charmed by you for the duration. You have a telepathic link with it as long as the two of you are on the same plane of existence, and can issue direct commands." }
+        { lvl: "4th", dnd: "Wall of Fire", sw: "Plasma Barrier", type: "Save", saveStat: "DEX", classes: ["Drd", "Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "5d8 Fire. 60 ft wall. Plasma emitter.", fullDesc: "Dexterity saving throw when wall appears. 5d8 fire damage on fail, half on success." },
+        { lvl: "4th", dnd: "Polymorph", sw: "Beast Bond Transformation", type: "Save", saveStat: "WIS", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 hr", comp: "Verbal, Somatic", desc: "Transform target into beast.", fullDesc: "Wisdom saving throw (willing targets can fail). Transform into a beast of CR equal or lower than target level." },
+        { lvl: "4th", dnd: "Greater Invisibility", sw: "Phase-Shift Cloak", type: "Utility", classes: ["Brd", "Sor", "Wiz"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Invisible while attacking.", fullDesc: "Target remains invisible even when attacking or casting spells." },
+        { lvl: "4th", dnd: "Banishment", sw: "Force Exile", type: "Save", saveStat: "CHA", classes: ["Clr", "Pal", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Send target to another plane.", fullDesc: "Charisma saving throw. Fail: Banished to a harmless demiplane (or home plane) for the duration." },
+        { lvl: "4th", dnd: "Dimension Door", sw: "Force Phase", type: "Utility", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "500 ft", dur: "Instantaneous", comp: "Verbal", desc: "Teleport 500 ft + 1 ally.", fullDesc: "Teleport yourself and one willing creature up to 500 feet." },
+        { lvl: "4th", dnd: "Guardian of Faith", sw: "Force Sentinel", type: "Auto", classes: ["Clr"], cast: "1 Action", range: "30 ft", dur: "8 Hours", comp: "Verbal", desc: "Spectral guardian deals 20 Force damage.", fullDesc: "A large spectral guardian appears. Any creature hostile to you that moves to a space within 10 feet of the guardian for the first time on a turn or starts its turn there must succeed on a Dexterity saving throw or take 20 radiant damage." },
+        
+        { lvl: "5th", dnd: "Cone of Cold", sw: "Cryo-Detonator Wave", type: "Save", saveStat: "CON", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (60ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "8d8 Cold. 60 ft cone. Mass thermal drain.", fullDesc: "Constitution saving throw. 8d8 cold damage on fail, half on success." },
+        { lvl: "5th", dnd: "Hold Monster", sw: "Force Stasis (Greater)", type: "Save", saveStat: "WIS", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "90 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Paralyze any creature. Frozen-in-place.", fullDesc: "Wisdom saving throw or be paralyzed. Repeat save at end of each turn." },
+        { lvl: "5th", dnd: "Telekinesis", sw: "Force Lift / Crush", type: "Utility", classes: ["Sor", "Wiz"], cast: "1 Action", range: "60 ft", dur: "Concentration, 10 min", comp: "Verbal, Somatic", desc: "Move creatures/objects up to 1000 lbs.", fullDesc: "Contested ability check (Casting Stat vs target Str) to move/restrain. Move objects up to 1000 lbs." },
+        { lvl: "5th", dnd: "Mass Cure Wounds", sw: "Battlefield Bacta Burst", type: "Utility", classes: ["Brd", "Clr", "Drd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "5d8+Mod healing to 6 creatures.", fullDesc: "Up to six creatures regain 5d8 + casting mod HP. (2024 Update: Healing increased from 3d8 to 5d8)." },
+        { lvl: "5th", dnd: "Dominate Person", sw: "Mind Control (Major)", type: "Save", saveStat: "WIS", classes: ["Brd", "Sor", "Wiz", "War"], cast: "1 Action", range: "60 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Take complete control of a humanoid.", fullDesc: "Wisdom saving throw. Advantage if you are fighting it. On failure, you control its actions via telepathic link." },
+        { lvl: "5th", dnd: "Flame Strike", sw: "Force Nova", type: "Save", saveStat: "DEX", classes: ["Clr"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "8d6 Fire/Radiant. 10ft cylinder.", fullDesc: "A vertical column of Force energy roars down. 8d6 damage (half fire, half radiant). Dexterity save for half." },
+        { lvl: "5th", dnd: "Cloudkill", sw: "Toxic Force Cloud", type: "Save", saveStat: "CON", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, 10 min", comp: "Verbal, Somatic", desc: "5d8 Poison. 20ft radius moving cloud.", fullDesc: "Creates a 20-foot-radius sphere of poisonous, yellow-green fog. 5d8 poison damage. The fog moves 10 feet away from you each turn." },
+        { lvl: "5th", dnd: "Animate Objects", sw: "Telekinetic Swarm", type: "Utility", classes: ["Brd", "Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Concentration, 1 min", comp: "Verbal, Somatic", desc: "Animate up to 10 objects. Swarm enemies.", fullDesc: "You telekinetically animate up to 10 non-magical objects. They become creatures under your control. (2024 Update: Now simplified into a 'Swarm' stat block)." }
     ];
 
     // --- RENDER: PROFILES ---
@@ -1788,12 +2038,25 @@
     function spellCard(s, q) {
         const tags = s.classes.map(cd => `<span class="class-tag">${cd}</span>`).join(' ');
         const starred = state.favorites.spells.includes(s.originalIndex);
+        const learned = (state.knownPowers || []).includes(s.originalIndex);
+        
+        const check = canLearnPower(s, state);
+        const canLearn = check.allowed;
         
         return `
-        <div class="data-card p-3 clickable" onclick="openDetails('spell', ${s.originalIndex})">
-            <button class="fav-btn ${starred?'active':''}" onclick="toggleFavorite(event, 'spells', ${s.originalIndex})" aria-label="Save">
-                <svg width="20" height="20" fill="${starred?'currentColor':'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </button>
+        <div class="data-card p-3 clickable group relative" onclick="openDetails('spell', ${s.originalIndex})">
+            <div class="absolute top-2 right-2 flex gap-1 z-10">
+                <button class="w-7 h-7 flex items-center justify-center rounded border transition-all ${learned ? 'bg-emerald-600 border-emerald-400 text-white' : (canLearn ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-emerald-400 hover:border-emerald-500' : 'bg-slate-900 border-slate-800 text-slate-700 cursor-not-allowed opacity-20')}" 
+                        onclick="toggleKnownPower(event, ${s.originalIndex})" 
+                        title="${learned ? 'Unlearn Power' : (canLearn ? 'Learn Power' : check.reason)}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </button>
+                <button class="w-7 h-7 flex items-center justify-center rounded border transition-all ${starred ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-indigo-400 hover:border-indigo-500'}" 
+                        onclick="toggleFavorite(event, 'spells', ${s.originalIndex})" 
+                        title="Save to Holocron">
+                    <svg class="w-4 h-4" fill="${starred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </button>
+            </div>
             
             ${s.dnd ? `
             <div class="mb-3 bg-slate-900/80 border border-slate-700/50 rounded p-2 flex items-center justify-between shadow-inner rename-guide mr-8">
@@ -1892,6 +2155,11 @@
             const data = spellData[index];
             title.innerText = data.sw; subtitle.innerText = data.dnd ? `Base Spell: ${data.dnd}` : `Star Wars Exclusive`;
             let classTags = data.classes.map(c => `<span class="class-tag">${c}</span>`).join(' ');
+            
+            const learned = (state.knownPowers || []).includes(index);
+            const check = canLearnPower(data, state);
+            const canLearn = check.allowed;
+
             html = `
                 <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
                     <div class="level-badge text-xs font-bold px-2 py-1 rounded datapad-font uppercase tracking-widest">${data.lvl}</div>
@@ -1915,7 +2183,24 @@
                         <span class="text-white text-xs">${data.comp}</span>
                     </div>
                 </div>
-                <div class="text-slate-300 space-y-3 leading-relaxed border-t border-slate-800 pt-3">${data.fullDesc.replace(/\n/g, '<br>')}</div>
+                <div class="text-slate-300 space-y-3 leading-relaxed border-t border-slate-800 pt-3 mb-6">${data.fullDesc.replace(/\n/g, '<br>')}</div>
+                
+                <div class="flex gap-3 pt-4 border-t border-slate-800">
+                    ${learned ? `
+                        <button onclick="closeDetails(); rollItem(event, ${index}, 'spell')" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                            Deploy Power
+                        </button>
+                        <button onclick="toggleKnownPower(event, ${index}); openDetails('spell', ${index});" class="px-4 bg-slate-800 hover:bg-red-900/30 text-slate-400 hover:text-red-400 py-3 rounded font-bold uppercase tracking-widest text-[10px] transition-all border border-slate-700 hover:border-red-900/50">
+                            Unlearn
+                        </button>
+                    ` : `
+                        <button onclick="toggleKnownPower(event, ${index}); openDetails('spell', ${index});" 
+                                class="flex-1 py-3 rounded font-bold uppercase tracking-widest text-xs transition-all border ${canLearn ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400 hover:bg-emerald-600/40' : 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'}"
+                                ${!canLearn ? 'disabled' : ''}>
+                            ${canLearn ? 'Integrate Into Dossier' : check.reason}
+                        </button>
+                    `}
+                </div>
             `;
         }
 
@@ -1938,6 +2223,7 @@
         
         let mod = 0;
         let title = "";
+        let noRoll = false;
         
         if (type === 'armory') {
             const item = armoryData[index];
@@ -1956,94 +2242,308 @@
             const spell = spellData[index];
             title = spell.sw;
             
+            // Auto-consume slot
+            const lvlDigit = lvlOrder[spell.lvl];
+            if (lvlDigit > 0) {
+                if (!consumeSlot(lvlDigit)) {
+                    showHolonetAlert(`Mental Block: No Level ${lvlDigit} slots available.`, 'border-red-900 bg-red-950/50');
+                    return;
+                }
+            }
+
             const cData = classData.find(c => c.dnd === state.cls);
+            let castingMod = 0;
             if(cData) {
                 const p = cData.primary.toLowerCase();
-                if(p.includes('cha')) mod = getMod('cha');
-                else if(p.includes('wis')) mod = getMod('wis');
-                else if(p.includes('int')) mod = getMod('int');
-                else mod = getMod('int');
+                if(p.includes('cha')) castingMod = getMod('cha');
+                else if(p.includes('wis')) castingMod = getMod('wis');
+                else if(p.includes('int')) castingMod = getMod('int');
+                else castingMod = getMod('int');
             }
-            mod += getProfBonus();
+            const prof = getProfBonus();
+            
+            if (spell.type === 'Save') {
+                const dc = 8 + castingMod + prof;
+                title = `${spell.sw} (Save DC ${dc} ${spell.saveStat})`;
+                noRoll = true;
+            } else if (spell.type === 'Utility' || spell.type === 'Auto') {
+                noRoll = true;
+            } else {
+                mod = castingMod + prof;
+            }
         }
 
-        rollDice(title, mod);
+        rollDice(title, mod, noRoll);
+    }
+
+    function rollDice(label, modifier, noRoll = false) {
+        if (noRoll) {
+            const resEl = document.getElementById('dice-result');
+            const hud = document.getElementById('dice-hud');
+            if (hud && resEl) {
+                document.getElementById('dice-label').innerText = label;
+                document.getElementById('dice-mod').innerText = '--';
+                resEl.innerText = 'OK';
+                hud.classList.add('active');
+                setTimeout(() => closeDiceHUD(), 1500);
+            }
+            // Log the DC or utility action
+            try {
+                const logRef = db.ref('shared/gamelog').push();
+                logRef.set({
+                    name: state.name || "Unknown",
+                    label: label,
+                    mod: 0,
+                    result: 'INF',
+                    timestamp: Date.now()
+                });
+            } catch(e){}
+            return;
+        }
+        
+        const hud = document.getElementById('dice-hud');
+        const resEl = document.getElementById('dice-result');
+        if (!hud || !resEl) return;
+        
+        document.getElementById('dice-label').innerText = `Rolling ${label}`;
+        document.getElementById('dice-mod').innerText = modifier >= 0 ? `+${modifier}` : modifier;
+        
+        hud.classList.add('active');
+        resEl.classList.remove('dice-crit', 'dice-fail');
+        resEl.innerText = '--';
+
+        const logRef = db.ref('shared/gamelog').push();
+        logRef.set({
+            name: state.name || "Unknown",
+            label: label,
+            mod: modifier,
+            result: 0,
+            timestamp: Date.now()
+        });
+
+        // Animation loop
+        let currentRoll = 1;
+        const interval = setInterval(() => {
+            currentRoll = Math.floor(Math.random() * 20) + 1;
+            resEl.innerText = currentRoll + modifier;
+        }, 50);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            const roll = Math.floor(Math.random() * 20) + 1;
+            const total = roll + modifier;
+            
+            logRef.update({ result: total });
+            
+            if(roll === 20) resEl.classList.add('dice-crit', 'glow-text-hud');
+            if(roll === 1) resEl.classList.add('dice-fail');
+            
+            resEl.innerText = total;
+            setTimeout(() => closeDiceHUD(), 2500);
+        }, 800);
+    }
+
+    function consumeSlot(lvl) {
+        const maxSlots = getMaxSlots(state.level, state.cls);
+        const max = maxSlots[lvl] || 0;
+        if (max === 0) return true; 
+        
+        if(!state.spellSlots) state.spellSlots = {};
+        const used = state.spellSlots[lvl] || 0;
+        
+        for(let i=0; i<max; i++) {
+            if (!(used & (1 << i))) {
+                state.spellSlots[lvl] = used | (1 << i);
+                saveState();
+                renderCharacterSheet();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getMaxKnownPowers(level, cls) {
+        const table = {
+            "Sorcerer": { 1:2, 2:3, 3:4, 4:5, 5:6, 6:7, 7:8 },
+            "Ranger": { 1:0, 2:2, 3:3, 4:3, 5:4, 6:4, 7:5 },
+            "Cleric": { 1:4, 2:5, 3:6, 4:7, 5:9, 6:10, 7:11 } 
+        };
+        return (table[cls] && table[cls][level]) || 99;
     }
 
     // --- RESOURCES & LOADOUT ---
+    function toggleKnownPower(event, index) {
+        if (event) event.stopPropagation();
+        if (!state.knownPowers) state.knownPowers = [];
+        
+        const spell = spellData[index];
+        const idx = state.knownPowers.indexOf(index);
+        
+        if (idx > -1) {
+            state.knownPowers.splice(idx, 1);
+        } else {
+            // Check limits for leveled spells (Cantrips are free)
+            if (spell.lvl !== 'Cantrip') {
+                const currentLeveledCount = state.knownPowers.filter(i => spellData[i].lvl !== 'Cantrip').length;
+                const max = getMaxKnownPowers(parseInt(state.level)||1, state.cls);
+                if (currentLeveledCount >= max) {
+                    showHolonetAlert(`Memory Overflow: You can only master ${max} leveled powers. Unlearn one first.`, 'border-red-900 bg-red-950/50');
+                    return;
+                }
+            }
+
+            const check = canLearnPower(spell, state);
+            if (!check.allowed) {
+                showHolonetAlert(`Deployment Rejected: ${check.reason}`, 'border-red-900 bg-red-950/50');
+                return;
+            }
+            state.knownPowers.push(index);
+        }
+        
+        saveState();
+        renderHolocron();
+        renderLoadout();
+        renderCharacterSheet();
+    }
+
     function toggleFavorite(event, type, index) {
-        event.stopPropagation(); 
-        const idx = state.favorites[type].indexOf(index);
-        if (idx > -1) { state.favorites[type].splice(idx, 1); } else { state.favorites[type].push(index); }
+        if (event) event.stopPropagation(); 
+        const favArray = state.favorites[type] || [];
+        const idx = favArray.indexOf(index);
+        if (idx > -1) { favArray.splice(idx, 1); } else { favArray.push(index); }
         saveState();
         if (type==='armory') renderArmory();
         if (type==='spells') renderHolocron();
         renderLoadout();
     }
 
-    function renderLoadout() {
-        const container = document.getElementById('char-loadout-container');
-        const emptyState = document.getElementById('char-loadout-empty');
-        if (!container || !emptyState) return;
-
-        if (state.favorites.armory.length === 0 && state.favorites.spells.length === 0) {
-            container.innerHTML = '';
-            emptyState.style.display = 'block';
-            return;
-        }
+    function switchLoadoutTab(tab) {
+        state.loadoutTab = tab;
+        const tabs = ['inv', 'abi', 'fea'];
+        const views = ['inventory', 'abilities', 'features'];
         
-        emptyState.style.display = 'none';
-        let html = '';
+        tabs.forEach(t => {
+            const btn = document.getElementById(`loadout-tab-${t}`);
+            if (!btn) return;
+            const isMatch = (t === 'inv' && tab === 'inventory') || (t === 'abi' && tab === 'abilities') || (t === 'fea' && tab === 'features');
+            
+            if (isMatch) {
+                const color = t === 'inv' ? 'border-hud' : (t === 'abi' ? 'border-indigo-500' : 'border-emerald-500');
+                btn.className = `flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 ${color} text-white`;
+            } else {
+                btn.className = `flex-1 py-2 text-[10px] font-bold uppercase tracking-widest transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-300`;
+            }
+        });
 
-        if (state.favorites.armory.length > 0) {
-            html += `<h3 class="text-hud font-bold uppercase tracking-widest text-xs mb-2 pl-1 border-l border-hud">Weapons & Gear</h3>`;
-            state.favorites.armory.forEach(index => {
+        views.forEach(v => {
+            const view = document.getElementById(`loadout-${v}-view`);
+            if (view) view.classList.toggle('hidden', v !== tab);
+        });
+
+        saveState();
+    }
+
+    function renderLoadout() {
+        const invContainer = document.getElementById('char-inventory-container');
+        const abiContainer = document.getElementById('char-abilities-container');
+        const feaContainer = document.getElementById('char-features-container');
+        const invEmpty = document.getElementById('char-inventory-empty');
+        const abiEmpty = document.getElementById('char-abilities-empty');
+        const feaEmpty = document.getElementById('char-features-empty');
+        
+        if (!invContainer || !abiContainer || !feaContainer) return;
+
+        const knownSpells = state.knownPowers || [];
+        const favArmory = state.favorites.armory || [];
+
+        // Render Inventory
+        if (favArmory.length === 0) {
+            invContainer.innerHTML = '';
+            invEmpty.classList.remove('hidden');
+        } else {
+            invEmpty.classList.add('hidden');
+            let html = '';
+            favArmory.forEach(index => {
                 const item = armoryData[index];
                 if(!item) return;
                 html += `
-                    <div class="data-card p-2 mb-2 clickable" onclick="openDetails('armory', ${index})">
+                    <div class="data-card p-2 mb-2 clickable border-slate-800 hover:border-hud transition-all" onclick="openDetails('armory', ${index})">
                         <div class="flex justify-between items-center pr-2">
                             <div>
-                                <span class="font-bold text-white text-sm leading-tight block">${item.sw}</span>
-                                <span class="text-[10px] font-bold font-mono mt-0.5 block" style="color: var(--accent);">${item.dmg}</span>
+                                <span class="font-bold text-white text-xs leading-tight block">${item.sw}</span>
+                                <span class="text-[9px] font-bold font-mono mt-0.5 block" style="color: var(--accent);">${item.dmg}</span>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="rollItem(event, ${index}, 'armory')" class="quick-roll-btn">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                    Roll
-                                </button>
-                            </div>
+                            <button onclick="rollItem(event, ${index}, 'armory')" class="quick-roll-btn">Roll</button>
                         </div>
                     </div>
                 `;
             });
+            invContainer.innerHTML = html;
         }
 
-        if (state.favorites.spells.length > 0) {
-            html += `<h3 class="text-hud font-bold uppercase tracking-widest text-xs mb-2 mt-4 pl-1 border-l border-hud">Force Powers</h3>`;
-            state.favorites.spells.forEach(index => {
+        // Render Abilities
+        if (knownSpells.length === 0) {
+            abiContainer.innerHTML = '';
+            abiEmpty.classList.remove('hidden');
+        } else {
+            abiEmpty.classList.add('hidden');
+            let html = '';
+            const maxKnown = getMaxKnownPowers(parseInt(state.level)||1, state.cls);
+            const currentLeveled = knownSpells.filter(i => spellData[i].lvl !== 'Cantrip').length;
+            
+            html += `<div class="text-[9px] text-slate-500 uppercase tracking-widest mb-2 text-right">Matrix Bandwidth: ${currentLeveled} / ${maxKnown}</div>`;
+
+            knownSpells.forEach(index => {
                 const spell = spellData[index];
                 if(!spell) return;
                 html += `
-                    <div class="data-card p-2 mb-2 clickable" onclick="openDetails('spell', ${index})">
+                    <div class="data-card p-2 mb-2 clickable border-slate-800 hover:border-indigo-500 transition-all" onclick="openDetails('spell', ${index})">
                         <div class="flex justify-between items-center pr-2">
                             <div>
-                                <span class="font-bold text-white text-sm block">${spell.sw}</span>
-                                <span class="level-badge text-[9px] font-bold px-1.5 py-0.5 rounded datapad-font uppercase tracking-widest inline-block mt-0.5">${spell.lvl}</span>
+                                <span class="font-bold text-white text-xs block">${spell.sw}</span>
+                                <span class="text-[9px] text-slate-500 uppercase tracking-widest block mt-0.5">${spell.lvl}</span>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="rollItem(event, ${index}, 'spell')" class="quick-roll-btn">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                    Cast
-                                </button>
-                            </div>
+                            <button onclick="rollItem(event, ${index}, 'spell')" class="quick-roll-btn">Cast</button>
                         </div>
                     </div>
                 `;
             });
+            abiContainer.innerHTML = html;
+        }
+
+        // Render Features
+        const features = [];
+        // Species
+        const sp = crSpeciesOptions.find(s => s.sw === state.species || s.id === state.species);
+        if (sp) {
+            sp.traits.forEach(t => features.push({ source: 'Species', text: t }));
+        }
+        // Class
+        const crData = state.cls === 'Ranger' ? crRangerData : (state.cls === 'Sorcerer' ? crSorcererData : (state.cls === 'Cleric' ? crClericData : null));
+        if (crData) {
+            for (let i = 1; i <= (parseInt(state.level) || 1); i++) {
+                const lvlFeats = crData.levels[i];
+                if (lvlFeats && lvlFeats.features) {
+                    lvlFeats.features.forEach(f => features.push({ source: `Lvl ${i}`, text: f }));
+                }
+            }
+        }
+
+        if (features.length === 0) {
+            feaContainer.innerHTML = '';
+            feaEmpty.classList.remove('hidden');
+        } else {
+            feaEmpty.classList.add('hidden');
+            feaContainer.innerHTML = features.map(f => `
+                <div class="bg-slate-900/50 border border-slate-800 p-3 rounded hover:border-emerald-500/30 transition-all">
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-500 block mb-1">${f.source}</span>
+                    <p class="text-xs text-slate-300 leading-relaxed">${f.text}</p>
+                </div>
+            `).join('');
         }
         
-        container.innerHTML = html;
+        // Ensure correct tab is visible
+        if (state.loadoutTab) switchLoadoutTab(state.loadoutTab);
     }
 
     // --- CHARACTER CREATOR WIZARD (D&D Beyond Style) ---
@@ -2113,6 +2613,7 @@
             {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
         ],
         Sorcerer: [
+            {group:'Uniform', options:[{id:'robes', name:'Force-Thread Robes (AC 10+DEX)'},{id:'padded', name:'Reinforced Under-armor (AC 11+DEX, Disadv. Stealth)'}]},
             {group:'Weapon', options:[{id:'crossbow', name:'Hold-out Blaster & 20 bolts (Light Crossbow, 1d8 Energy)'},{id:'simple', name:'Vibro-dagger (Dagger, 1d4 Piercing)'}]},
             {group:'Force Focus', options:[{id:'pouch', name:'Utility Belt (Component Pouch) — pockets of crystals, herbs, and reagents'},{id:'focus', name:'Holocron Shard (Arcane Focus) — a fragment of an ancient Force artifact'}]},
             {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
@@ -2690,6 +3191,27 @@
         }
     }
 
+    function executeRest(type) {
+        if (!confirm(`Take a ${type === 'long' ? 'Bacta Tank (Long Rest)' : 'Field Medic (Short Rest)'}? This will restore Hit Points and refresh resources.`)) return;
+        
+        state.hp.current = state.hp.max;
+        
+        if(type === 'long') {
+            state.resources[0].current = state.resources[0].max;
+            state.resources[1].current = state.resources[1].max;
+            state.spellSlots = {}; // Flush Force Power slots
+        }
+
+        saveState();
+        renderCharacterSheet();
+        
+        const charEl = document.getElementById('main-character');
+        if (charEl) {
+            charEl.style.opacity = '0.5';
+            setTimeout(() => charEl.style.opacity = '1', 150);
+        }
+    }
+
     // --- CHARACTER SHEET FUNCTIONS ---
     function getMod(stat) {
         const score = state.stats[stat] || 10;
@@ -2703,17 +3225,21 @@
     function toggleEditMode() {
         state.editMode = !state.editMode;
         const btn = document.getElementById('btn-edit-sheet');
+        const lvlBtn = document.getElementById('btn-level-up');
         if (!btn) return;
+        
         if (state.editMode) {
             btn.classList.add('bg-theme', 'text-slate-900');
             btn.style.backgroundColor = 'var(--hud)';
             btn.classList.remove('bg-slate-800', 'text-slate-300');
             btn.innerText = "Save Stats";
+            if (lvlBtn) lvlBtn.classList.remove('hidden');
         } else {
             btn.classList.remove('bg-theme', 'text-slate-900');
             btn.style.backgroundColor = '';
             btn.classList.add('bg-slate-800', 'text-slate-300');
             btn.innerText = "Edit Stats";
+            if (lvlBtn) lvlBtn.classList.add('hidden');
         }
         renderCharacterSheet();
     }
@@ -2787,24 +3313,55 @@
         if (el) el.innerText = res.current;
     }
 
-    function executeRest(type) {
-        if (!confirm(`Take a ${type === 'long' ? 'Bacta Tank (Long Rest)' : 'Field Medic (Short Rest)'}? This will restore Hit Points and refresh resources.`)) return;
+    function levelUp() {
+        if (!state.cls) { alert("Please compile a dossier first."); return; }
+        if (state.level >= 20) { alert("Maximum operative level reached."); return; }
         
+        state.level++;
+        
+        const conMod = Math.floor((state.stats.con - 10) / 2);
+        let hitDieMax = 8;
+        if (state.cls === 'Fighter') hitDieMax = 10;
+        if (state.cls === 'Rogue') hitDieMax = 8;
+        if (state.cls === 'Wizard') hitDieMax = 6;
+        
+        const hitDieAvg = Math.floor(hitDieMax/2) + 1;
+        state.hp.max += (hitDieAvg + conMod);
         state.hp.current = state.hp.max;
         
-        if(type === 'long') {
-            state.resources[0].current = state.resources[0].max;
-            state.resources[1].current = state.resources[1].max;
-        }
-
         saveState();
         renderCharacterSheet();
+        loadSettingsUI();
         
-        const charEl = document.getElementById('main-character');
-        if (charEl) {
-            charEl.style.opacity = '0.5';
-            setTimeout(() => charEl.style.opacity = '1', 150);
-        }
+        const pulse = document.createElement('div');
+        pulse.className = 'fixed inset-0 bg-indigo-500/20 pointer-events-none z-[15000] transition-opacity duration-1000 opacity-100';
+        document.body.appendChild(pulse);
+        setTimeout(() => pulse.style.opacity = '0', 10);
+        setTimeout(() => pulse.remove(), 1000);
+    }
+
+    function getMaxSlots(level, cls) {
+        const table = {
+            "Fighter": {},
+            "Rogue": {},
+            "Cleric": {
+                1: {1:2}, 2: {1:3}, 3: {1:4, 2:2}, 4: {1:4, 2:3}, 5: {1:4, 2:3, 3:2}, 6: {1:4, 2:3, 3:3}, 7: {1:4, 2:3, 3:3, 4:1}
+            },
+            "Sorcerer": {
+                1: {1:2}, 2: {1:3}, 3: {1:4, 2:2}, 4: {1:4, 2:3}, 5: {1:4, 2:3, 3:2}, 6: {1:4, 2:3, 3:3}, 7: {1:4, 2:3, 3:3, 4:1}
+            },
+            "Ranger": {
+                1: {}, 2: {1:2}, 3: {1:3}, 4: {1:3}, 5: {1:4, 2:2}, 6: {1:4, 2:2}, 7: {1:4, 2:3}
+            }
+        };
+        return (table[cls] && table[cls][level]) || {};
+    }
+
+    function toggleSlot(lvl, index) {
+        if(!state.spellSlots) state.spellSlots = {};
+        state.spellSlots[lvl] = state.spellSlots[lvl] ^ (1 << index);
+        saveState();
+        renderCharacterSheet();
     }
 
     function renderCharacterSheet() {
@@ -2860,16 +3417,42 @@
             const mod = getMod(stat);
             document.getElementById(`mod-${stat}`).innerText = mod >= 0 ? `+${mod}` : mod;
             
-            // Beginner logic for scores
-            const begEl = document.getElementById(`beg-mod-${stat}`);
-            if(begEl) begEl.innerText = `(${state.stats[stat]} - 10) / 2`;
-
             if (state.editMode) {
                 document.getElementById(`score-${stat}`).innerHTML = `<input type="number" value="${state.stats[stat]}" onchange="updateStat('${stat}', this.value)" class="char-input w-10">`;
             } else {
                 document.getElementById(`score-${stat}`).innerText = state.stats[stat];
             }
         });
+
+        // Render Spell Slots
+        const slotsContainer = document.getElementById('spell-slots-container');
+        const slotsList = document.getElementById('slots-list');
+        if (slotsContainer && slotsList) {
+            const maxSlots = getMaxSlots(state.level, state.cls);
+            if (Object.keys(maxSlots).length > 0) {
+                slotsContainer.classList.remove('hidden');
+                if(!state.spellSlots) state.spellSlots = {};
+                slotsList.innerHTML = Object.entries(maxSlots).map(([lvl, max]) => {
+                    let pips = '';
+                    for(let i=0; i<max; i++) {
+                        const isUsed = state.spellSlots[lvl] & (1 << i);
+                        pips += `
+                            <div onclick="toggleSlot(${lvl}, ${i})" class="w-6 h-6 rounded flex items-center justify-center border-2 cursor-pointer transition-all ${isUsed ? 'bg-red-500/20 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'border-hud-soft bg-slate-900 hover:border-hud'}">
+                                ${isUsed ? '<svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>' : ''}
+                            </div>
+                        `;
+                    }
+                    return `
+                        <div class="flex items-center gap-4">
+                            <div class="w-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">LVL ${lvl}</div>
+                            <div class="flex gap-2">${pips}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                slotsContainer.classList.add('hidden');
+            }
+        }
 
         // Render Saves
         const savesContainer = document.getElementById('saves-list');
@@ -2980,10 +3563,25 @@
         const roll = Math.floor(Math.random() * 20) + 1;
         const total = roll + modifier;
         
-        if(roll === 20) resEl.classList.add('dice-crit');
+        // Final Broadcast
+        logRef.update({ result: total });
+        
+        if(roll === 20) resEl.classList.add('dice-crit', 'glow-text-hud');
         if(roll === 1) resEl.classList.add('dice-fail');
         
         resEl.innerText = total;
+        
+        setTimeout(() => closeDiceHUD(), 2000);
+    }
+
+    function closeDiceHUD() {
+        const hud = document.getElementById('dice-hud');
+        if(hud) hud.classList.remove('active');
+    }
+
+    function toggleGameLogTray() {
+        const tray = document.getElementById('game-log-tray');
+        if (tray) tray.classList.toggle('open');
     }
 
     async function rollShipDice(label, modifier, diceCount = 1) {
@@ -3376,35 +3974,25 @@
             typeStr = "Heavy Cruiser";
             svgContent = `
             <g class="ship-path transition-all duration-300">
-                <!-- Main hull body (wide boxy center) -->
                 <rect x="25" y="20" width="50" height="45" rx="3" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
-                <!-- Side wing extensions (port & starboard) -->
                 <path d="M 25 25 L 8 30 L 5 50 L 8 55 L 25 50 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
                 <path d="M 75 25 L 92 30 L 95 50 L 92 55 L 75 50 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
-                <!-- Wing tip accents -->
                 <rect x="5" y="35" width="6" height="12" rx="2" fill="#334155" stroke="#64748b" stroke-width="0.5"/>
                 <rect x="89" y="35" width="6" height="12" rx="2" fill="#334155" stroke="#64748b" stroke-width="0.5"/>
-                <!-- Cockpit dome (top center) -->
                 <ellipse cx="50" cy="18" rx="12" ry="10" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
                 <ellipse cx="50" cy="16" rx="7" ry="5" fill="#0f172a" stroke="#38bdf8" stroke-width="0.5" opacity="0.8"/>
                 <circle cx="50" cy="16" r="2" fill="#38bdf8" opacity="0.6"/>
-                <!-- Hull panel lines -->
                 <line x1="50" y1="20" x2="50" y2="65" stroke="#334155" stroke-width="1"/>
                 <line x1="25" y1="40" x2="75" y2="40" stroke="#334155" stroke-width="0.5"/>
-                <!-- Lower cargo / engineering section -->
                 <path d="M 30 65 L 70 65 L 68 75 L 32 75 Z" fill="#3f4f63" stroke="#64748b" stroke-width="1"/>
-                <!-- Engine pylons connecting to nacelles -->
                 <rect x="28" y="75" width="10" height="12" fill="#475569" stroke="#64748b" stroke-width="0.8"/>
                 <rect x="62" y="75" width="10" height="12" fill="#475569" stroke="#64748b" stroke-width="0.8"/>
-                <!-- Engine nacelles (two large cylinders at bottom) -->
                 <rect x="25" y="85" width="16" height="10" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
                 <rect x="59" y="85" width="16" height="10" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
-                <!-- Engine glow -->
                 <ellipse cx="33" cy="96" rx="6" ry="3" fill="#38bdf8" opacity="0.4"/>
                 <ellipse cx="67" cy="96" rx="6" ry="3" fill="#38bdf8" opacity="0.4"/>
                 <rect x="29" y="93" width="8" height="3" rx="1" fill="#38bdf8" class="animate-pulse"/>
                 <rect x="63" y="93" width="8" height="3" rx="1" fill="#38bdf8" class="animate-pulse"/>
-                <!-- Hull detail lights -->
                 <circle cx="15" cy="42" r="1.5" fill="#f59e0b" opacity="0.8"/>
                 <circle cx="85" cy="42" r="1.5" fill="#f59e0b" opacity="0.8"/>
                 <circle cx="40" cy="70" r="1" fill="#38bdf8" opacity="0.5"/>
@@ -3418,31 +4006,60 @@
             shipWrapper.innerHTML = `<svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-lg">${svgContent}</svg>`;
         }
         
-        // Update Shield Colors & Badges
-        const updateQuadrant = (id, val, max) => {
-            const arc = document.getElementById(`shield-${id}`);
-            const badge = document.getElementById(`hp-badge-${id}`);
-            if(!arc || !badge) return;
-            badge.innerText = val;
-            let color = "#3b82f6"; // blue
-            if (val <= max * 0.5) color = "#eab308"; // yellow
-            if (val <= max * 0.25) color = "#ef4444"; // red
-            if (val === 0) { color = "#1e293b"; arc.style.opacity = "0.2"; } else { arc.style.opacity = "1"; }
-            arc.style.stroke = color;
-            badge.style.color = val === 0 ? "#64748b" : color;
-        };
-        
-        if (state.ship.shields) {
-            updateQuadrant('front', state.ship.shields.front, state.ship.shieldsMax);
-            updateQuadrant('back', state.ship.shields.back, state.ship.shieldsMax);
-            updateQuadrant('port', state.ship.shields.port, state.ship.shieldsMax);
-            updateQuadrant('starboard', state.ship.shields.starboard, state.ship.shieldsMax);
+        // Unified Shields
+        const ring = document.getElementById('shield-ring');
+        const sBadge = document.getElementById('ship-shield-badge');
+        const contactsG = document.getElementById('tactical-contacts');
+
+        if (ring && sBadge) {
+            const val = state.ship.shieldsCur || 0;
+            const max = state.ship.shieldsMax || 1; // avoid div by zero
+            sBadge.innerText = `${val}/${max} SHIELDS`;
+            const pct = val / max;
+            // r=45 -> circumference = 2*pi*45 = 282.7
+            const offset = 282.7 * (1 - pct);
+            ring.style.strokeDashoffset = offset;
+            ring.style.stroke = pct < 0.3 ? '#ef4444' : '#3b82f6';
+            ring.style.opacity = val === 0 ? "0.1" : "0.6";
+        }
+
+        // Render Enemy Dots on Scope
+        if (contactsG) {
+            contactsG.innerHTML = (state.enemies || []).filter(e => e.visible).map((e, idx) => {
+                const positions = [{x: 20, y: 30}, {x: 80, y: 25}, {x: 70, y: 80}];
+                const pos = positions[idx % positions.length];
+                
+                let color = "#ef4444"; // red for hostile/unknown
+                if (e.affiliation === 'Civilian') color = "#38bdf8"; // blue
+                if (e.affiliation === 'Pirate') color = "#a855f7"; // purple
+                if (e.affiliation === 'Imperial') color = "#ef4444"; // red
+                
+                if (e.stage === 1) {
+                    return `
+                        <circle cx="${pos.x}" cy="${pos.y}" r="1.5" fill="${color}" class="animate-pulse opacity-60" />
+                        <text x="${pos.x}" y="${pos.y + 4}" fill="${color}" font-size="2" text-anchor="middle" font-family="Share Tech Mono" opacity="0.6">${e.affiliation || '???'}</text>
+                    `;
+                } else if (e.stage === 2) {
+                    return `
+                        <circle cx="${pos.x}" cy="${pos.y}" r="2" fill="${color}" />
+                        <text x="${pos.x}" y="${pos.y + 5}" fill="${color}" font-size="2.5" text-anchor="middle" font-family="Share Tech Mono" font-weight="bold">${e.affiliation}</text>
+                        <circle cx="${pos.x}" cy="${pos.y}" r="4" fill="none" stroke="${color}" stroke-width="0.5" class="animate-ping" style="animation-duration: 3s;" />
+                    `;
+                } else {
+                    return `
+                        <circle cx="${pos.x}" cy="${pos.y}" r="2.5" fill="${color}" />
+                        <text x="${pos.x}" y="${pos.y - 5}" fill="${color}" font-size="3" text-anchor="middle" font-family="Share Tech Mono">${e.class.charAt(0)}</text>
+                        <text x="${pos.x}" y="${pos.y + 6}" fill="${color}" font-size="2.5" text-anchor="middle" font-family="Share Tech Mono" font-weight="bold">${e.affiliation}</text>
+                        <circle cx="${pos.x}" cy="${pos.y}" r="5" fill="none" stroke="${color}" stroke-width="0.5" opacity="0.3" />
+                    `;
+                }
+            }).join('');
         }
         
         const hullBadge = document.getElementById('ship-hull-badge');
         if (hullBadge) {
             hullBadge.innerText = `${state.ship.hullCur} HP`;
-            hullBadge.className = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border text-xs font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 ${state.ship.hullCur < state.ship.hullMax * 0.3 ? 'bg-red-950/80 border-red-900 text-red-500 animate-pulse' : 'bg-slate-950/80 border-emerald-900 text-emerald-400'}`;
+            hullBadge.className = `absolute top-4 right-4 border text-[10px] font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 ${state.ship.hullCur < state.ship.hullMax * 0.3 ? 'bg-red-950/80 border-red-900 text-red-500 animate-pulse' : 'bg-slate-950/80 border-emerald-900 text-emerald-400'}`;
         }
 
         // Update Station Claim Buttons
@@ -3451,6 +4068,15 @@
                 const btn = document.getElementById('btn-claim-' + st);
                 if (!btn) return;
                 const occupant = state.ship.stations[st];
+                // Only show claim buttons if NOT DM, or if DM is assuming a specific player slot
+                const canClaim = !state.isDM || (state.activeSlot && state.activeSlot.startsWith('slot'));
+                
+                if (!canClaim) {
+                    btn.classList.add('hidden');
+                    return;
+                }
+                btn.classList.remove('hidden');
+
                 if (occupant === state.activeSlot) {
                     btn.innerText = "Unseat";
                     btn.className = "text-[9px] bg-hud hover:bg-white text-slate-900 px-2 py-1 rounded border border-hud uppercase font-bold datapad-font transition-colors shadow-[0_0_10px_var(--hud-glow)]";
@@ -3464,6 +4090,186 @@
                 }
             });
         }
+
+        renderEnemies();
+    }
+
+    function renderEnemies() {
+        const panel = document.getElementById('enemy-scanner-panel');
+        const container = document.getElementById('enemy-list-container');
+        if (!panel || !container) return;
+        
+        const activeEnemies = (state.enemies || []).filter(e => e.visible);
+        if (activeEnemies.length === 0) {
+            panel.classList.add('hidden');
+            return;
+        }
+        
+        panel.classList.remove('hidden');
+        container.innerHTML = activeEnemies.map((e, idx) => {
+            let colorClass = "text-red-500";
+            if (e.affiliation === 'Civilian') colorClass = "text-blue-400";
+            if (e.affiliation === 'Pirate') colorClass = "text-purple-400";
+            
+            let content = '';
+            if (e.stage === 1) {
+                content = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full border border-slate-800 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: currentColor"></div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest ${colorClass}">${e.affiliation || 'Unknown'} Contact</div>
+                            <div class="text-[8px] text-slate-500 font-mono">Distance: Critical // Bearings: Variable</div>
+                        </div>
+                    </div>
+                `;
+            } else if (e.stage === 2) {
+                content = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="${colorClass}"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2l-6 16h12L10 2z"/></svg></div>
+                            <div>
+                                <div class="text-[10px] font-bold uppercase tracking-widest ${colorClass}">${e.affiliation} ${e.class} Signature</div>
+                                <div class="text-[8px] text-slate-500 font-mono">Sensors Locked // Auto-Tracking Active</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const hpPct = (e.hpCur / e.hpMax) * 100;
+                const shPct = (e.shCur / e.shMax) * 100;
+                content = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-xs text-white font-bold uppercase display-font">${e.name}</div>
+                                <div class="text-[8px] font-mono uppercase tracking-widest ${colorClass}">${e.affiliation} // ${e.class} // AC: ${e.ac}</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] text-slate-400 font-mono">HULL: ${e.hpCur}/${e.hpMax}</span>
+                            </div>
+                        </div>
+                        <div class="h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div class="h-full bg-emerald-500 transition-all duration-500" style="width: ${hpPct}%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] text-blue-400 font-mono uppercase">Shields</span>
+                            <span class="text-[9px] text-blue-300 font-mono">${e.shCur}/${e.shMax}</span>
+                        </div>
+                        <div class="h-1 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                            <div class="h-full bg-blue-500 transition-all duration-500" style="width: ${shPct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="bg-slate-900/60 border border-slate-800 rounded p-3 relative overflow-hidden" id="enemy-card-${idx}">
+                    <div class="absolute inset-0 bg-white/5 pointer-events-none"></div>
+                    <div class="${colorClass}">${content}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function addEnemyShip() {
+        if ((state.enemies || []).length >= 3) {
+            showHolonetAlert("Tactical Limit: Max 3 threats allowed.", 'border-red-900 bg-red-950/50');
+            return;
+        }
+        const newEnemy = {
+            name: "Unknown Contact",
+            class: "Fighter",
+            affiliation: "Imperial",
+            stage: 1,
+            hpMax: 50, hpCur: 50,
+            shMax: 20, shCur: 20,
+            ac: 14,
+            visible: true
+        };
+        if(!state.enemies) state.enemies = [];
+        state.enemies.push(newEnemy);
+        db.ref('shared/enemies').set(state.enemies);
+        renderDMEnemies();
+    }
+
+    function updateEnemy(idx, field, val) {
+        state.enemies[idx][field] = val;
+        db.ref('shared/enemies').set(state.enemies);
+        renderDMEnemies();
+    }
+
+    function removeEnemy(idx) {
+        state.enemies.splice(idx, 1);
+        db.ref('shared/enemies').set(state.enemies);
+        renderDMEnemies();
+    }
+
+    function renderDMEnemies() {
+        const container = document.getElementById('dm-enemies-container');
+        if (!container) return;
+        
+        container.innerHTML = (state.enemies || []).map((e, i) => `
+            <div class="bg-slate-900 border border-red-900/40 rounded p-4 space-y-4">
+                <div class="flex justify-between items-center border-b border-red-900/20 pb-2">
+                    <input type="text" value="${e.name}" onchange="updateEnemy(${i}, 'name', this.value)" class="bg-transparent text-white font-bold uppercase display-font border-none focus:ring-0 w-2/3">
+                    <button onclick="removeEnemy(${i})" class="text-red-500 text-[10px] uppercase font-bold">Purge Vector</button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Affiliation</label>
+                        <select onchange="updateEnemy(${i}, 'affiliation', this.value)" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
+                            <option value="Imperial" ${e.affiliation==='Imperial'?'selected':''}>Imperial</option>
+                            <option value="Pirate" ${e.affiliation==='Pirate'?'selected':''}>Pirate</option>
+                            <option value="Civilian" ${e.affiliation==='Civilian'?'selected':''}>Civilian</option>
+                            <option value="Unknown" ${e.affiliation==='Unknown'?'selected':''}>Unknown</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Class</label>
+                        <select onchange="updateEnemy(${i}, 'class', this.value)" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
+                            <option value="Fighter" ${e.class==='Fighter'?'selected':''}>Fighter</option>
+                            <option value="Freighter" ${e.class==='Freighter'?'selected':''}>Freighter</option>
+                            <option value="Destroyer" ${e.class==='Destroyer'?'selected':''}>Destroyer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[9px] text-slate-500 uppercase block mb-1">Armor Class (AC)</label>
+                    <input type="number" value="${e.ac}" onchange="updateEnemy(${i}, 'ac', parseInt(this.value))" class="w-full bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
+                </div>
+
+                <div>
+                    <label class="text-[9px] text-red-400 uppercase block mb-2">Detection Stage: ${e.stage}</label>
+                    <input type="range" min="1" max="3" step="1" value="${e.stage}" oninput="updateEnemy(${i}, 'stage', parseInt(this.value))" class="w-full">
+                    <div class="flex justify-between text-[8px] text-slate-600 mt-1">
+                        <span>Far Contact</span>
+                        <span>Long Range</span>
+                        <span>Tactical Lock</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Hull Integrity</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${e.hpCur}" onchange="updateEnemy(${i}, 'hpCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
+                            <input type="number" value="${e.hpMax}" onchange="updateEnemy(${i}, 'hpMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded opacity-50">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Shield Output</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${e.shCur}" onchange="updateEnemy(${i}, 'shCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded">
+                            <input type="number" value="${e.shMax}" onchange="updateEnemy(${i}, 'shMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-700 text-xs text-white p-1 rounded opacity-50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     function switchShipTab(id) {
@@ -3481,6 +4287,13 @@
 
     function claimStation(stationId) {
         if (!state.ship.stations) state.ship.stations = { helm: null, gunnery: null, engineering: null };
+        
+        // Prevent DM from sitting unless they assume a player slot
+        if (state.isDM && (!state.activeSlot || !state.activeSlot.startsWith('slot'))) {
+            showHolonetAlert("Administrative Access Only: Bridge seating restricted.", "border-red-900 bg-red-950/80");
+            return;
+        }
+
         const currentlyOccupiedByMe = Object.keys(state.ship.stations).find(k => state.ship.stations[k] === state.activeSlot);
         
         if (state.ship.stations[stationId] === state.activeSlot) {
@@ -3755,9 +4568,31 @@
             if (occupantSlot && partyData[occupantSlot].name) {
                 labelStr = `${partyData[occupantSlot].name}: ${labelStr}`;
             }
-            
             rollShipDice(labelStr, activeMod, 1);
+
+            // Hit detection for enemies
+            if (action === 'fire_lasers' || action === 'torpedo') {
+                const roll = Math.floor(Math.random() * 20) + 1;
+                const total = roll + activeMod;
+                const hitEnemyIdx = (state.enemies || []).findIndex(e => e.visible && total >= e.ac);
+                if (hitEnemyIdx !== -1) triggerDamageAnim(hitEnemyIdx);
+            }
         }
+    }
+
+    function triggerDamageAnim(idx) {
+        const card = document.getElementById(`enemy-card-${idx}`);
+        if (!card) return;
+        
+        card.classList.add('animate-shake');
+        const flash = document.createElement('div');
+        flash.className = 'absolute inset-0 bg-red-500/40 z-50 pointer-events-none';
+        card.appendChild(flash);
+        
+        setTimeout(() => {
+            card.classList.remove('animate-shake');
+            flash.remove();
+        }, 500);
     }
 
     // --- BOUNTY LOGIC ---
@@ -3939,12 +4774,124 @@
         }
     }
 
+    function switchDMTab(tabId) {
+        document.querySelectorAll('.dm-sub-tab').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dm-tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(`dm-tab-${tabId}`).classList.remove('hidden');
+        document.getElementById(`dm-nav-${tabId}`).classList.add('active');
+        
+        if (tabId === 'telemetry') renderDMTelemetry();
+    }
+
+    async function rollDMDice(sides) {
+        const hud = document.getElementById('dice-hud');
+        const resEl = document.getElementById('dice-result');
+        if (!hud || !resEl) return;
+        
+        document.getElementById('dice-label').innerText = `DM Roll: D${sides}`;
+        document.getElementById('dice-mod').innerText = '--';
+        
+        hud.classList.add('active');
+        resEl.classList.remove('dice-crit', 'dice-fail');
+        resEl.innerText = '--';
+
+        try {
+            const logRef = db.ref('shared/gamelog').push();
+            logRef.set({ name: "The Force (DM)", label: `D${sides} Roll`, mod: 0, result: 0, timestamp: Date.now() });
+
+            let currentRoll = 1;
+            const interval = setInterval(() => {
+                currentRoll = Math.floor(Math.random() * sides) + 1;
+                resEl.innerText = currentRoll;
+            }, 50);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                const roll = Math.floor(Math.random() * sides) + 1;
+                logRef.update({ result: roll });
+                if(roll === sides) resEl.classList.add('dice-crit', 'glow-text-hud');
+                if(roll === 1) resEl.classList.add('dice-fail');
+                resEl.innerText = roll;
+                setTimeout(() => closeDiceHUD(), 2000);
+            }, 800);
+        } catch(e) {
+            resEl.innerText = Math.floor(Math.random() * sides) + 1;
+            setTimeout(() => closeDiceHUD(), 2000);
+        }
+    }
+
+    function renderDMTelemetry() {
+        const container = document.getElementById('dm-telemetry-container');
+        if (!container) return;
+        
+        let html = '';
+        Object.entries(partyData).forEach(([slotId, data]) => {
+            if (!data) return;
+            const hpPct = Math.min(100, Math.max(0, (data.hp.current / data.hp.max) * 100));
+            const hpColor = hpPct < 30 ? 'bg-red-500' : hpPct < 60 ? 'bg-amber-500' : 'bg-emerald-500';
+            
+            html += `
+                <div class="bg-slate-950/60 border border-slate-800 rounded p-4 relative overflow-hidden group transition-all hover:border-red-900/40">
+                    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #fff 1px, transparent 0); background-size: 16px 16px;"></div>
+                    <div class="absolute top-0 left-0 w-1 h-full bg-red-900 shadow-[0_0_10px_rgba(153,27,27,0.5)]"></div>
+                    <div class="flex justify-between items-start mb-3 relative">
+                        <div>
+                            <h4 class="text-white font-bold text-base uppercase display-font tracking-wide">${data.name}</h4>
+                            <p class="text-[10px] text-red-500/70 uppercase datapad-font tracking-widest font-bold">Operative Signal: ${slotId.toUpperCase()}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[9px] text-slate-500 uppercase font-bold mb-1">Combat Rating</div>
+                            <span class="text-xs font-mono text-slate-200 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">AC: ${data.ac}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 relative">
+                        <div class="flex justify-between text-[9px] uppercase font-bold text-slate-500 mb-1.5">
+                            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full ${hpPct < 30 ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}"></span> Bio-Vitals Scan</span>
+                            <span class="${data.hp.current < data.hp.max * 0.3 ? 'text-red-500 animate-pulse font-black' : 'text-slate-300'} font-mono">${data.hp.current} / ${data.hp.max} HP</span>
+                        </div>
+                        <div class="h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-[1px]">
+                            <div class="h-full ${hpColor} transition-all duration-700 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)]" style="width: ${hpPct}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-6 gap-1.5 relative mb-4">
+                        ${['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => `
+                            <div class="bg-slate-950 border border-slate-800/80 p-1.5 rounded flex flex-col items-center">
+                                <div class="text-[7px] text-slate-600 uppercase font-black tracking-tighter mb-0.5">${s}</div>
+                                <div class="text-[11px] text-slate-100 font-mono font-bold">${data.stats[s]}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-3 mt-1 flex justify-between items-center relative">
+                        <div class="text-[8px] text-slate-600 uppercase font-bold">Administrative Override</div>
+                        <button onclick="assumeControl('${slotId}')" class="bg-red-950/40 border border-red-900 text-red-500 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-red-900 transition-colors">Assume Control</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (html === '') {
+            html = '<div class="text-slate-600 text-center py-10 uppercase datapad-font text-xs tracking-widest">No active life signs detected in squad frequency.</div>';
+        }
+        
+        container.innerHTML = html;
+    }
+
     function exitDMMode() {
         state.isDM = false;
         saveState();
         switchMainTab('character');
     }
 
+    function assumeControl(slotId) {
+        state.activeSlot = slotId;
+        saveState();
+        switchMainTab('character');
+        showHolonetAlert(`Administrative Override: Controlling ${slotId.toUpperCase()}`, 'border-red-900 bg-red-950/50');
+    }
     function updateDMCharField(slot, field, subfield, value) {
         if(!partyData[slot]) return;
         if(subfield) {
@@ -3959,118 +4906,202 @@
         const c = document.getElementById('dm-controls-container');
         if (!c) return;
 
-        let html = `
-            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg> Ship Alert Board <label class="ml-auto flex items-center gap-1 cursor-pointer"><input type="checkbox" id="dm-show-roll" class="accent-red-500 w-3 h-3" checked><span class="text-[9px] text-slate-400 font-normal normal-case tracking-normal">Show d20</span></label></h4>
-            <div class="grid grid-cols-3 gap-2 mb-6">
-                ${SHIP_ALERTS.map(a => `
-                    <button onclick="triggerShipAlert('${a.id}')" class="border rounded p-2 text-center transition-all hover:scale-105 active:scale-95 ${a.color}">
-                        <span class="text-xl block mb-1">${a.icon}</span>
-                        <span class="text-[9px] font-bold uppercase tracking-widest datapad-font block">${a.name}</span>
-                    </button>
-                `).join('')}
-            </div>
+        c.innerHTML = `
+            <div class="space-y-6">
+                <!-- Global Alerts -->
+                <div>
+                    <h4 class="text-red-400 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-red-900/50 pb-1 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        Global Ship Directives
+                    </h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        ${SHIP_ALERTS.map(a => `
+                            <button onclick="triggerShipAlert('${a.id}')" class="border rounded p-2 text-center transition-all hover:scale-105 active:scale-95 ${a.color}">
+                                <span class="text-xl block mb-1">${a.icon}</span>
+                                <span class="text-[9px] font-bold uppercase tracking-widest datapad-font block">${a.name}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
 
-            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1">Vessel Configuration</h4>
-            <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-white font-bold text-xs uppercase datapad-font">Name</span>
-                    <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font w-40 text-right" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-white font-bold text-xs uppercase datapad-font">Class</span>
-                    <select class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-300 text-xs w-40" onchange="if(state.ship) { state.ship.type=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-                        <option value="freighter" ${state.ship && state.ship.type==='freighter' ? 'selected' : ''}>Light Freighter</option>
-                        <option value="gunship" ${state.ship && (state.ship.type==='gunship' || state.ship.type==='fighter') ? 'selected' : ''}>Assault Gunship</option>
-                        <option value="cruiser" ${state.ship && state.ship.type==='cruiser' ? 'selected' : ''}>Heavy Cruiser</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800">
-                    <div class="flex flex-col">
-                        <span class="text-slate-500 font-bold text-[10px] uppercase datapad-font">Hull Max</span>
-                        <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-mono w-full text-right" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-slate-500 font-bold text-[10px] uppercase datapad-font">Quad Max</span>
-                        <input type="number" value="${state.ship ? state.ship.shieldsMax : 25}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-blue-400 font-mono w-full text-right" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                <!-- Holonet Broadcast -->
+                <div>
+                    <h4 class="text-red-400 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-red-900/50 pb-1">Holonet Broadcast</h4>
+                    <div class="flex gap-2">
+                        <input type="text" id="dm-broadcast-input" placeholder="ENTER CRITICAL ALERT..." class="flex-1 bg-slate-950 border border-red-900/30 rounded px-3 py-2 text-red-500 font-bold datapad-font focus:outline-none focus:border-red-500 uppercase text-xs">
+                        <button onclick="sendBroadcast()" class="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font text-[10px]">Send</button>
                     </div>
                 </div>
-                <div class="grid grid-cols-4 gap-1 mt-2">
-                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">F</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.front : 25}" onchange="if(state.ship){state.ship.shields.front=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
-                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">B</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.back : 25}" onchange="if(state.ship){state.ship.shields.back=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
-                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">P</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.port : 25}" onchange="if(state.ship){state.ship.shields.port=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
-                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">S</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.starboard : 25}" onchange="if(state.ship){state.ship.shields.starboard=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
+
+                <!-- Ship's Log -->
+                <div>
+                    <h4 class="text-hud font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-hud/30 pb-1">Ship's Log Transmission</h4>
+                    <textarea id="dm-shiplog-input" placeholder="ENTER LOG ENTRY DATA..." class="w-full h-24 bg-slate-950 border border-hud/20 rounded p-3 text-hud font-mono text-xs focus:outline-none focus:border-hud mb-2 custom-scrollbar uppercase"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="sendShipLog('all')" class="flex-1 bg-hud/10 hover:bg-hud/20 text-hud border border-hud/30 px-3 py-1.5 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Show All</button>
+                        <button onclick="sendShipLog('scroll')" class="flex-1 bg-indigo-950/20 hover:bg-indigo-900/40 text-indigo-400 border border-indigo-900/30 px-3 py-1.5 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Scroll</button>
+                    </div>
                 </div>
-                <div class="mt-2">
-                    <span class="text-[9px] text-slate-500 uppercase font-bold">Hull Cur</span>
-                    <input type="number" value="${state.ship ? state.ship.hullCur : 100}" onchange="if(state.ship){state.ship.hullCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-emerald-400 rounded px-2 py-1 w-full text-right mt-1">
+
+                <!-- Danger Zone -->
+                <div class="pt-4 border-t border-red-900/30">
+                    <h4 class="text-red-600 font-black uppercase tracking-tighter text-[10px] mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                        Administrative Purge
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="dmResetShip()" class="border border-red-900/50 text-red-500 hover:bg-red-950/30 text-[9px] py-2 rounded uppercase font-bold tracking-widest datapad-font">Reset Ship</button>
+                        <button onclick="dmResetAll()" class="bg-red-950/50 border border-red-900 text-red-400 hover:bg-red-900 text-[9px] py-2 rounded uppercase font-bold tracking-widest datapad-font">Reset All</button>
+                    </div>
                 </div>
             </div>
-            <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4 mt-6">
-                <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg> Holonet Broadcast</h4>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="dm-broadcast-input" placeholder="ENTER CRITICAL ALERT..." class="flex-1 bg-slate-950 border border-red-900/50 rounded px-3 py-2 text-red-500 font-bold datapad-font focus:outline-none focus:border-red-500 uppercase">
-                    <button onclick="sendBroadcast()" class="bg-red-900 hover:bg-red-700 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors">Send</button>
+        `;
+
+        renderDMEnemies();
+    }
+
+    function renderDMEnemies() {
+        const container = document.getElementById('dm-enemies-container');
+        if (!container) return;
+        
+        let vesselConfig = `
+            <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-lg mb-6 relative overflow-hidden">
+                <div class="absolute inset-0 bg-blue-500/5 pointer-events-none"></div>
+                <h4 class="text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-blue-900/30 pb-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Operative Vessel Status
+                </h4>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Designation</label>
+                        <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font text-xs" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Bridge Status</label>
+                        <div class="flex gap-1 pt-1">
+                            ${['helm', 'gunnery', 'engineering'].map(s => {
+                                const occ = state.ship.stations[s];
+                                return `<div class="w-5 h-5 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold ${occ ? 'bg-emerald-500/20 text-emerald-400 border-emerald-900' : 'bg-slate-800 text-slate-500'}" title="${s.toUpperCase()}: ${occ || 'EMPTY'}">${s.charAt(0).toUpperCase()}</div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-slate-800 pt-4">
+                    <div>
+                        <label class="text-[9px] text-emerald-500 uppercase font-bold block mb-1">Hull Integrity</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${state.ship ? state.ship.hullCur : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                            <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-800 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] text-blue-400 uppercase font-bold block mb-1">Shield Energy</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${state.ship ? state.ship.shieldsCur : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                            <input type="number" value="${state.ship ? state.ship.shieldsMax : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-900 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const enemiesHtml = (state.enemies || []).map((e, i) => `
+            <div class="bg-slate-900 border border-red-900/40 rounded p-4 space-y-4 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                <div class="flex justify-between items-center border-b border-red-900/20 pb-2 relative">
+                    <input type="text" value="${e.name}" onchange="updateEnemy(${i}, 'name', this.value)" class="bg-transparent text-white font-bold uppercase display-font border-none focus:ring-0 w-2/3 text-xs">
+                    <button onclick="removeEnemy(${i})" class="text-red-500 text-[9px] uppercase font-bold hover:text-red-400 transition-colors">Purge</button>
                 </div>
                 
-                <h4 class="text-hud font-bold uppercase tracking-widest text-[10px] mb-2 flex items-center gap-2">Ship's Log Transmissions</h4>
-                <textarea id="dm-shiplog-input" placeholder="ENTER LOG ENTRY DATA..." class="w-full h-32 bg-slate-950 border border-hud/30 rounded p-3 text-hud font-mono text-xs focus:outline-none focus:border-hud mb-2 custom-scrollbar uppercase"></textarea>
-                <div class="flex gap-2">
-                    <button onclick="sendShipLog('all')" class="flex-1 bg-hud/20 hover:bg-hud/40 text-hud border border-hud/40 px-3 py-2 rounded text-[10px] uppercase font-bold tracking-widest datapad-font transition-all">Show All</button>
-                    <button onclick="sendShipLog('scroll')" class="flex-1 bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-400 border border-indigo-700/50 px-3 py-2 rounded text-[10px] uppercase font-bold tracking-widest datapad-font transition-all">Scroll Mode</button>
-                </div>
-            </div>
-
-            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1 mt-6">Custom Bounty Creation</h4>
-            <div class="bg-slate-900/80 p-3 rounded border border-slate-700 mb-4">
-                <input type="text" id="dm-bounty-name" placeholder="Target Name" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font mb-2">
-                <input type="text" id="dm-bounty-reward" placeholder="Reward (e.g. 50,000 cr)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-amber-400 font-mono text-sm mb-2">
-                <button onclick="createCustomBounty()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded text-xs uppercase font-bold tracking-widest datapad-font transition-colors">Issue Bounty</button>
-            </div>
-
-            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1">Operative Overrides</h4>
-        `;
-
-        const slots = ['slot1', 'slot2', 'slot3'];
-        slots.forEach(slot => {
-            const data = partyData[slot];
-            if(!data) {
-                html += `<div class="bg-slate-900/50 p-3 rounded border border-slate-800 mb-2 opacity-50"><span class="text-xs uppercase datapad-font text-slate-500">No Data for ${slot}</span></div>`;
-                return;
-            }
-            html += `
-            <div class="bg-slate-900/80 p-3 rounded border border-slate-700 mb-2">
-                <div class="text-white font-bold text-sm mb-2 display-font glow-text-hud">${escapeHtml(data.name)} <span class="text-[9px] uppercase tracking-widest text-slate-500">(${slot})</span></div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="flex items-center justify-between bg-slate-950 p-1 px-2 rounded border border-slate-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold datapad-font">HP Cur</span>
-                        <input type="number" value="${data.hp ? data.hp.current : 0}" onchange="updateDMCharField('${slot}', 'hp', 'current', this.value)" class="w-12 bg-transparent text-emerald-400 font-mono text-right text-xs outline-none">
+                <div class="grid grid-cols-2 gap-4 relative">
+                    <div>
+                        <label class="text-[8px] text-slate-500 uppercase block mb-1">Affiliation</label>
+                        <select onchange="updateEnemy(${i}, 'affiliation', this.value)" class="w-full bg-slate-950 border border-slate-800 text-[10px] text-white p-1 rounded">
+                            <option value="Imperial" ${e.affiliation==='Imperial'?'selected':''}>Imperial</option>
+                            <option value="Pirate" ${e.affiliation==='Pirate'?'selected':''}>Pirate</option>
+                            <option value="Civilian" ${e.affiliation==='Civilian'?'selected':''}>Civilian</option>
+                            <option value="Unknown" ${e.affiliation==='Unknown'?'selected':''}>Unknown</option>
+                        </select>
                     </div>
-                    <div class="flex items-center justify-between bg-slate-950 p-1 px-2 rounded border border-slate-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold datapad-font">HP Max</span>
-                        <input type="number" value="${data.hp ? data.hp.max : 0}" onchange="updateDMCharField('${slot}', 'hp', 'max', this.value)" class="w-12 bg-transparent text-emerald-600 font-mono text-right text-xs outline-none">
-                    </div>
-                    <div class="flex items-center justify-between bg-slate-950 p-1 px-2 rounded border border-slate-800">
-                        <span class="text-[10px] text-slate-400 uppercase font-bold datapad-font">Credits</span>
-                        <input type="number" value="${data.credits || 0}" onchange="updateDMCharField('${slot}', 'credits', null, this.value)" class="w-16 bg-transparent text-amber-400 font-mono text-right text-xs outline-none">
+                    <div>
+                        <label class="text-[8px] text-slate-500 uppercase block mb-1">Class Signature</label>
+                        <select onchange="updateEnemy(${i}, 'class', this.value)" class="w-full bg-slate-950 border border-slate-800 text-[10px] text-white p-1 rounded">
+                            <option value="Fighter" ${e.class==='Fighter'?'selected':''}>Fighter</option>
+                            <option value="Freighter" ${e.class==='Freighter'?'selected':''}>Freighter</option>
+                            <option value="Destroyer" ${e.class==='Destroyer'?'selected':''}>Destroyer</option>
+                        </select>
                     </div>
                 </div>
-                <button onclick="dmResetPlayer('${slot}')" class="mt-2 w-full border border-red-900/50 text-red-500/70 hover:text-red-400 hover:bg-red-950/30 text-[9px] py-1 rounded uppercase font-bold tracking-widest datapad-font transition-colors">⚠ Purge Operative</button>
-            </div>`;
-        });
 
-        html += `
-            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1 mt-6 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
-                Danger Zone
-            </h4>
-            <div class="bg-red-950/20 border border-red-900/50 rounded p-3 space-y-2">
-                <button onclick="dmResetShip()" class="w-full border border-red-900 text-red-500 hover:bg-red-900/30 text-xs py-2 rounded uppercase font-bold tracking-widest datapad-font transition-colors">⚠ Reset Ship Data</button>
-                <button onclick="dmResetAll()" class="w-full bg-red-900/40 border border-red-700 text-red-300 hover:bg-red-800/60 text-xs py-2 rounded uppercase font-bold tracking-widest datapad-font transition-colors">☠ TOTAL SYSTEM PURGE</button>
-                <p class="text-[9px] text-red-500/50 text-center uppercase datapad-font">Warning: Purge operations are irreversible</p>
+                <div class="relative">
+                    <label class="text-[8px] text-red-400 uppercase block mb-2 font-bold">Detection Range: Stage ${e.stage}</label>
+                    <input type="range" min="1" max="3" step="1" value="${e.stage}" oninput="updateEnemy(${i}, 'stage', parseInt(this.value))" class="w-full accent-red-600">
+                    <div class="flex justify-between text-[7px] text-slate-600 mt-1 uppercase font-bold">
+                        <span>Ghost</span>
+                        <span>Lock</span>
+                        <span>Tactical</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 relative pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="text-[8px] text-slate-500 uppercase block mb-1">Hull Integrity</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${e.hpCur}" onchange="updateEnemy(${i}, 'hpCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-emerald-400 p-1 rounded font-mono text-center">
+                            <input type="number" value="${e.hpMax}" onchange="updateEnemy(${i}, 'hpMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-emerald-900 p-1 rounded font-mono text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[8px] text-slate-500 uppercase block mb-1">Shield Energy</label>
+                        <div class="flex gap-2">
+                            <input type="number" value="${e.shCur}" onchange="updateEnemy(${i}, 'shCur', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-blue-400 p-1 rounded font-mono text-center">
+                            <input type="number" value="${e.shMax}" onchange="updateEnemy(${i}, 'shMax', parseInt(this.value))" class="w-1/2 bg-slate-950 border border-slate-800 text-[10px] text-blue-900 p-1 rounded font-mono text-center">
+                        </div>
+                    </div>
+                </div>
             </div>
-        `;
+        `).join('');
 
-        c.innerHTML = html;
+        container.innerHTML = vesselConfig + enemiesHtml;
+    }
+
+    function updateEnemy(idx, field, val) {
+        if (!state.enemies[idx]) return;
+        state.enemies[idx][field] = val;
+        saveState();
+        try { db.ref('shared/enemies').set(state.enemies); } catch(e){}
+        renderShip();
+        renderDMEnemies();
+    }
+
+    function removeEnemy(idx) {
+        state.enemies.splice(idx, 1);
+        saveState();
+        try { db.ref('shared/enemies').set(state.enemies); } catch(e){}
+        renderShip();
+        renderDMEnemies();
+    }
+
+    function addEnemyShip() {
+        if (!state.enemies) state.enemies = [];
+        if (state.enemies.length >= 3) return;
+        const newEnemy = {
+            name: "Unknown Contact",
+            class: "Fighter",
+            affiliation: "Imperial",
+            stage: 1,
+            hpMax: 50, hpCur: 50,
+            shMax: 20, shCur: 20,
+            ac: 14,
+            visible: true
+        };
+        state.enemies.push(newEnemy);
+        saveState();
+        try { db.ref('shared/enemies').set(state.enemies); } catch(e){}
+        renderShip();
+        renderDMEnemies();
     }
 
     // --- PARTY ROSTER LOGIC ---
