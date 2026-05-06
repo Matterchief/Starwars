@@ -564,10 +564,9 @@
                 <span id="profile-btn-slot3">Operative 3</span>
                 <svg class="w-5 h-5 text-slate-600 group-hover:text-hud transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
-            <div class="border-t border-slate-800 my-4"></div>
-            <button onclick="selectProfile('dm')" class="w-full bg-red-950/30 border border-red-900/50 hover:border-red-500 text-red-500 p-4 rounded font-bold uppercase tracking-widest datapad-font transition-all text-left flex justify-between items-center group">
-                <span>Living Force (DM)</span>
-                <svg class="w-5 h-5 text-red-900 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            <div class="h-px bg-hud/10 my-4"></div>
+            <button onclick="selectProfile('dm')" class="w-full bg-red-950/40 border border-red-900 text-red-500 p-4 rounded font-black uppercase tracking-[0.2em] datapad-font transition-all text-center hover:bg-red-900 hover:text-white shadow-[0_0_20px_rgba(153,27,27,0.2)] text-xs">
+                Protocol Override: Dungeon Master
             </button>
         </div>
     </div>
@@ -585,6 +584,35 @@
             <div class="h-[1px] flex-1 bg-hud/10"></div>
         </div>
         <div class="mt-20 text-[10px] text-slate-600 uppercase tracking-widest datapad-font animate-pulse">Syncing with Alliance Net...</div>
+    </div>
+</div>
+
+<!-- DM Inspect Modal -->
+<div id="inspect-modal" class="fixed inset-0 bg-slate-950/95 z-[20000] hidden flex flex-col items-center justify-center p-4">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-950/20 via-transparent to-transparent pointer-events-none"></div>
+    <div class="max-w-4xl w-full h-[90vh] bg-slate-900 border border-red-900/50 rounded-lg flex flex-col relative overflow-hidden shadow-[0_0_50px_rgba(153,27,27,0.2)]">
+        <div class="p-4 bg-red-950/20 border-b border-red-900/40 flex justify-between items-center relative">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded border border-red-900 flex items-center justify-center bg-red-950/40 text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z"></path></svg>
+                </div>
+                <div>
+                    <h2 id="inspect-name" class="text-white font-bold text-xl display-font uppercase tracking-widest leading-none">Operative Dossier</h2>
+                    <p id="inspect-slot" class="text-[10px] text-red-500 uppercase font-black datapad-font tracking-[0.2em] mt-1">Deep Scan Transmission: Slot 1</p>
+                </div>
+            </div>
+            <button onclick="closeInspect()" class="text-red-500 hover:text-white transition-colors">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
+        <div id="inspect-content" class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-8 bg-slate-950/40">
+            <!-- Dynamic Content -->
+        </div>
+        
+        <div class="p-3 bg-slate-900 border-t border-slate-800 text-center relative">
+            <span class="text-[8px] text-slate-600 uppercase font-bold tracking-[0.4em] datapad-font">Alliance Administrative Intelligence Agency // Encrypted Data Stream</span>
+        </div>
     </div>
 </div>
 
@@ -1425,7 +1453,7 @@
     }
 
     // Party Data Cache
-    let partyData = { slot1: null, slot2: null, slot3: null };
+    let partyData = { slot1: null, slot2: null, slot3: null, slot4: null };
     let lastBroadcastTime = Date.now();
     let lastShipLogTime = Date.now();
     let logScrollInterval = null;
@@ -1600,10 +1628,10 @@
                 if(typeof state.credits === 'undefined') state.credits = 0;
                 if(typeof state.beginnerMode === 'undefined') state.beginnerMode = false;
                 if(typeof state.customTitle === 'undefined') state.customTitle = '';
-                if(!state.ship || typeof state.ship.shieldsCur !== 'undefined') {
+                if(!state.ship || typeof state.ship.shieldsCur === 'undefined') {
                     const name = state.ship && state.ship.name ? state.ship.name : "The Vanguard";
                     const type = state.ship && state.ship.type ? state.ship.type : "freighter";
-                    state.ship = { name, type, hullMax: 100, hullCur: 100, shieldsMax: 25, shields: { front: 25, back: 25, port: 25, starboard: 25 }, speed: 800, hyperdrive: 2.0, crew: 2, cargo: [] };
+                    state.ship = { name, type, hullMax: 100, hullCur: 100, shieldsMax: 50, shieldsCur: 50, speed: 800, hyperdrive: 2.0, crew: 2, cargo: [] };
                 }
                 if(!state.ship.stations) state.ship.stations = { helm: null, gunnery: null, engineering: null };
                 if(!state.ship.location) state.ship.location = "Coruscant";
@@ -4827,7 +4855,7 @@
         
         let html = '';
         Object.entries(partyData).forEach(([slotId, data]) => {
-            if (!data) return;
+            if (!data || slotId === 'slot4') return;
             const hpPct = Math.min(100, Math.max(0, (data.hp.current / data.hp.max) * 100));
             const hpColor = hpPct < 30 ? 'bg-red-500' : hpPct < 60 ? 'bg-amber-500' : 'bg-emerald-500';
             
@@ -4867,7 +4895,11 @@
 
                     <div class="border-t border-slate-800 pt-3 mt-1 flex justify-between items-center relative">
                         <div class="text-[8px] text-slate-600 uppercase font-bold">Administrative Override</div>
-                        <button onclick="assumeControl('${slotId}')" class="bg-red-950/40 border border-red-900 text-red-500 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-red-900 transition-colors">Assume Control</button>
+                        <div class="flex gap-2">
+                            ${state.activeSlot !== 'slot4' ? `<button onclick="releaseControl()" class="bg-blue-950/40 border border-blue-900 text-blue-400 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-blue-900 transition-colors">Release Control</button>` : ''}
+                            <button onclick="inspectOperative('${slotId}')" class="bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-slate-700 transition-colors">Inspect</button>
+                            <button onclick="assumeControl('${slotId}')" class="bg-red-950/40 border border-red-900 text-red-500 px-3 py-1 rounded text-[9px] uppercase font-bold hover:bg-red-900 transition-colors">Assume Control</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -4880,10 +4912,109 @@
         container.innerHTML = html;
     }
 
+    function inspectOperative(slotId) {
+        const data = partyData[slotId];
+        if (!data) return;
+        
+        const modal = document.getElementById('inspect-modal');
+        const nameEl = document.getElementById('inspect-name');
+        const slotEl = document.getElementById('inspect-slot');
+        const contentEl = document.getElementById('inspect-content');
+        
+        if (!modal || !contentEl) return;
+        
+        nameEl.innerText = data.name;
+        slotEl.innerText = `Deep Scan Transmission: ${slotId.toUpperCase()}`;
+        
+        let html = `
+            <div class="grid grid-cols-3 gap-6">
+                <!-- Vitals Column -->
+                <div class="space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded">
+                        <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-hud/20 pb-1">Vital Statistics</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Class</span>
+                                <span class="text-[10px] text-white font-bold uppercase">${data.cls} (Lvl ${data.level})</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Armor Class</span>
+                                <span class="text-[10px] text-white font-mono">${data.ac}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Speed</span>
+                                <span class="text-[10px] text-white font-mono">${data.speed} ft</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded">
+                        <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-hud/20 pb-1">Resources</h4>
+                        <div class="space-y-2">
+                            ${(data.resources || []).map(r => `
+                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+                                    <span class="text-[9px] text-slate-400 uppercase font-bold">${r.name}</span>
+                                    <span class="text-[10px] text-emerald-400 font-mono">${r.current} / ${r.max}</span>
+                                </div>
+                            `).join('')}
+                            <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 uppercase font-bold">Credits</span>
+                                <span class="text-[10px] text-amber-400 font-mono">${(data.credits || 0).toLocaleString()} cr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Inventory Column -->
+                <div class="col-span-2 space-y-6">
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded h-full">
+                        <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-4 border-b border-hud/20 pb-1">Armory & Equipment</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            ${(data.armory || []).length > 0 ? data.armory.map(i => `
+                                <div class="bg-slate-950 border border-slate-800 p-2 rounded flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-slate-900 rounded border border-slate-800 flex items-center justify-center text-lg">${i.icon || '📦'}</div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-[10px] text-white font-bold uppercase truncate">${i.name}</div>
+                                        <div class="text-[8px] text-slate-500 uppercase">${i.type || 'Gear'}</div>
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="col-span-2 py-10 text-center text-slate-600 uppercase text-[10px] tracking-widest">No gear detected in local frequency.</div>'}
+                        </div>
+                        
+                        <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-4 mt-8 border-b border-hud/20 pb-1">Special Features & Traits</h4>
+                        <div class="space-y-2">
+                            ${(data.features || []).length > 0 ? data.features.map(f => `
+                                <div class="bg-slate-950/50 border border-slate-800/50 p-3 rounded">
+                                    <div class="text-[10px] text-blue-400 font-bold uppercase mb-1">${f.name}</div>
+                                    <div class="text-[9px] text-slate-400 leading-tight">${f.desc || 'No description available.'}</div>
+                                </div>
+                            `).join('') : '<div class="py-6 text-center text-slate-600 uppercase text-[10px] tracking-widest">No active traits extracted.</div>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        contentEl.innerHTML = html;
+        modal.classList.remove('hidden');
+    }
+
+    function closeInspect() {
+        document.getElementById('inspect-modal').classList.add('hidden');
+    }
+
     function exitDMMode() {
         state.isDM = false;
         saveState();
         switchMainTab('character');
+    }
+
+    function releaseControl() {
+        state.activeSlot = 'slot4';
+        saveState();
+        switchMainTab('dm');
+        renderDM();
+        showHolonetAlert("Administrative Access Restored", "border-blue-900 bg-blue-950/50");
     }
 
     function assumeControl(slotId) {
@@ -5406,8 +5537,18 @@
             const pass = prompt("Enter Protocol Override Code:");
             if (pass !== "ORGY") { alert("Access Denied."); return; }
             localStorage.setItem('sw5e_profile', 'dm');
+            
+            // 1. Load general state first
             loadState();
+            
+            // 2. Overwrite with DM specific identity
             state.isDM = true;
+            state.activeSlot = 'slot4';
+            state.name = "Dungeon Master";
+            state.cls = "Overseer";
+            state.level = 20;
+            
+            // 3. Save and initialize
             saveState();
         } else {
             localStorage.setItem('sw5e_profile', slot);
@@ -5419,7 +5560,17 @@
         
         const selector = document.getElementById('profile-selector');
         selector.style.opacity = '0';
+        
         startApplication();
+        
+        if (slot === 'dm') {
+            const dmBtn = document.getElementById('nav-dm');
+            if (dmBtn) dmBtn.classList.remove('hidden');
+            switchMainTab('dm');
+            renderDM();
+        } else {
+            switchMainTab('character');
+        }
         setTimeout(() => { selector.style.display = 'none'; }, 500);
     }
 
@@ -5451,7 +5602,13 @@
         renderCharacterSheet();
         renderShip();
         renderBounties();
-        if(state.isDM) { renderDM(); }
+        if(state.isDM) { 
+            renderDM(); 
+            // If we are exactly Slot 4 (DM identity), force the DM tab
+            if (state.activeSlot === 'slot4') {
+                switchMainTab('dm');
+            }
+        }
         runBootSequence();
     }
 
