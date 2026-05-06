@@ -2464,14 +2464,18 @@
         if(modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            setTimeout(() => { modal.style.opacity = '1'; }, 10);
         }
     }
 
     function closeSettingsModal() {
         const modal = document.getElementById('settings-modal');
         if(modal) {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
         }
     }
 
