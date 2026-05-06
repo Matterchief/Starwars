@@ -57,7 +57,8 @@ function renderNaviComputer() {
         label.setAttribute("text-anchor", "middle");
         label.setAttribute("fill", isCurrent ? "#c7d2fe" : "#64748b");
         label.setAttribute("font-size", "2.2"); label.setAttribute("font-family", "'Share Tech Mono', monospace");
-        label.textContent = p.name.length > 12 ? p.name.substring(0,10) + ".." : p.name;
+        const shortName = p.name.includes(' (') ? p.name.split(' (')[0] : p.name;
+        label.textContent = shortName.length > 12 ? shortName.substring(0,10) + ".." : shortName;
         g.appendChild(label);
         
         planetsG.appendChild(g);

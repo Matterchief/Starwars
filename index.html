@@ -99,6 +99,39 @@
             100% { opacity: calc(1 - (0.25 * var(--flicker-intensity))); }
         }
 
+        .scanline-effect {
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 0, 0, 0.1) 51%,
+                transparent 100%
+            );
+            background-size: 100% 4px;
+        }
+
+        .log-line {
+            border-left: 2px solid var(--accent);
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+            animation: lineFadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes lineFadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--hud);
+            border-radius: 2px;
+        }
+
         .static-burst {
             position: fixed; inset: 0; z-index: 4; pointer-events: none; mix-blend-mode: color-dodge;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
@@ -370,7 +403,7 @@
         /* --- CHARACTER CREATOR WIZARD --- */
         #creator-modal, #settings-modal {
             position: fixed; inset: 0; background: rgba(2,6,23,0.95); backdrop-filter: blur(12px);
-            z-index: 300; flex-direction: column; opacity: 0; transition: opacity 0.3s;
+            z-index: 300; flex-direction: column; transition: opacity 0.3s;
         }
         .creator-step-dot {
             width: 12px; height: 12px; border-radius: 50%; background: #1e293b; border: 1px solid #475569; transition: all 0.3s;
@@ -431,6 +464,26 @@
         <h1 class="display-font text-5xl md:text-7xl font-black text-red-500 uppercase tracking-widest mb-4 glow-text-hud" style="text-shadow: 0 0 30px rgba(220,38,38,0.8);">CRITICAL ALERT</h1>
         <p id="holonet-message" class="text-white text-xl md:text-3xl font-bold datapad-font uppercase tracking-widest mb-12">SYSTEM BREACH DETECTED</p>
         <button onclick="dismissAlert()" class="border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-black px-8 py-3 font-bold uppercase tracking-widest datapad-font transition-all text-xl active:scale-95">Acknowledge</button>
+    </div>
+</div>
+
+<!-- Ship Log Readout Overlay -->
+<div id="ship-log-overlay" class="fixed inset-0 bg-[#020617]/95 z-[12500] hidden flex-col items-center justify-center p-8 backdrop-blur-xl transition-opacity duration-500 opacity-0 overflow-hidden">
+    <div class="absolute inset-0 scanline-effect pointer-events-none opacity-20"></div>
+    <div class="max-w-4xl w-full bg-slate-900/40 border border-hud/30 rounded-lg p-8 shadow-[0_0_50px_rgba(38,198,218,0.1)] relative">
+        <div class="flex justify-between items-center mb-6 border-b border-hud/20 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 bg-hud animate-pulse rounded-full"></div>
+                <h2 class="display-font text-2xl font-black text-hud uppercase tracking-[0.2em]">Incoming Transmission // Ship's Log</h2>
+            </div>
+            <span id="log-timestamp" class="text-hud/60 font-mono text-sm uppercase tracking-widest">TS: 2187.0504</span>
+        </div>
+        <div id="log-content-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
+            <div id="log-text" class="text-white text-lg md:text-xl font-mono leading-relaxed whitespace-pre-wrap datapad-font opacity-0 translate-y-4 transition-all duration-700"></div>
+        </div>
+        <div class="mt-8 pt-6 border-t border-hud/20 flex justify-end">
+            <button onclick="dismissShipLog()" id="log-dismiss-btn" class="border border-hud text-hud hover:bg-hud hover:text-black px-8 py-2 font-bold uppercase tracking-widest datapad-font transition-all text-sm opacity-0 pointer-events-none">Close Entry</button>
+        </div>
     </div>
 </div>
 
@@ -514,7 +567,12 @@
         <!-- MAIN TAB: CHARACTER SHEET -->
         <div id="main-character" class="main-tab">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="display-font text-2xl font-black text-white uppercase tracking-wide" style="color: var(--hud);">Operative Sheet</h2>
+                <div>
+                    <h2 class="display-font text-2xl font-black text-white uppercase tracking-wide" style="color: var(--hud);">Operative Sheet</h2>
+                    <div id="char-title-badge" onclick="editTitleInline()" class="inline-block mt-1 cursor-pointer transition-all hover:scale-105">
+                        <span id="char-title-display" class="text-[10px] uppercase tracking-widest datapad-font px-2 py-0.5 rounded border border-dashed" style="color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 8%, transparent);">Operative</span>
+                    </div>
+                </div>
                 <div class="flex gap-2">
                     <button onclick="openCreator()" class="text-xs bg-theme text-slate-900 px-2 py-1 rounded border border-theme uppercase font-bold tracking-widest datapad-font shadow-theme flex items-center gap-1" style="background-color: var(--hud);">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -963,6 +1021,10 @@
                     </h3>
                     <div class="space-y-3">
                         <input type="text" id="setting-callsign" oninput="updateIdentity()" class="w-full bg-slate-900 border border-slate-700 rounded-md px-4 py-2 text-hud focus:outline-none focus:border-hud font-bold uppercase tracking-wider datapad-font" placeholder="Enter Callsign...">
+                        <div class="relative">
+                            <input type="text" id="setting-custom-title" oninput="updateIdentity()" class="w-full bg-slate-900 border border-slate-700 rounded-md px-4 py-2 text-white focus:outline-none focus:border-hud text-sm datapad-font" placeholder="Custom Title / Rank (leave blank for auto)">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 uppercase tracking-widest pointer-events-none">Title</span>
+                        </div>
                         <select id="setting-class" onchange="updateIdentity()" class="w-full bg-slate-900 border border-slate-700 text-hud rounded-md px-3 py-2 focus:outline-none focus:border-hud font-bold uppercase tracking-wider datapad-font appearance-none">
                         </select>
                         <div class="bg-slate-900 border border-slate-700 p-3 rounded-md">
@@ -1182,10 +1244,12 @@
     // Party Data Cache
     let partyData = { slot1: null, slot2: null, slot3: null };
     let lastBroadcastTime = Date.now();
+    let lastShipLogTime = Date.now();
+    let logScrollInterval = null;
 
     let state = {
         activeSlot: "slot1",
-        name: "", cls: "", level: 1, alignment: 1, skin: "rebellion", scan: 30, static: 10, flicker: 5,
+        name: "", customTitle: "", cls: "", level: 1, alignment: 1, skin: "rebellion", scan: 30, static: 10, flicker: 5,
         favorites: { armory: [], spells: [] }, spellLevel: "All", spellMine: false, armoryCat: "All", viewmode: "standard", uiscale: "md",
         beginnerMode: false,
         editMode: false,
@@ -1207,10 +1271,23 @@
         bountiesStatus: {}
     };
 
+    function isEqual(obj1, obj2) {
+        if (obj1 === obj2) return true;
+        if (!obj1 || !obj2 || typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+        if (keys1.length !== keys2.length) return false;
+        for (let key of keys1) {
+            if (!keys2.includes(key) || !isEqual(obj1[key], obj2[key])) return false;
+        }
+        return true;
+    }
+
     function syncToFirebase() {
         if (!state.activeSlot) return;
         const charData = {
             name: state.name || "Unknown",
+            customTitle: state.customTitle || "",
             cls: state.cls || "None",
             level: state.level || 1,
             hp: state.hp,
@@ -1234,11 +1311,20 @@
         try {
             db.ref('shared/ship').on('value', snap => {
                 const data = snap.val();
-                if (data) { state.ship = data; saveState(); renderShip(); }
+                if (data && !isEqual(state.ship, data)) { 
+                    state.ship = data; 
+                    saveState(); 
+                    renderShip(); 
+                    renderNaviComputer();
+                }
             });
             db.ref('shared/bounties').on('value', snap => {
                 const data = snap.val();
-                if (data) { state.bountiesStatus = data; saveState(); renderBounties(); }
+                if (data && !isEqual(state.bountiesStatus, data)) { 
+                    state.bountiesStatus = data; 
+                    saveState(); 
+                    renderBounties(); 
+                }
             });
             db.ref('characters').on('value', snap => {
                 const data = snap.val();
@@ -1252,12 +1338,28 @@
                 const data = snap.val();
                 if (data && data.message && data.timestamp > lastBroadcastTime) {
                     lastBroadcastTime = data.timestamp;
-                    showHolonetAlert(data.message);
+                    showHolonetAlert(data.message, data.alertColor || null);
+                    // Play matching alert sound for ship alerts
+                    if (typeof SHIP_ALERTS !== 'undefined' && data.message.includes('SHIP ALERT:')) {
+                        const match = SHIP_ALERTS.find(a => data.message.includes(a.name.toUpperCase()));
+                        if (match) { try { audioCtx.resume(); playAlertSound(match); } catch(e){} }
+                    }
+                }
+            });
+            db.ref('shared/shiplog').on('value', snap => {
+                const data = snap.val();
+                if (data && data.timestamp > lastShipLogTime) {
+                    lastShipLogTime = data.timestamp;
+                    showShipLog(data.text, data.mode);
                 }
             });
             db.ref('shared/customBounties').on('value', snap => {
                 const data = snap.val();
-                if (data) { state.customBounties = data; saveState(); renderBounties(); }
+                if (data && !isEqual(state.customBounties, data)) { 
+                    state.customBounties = data; 
+                    saveState(); 
+                    renderBounties(); 
+                }
             });
         } catch(e) { console.error(e); }
     }
@@ -1275,6 +1377,7 @@
                 if(!state.resources) state.resources = [{ name: "Hit Dice", current: 1, max: 1 }, { name: "Force Pts", current: 0, max: 0 }];
                 if(typeof state.credits === 'undefined') state.credits = 0;
                 if(typeof state.beginnerMode === 'undefined') state.beginnerMode = false;
+                if(typeof state.customTitle === 'undefined') state.customTitle = '';
                 if(!state.ship || typeof state.ship.shieldsCur !== 'undefined') {
                     const name = state.ship && state.ship.name ? state.ship.name : "The Vanguard";
                     const type = state.ship && state.ship.type ? state.ship.type : "freighter";
@@ -1978,48 +2081,94 @@
             2: {features:['Spellcasting: Access to Ranger spell list (WIS-based). 2 spells known.','Fighting Style: Choose a combat specialization.']},
             3: {features:['Ranger Conclave: Choose your subclass archetype.','3 spells known.']},
             4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4 spells known.']},
-            5: {features:['Extra Attack: Attack twice per Attack action.','5 spells known. 2nd-level spell slots.']}
+            5: {features:['Extra Attack: Attack twice per Attack action.','5 spells known. 2nd-level spell slots.']},
+            6: {features:['Roving: Your speed increases by 5 feet, and you gain a climbing and swimming speed.','Favored Enemy (Bounty Target Lock) Improvement: Damage increases.']},
+            7: {features:['Subclass Feature: Gain an archetype ability (e.g. Defensive Tactics for Hunter).','6 spells known.']}
         }
     };
 
-    const crEquipmentChoices = [
-        {group:'Armor', options:[{id:'scale', name:'Durasteel Scale Mail (AC 14+DEX max 2)'},{id:'leather', name:'Nerf-Hide Jacket (Leather, AC 11+DEX)'}]},
-        {group:'Weapons', options:[{id:'2short', name:'Two Vibroblades (Shortswords)'},{id:'2simple', name:'Two Simple Melee Weapons'}]},
-        {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]},
-        {group:'Ranged', options:[{id:'longbow', name:'Blaster Rifle (Longbow) + 20 power cells'}]}
-    ];
+    const crEquipmentChoices = {
+        Ranger: [
+            {group:'Armor', options:[{id:'scale', name:'Durasteel Scale Mail (AC 14+DEX max 2)'},{id:'leather', name:'Nerf-Hide Jacket (Leather, AC 11+DEX)'}]},
+            {group:'Melee Weapon', options:[{id:'vibro', name:'Vibrosword (1d8 Slashing)'},{id:'saber', name:'Training Lightsaber (1d8 Radiant)'},{id:'2short', name:'Two Vibro-shivs (Shortswords)'}]},
+            {group:'Ranged Weapon', options:[{id:'carbine', name:'Blaster Carbine (1d8 Energy)'},{id:'pistol', name:'Heavy Blaster Pistol (1d6 Energy)'}]},
+            {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
+        ],
+        Sorcerer: [
+            {group:'Weapon', options:[{id:'crossbow', name:'Hold-out Blaster & 20 bolts (Light Crossbow, 1d8 Energy)'},{id:'simple', name:'Vibro-dagger (Dagger, 1d4 Piercing)'}]},
+            {group:'Force Focus', options:[{id:'pouch', name:'Utility Belt (Component Pouch) — pockets of crystals, herbs, and reagents'},{id:'focus', name:'Holocron Shard (Arcane Focus) — a fragment of an ancient Force artifact'}]},
+            {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]}
+        ]
+    };
+
+    const crSorcererData = {
+        dnd: 'Sorcerer', sw: 'Force Adept / Sith Inquisitor', hitDie: 'd6', primary: 'CHA',
+        saves: ['con', 'cha'], armorProf: 'None', weaponProf: 'Vibro-daggers, Throwing Knives, Hold-out Blasters, Quarterstaffs',
+        skillChoices: ['arcana','deception','insight','intimidation','persuasion','religion'],
+        numSkills: 2,
+        metamagicOptions: [
+            {id:'twin', name:'Twinned Force Power', dnd:'Twinned Spell', desc:'Spend sorcery points equal to the power\'s level to target a second creature with the same Force power. Force Choke two targets at once. (Cantrips cost 1 point.)'},
+            {id:'subtle', name:'Hidden Manifestation', dnd:'Subtle Spell', desc:'Spend 1 sorcery point to use a Force power without any visible gestures or words. Perform Mind Tricks without waving your hand or speaking.'},
+            {id:'quicken', name:'Accelerated Casting', dnd:'Quickened Spell', desc:'Spend 2 sorcery points to change the casting time of a Force power from 1 action to 1 bonus action. Strike with blinding speed.'},
+            {id:'heighten', name:'Overwhelming Will', dnd:'Heightened Spell', desc:'Spend 3 sorcery points to impose disadvantage on a target\'s first saving throw against your Force power. Crush their mental resistance.'}
+        ],
+        subclasses: [
+            {id:'wild', name:'Unbound Force', dnd:'Wild Magic', desc:'Your connection to the Force is raw, chaotic, and unpredictable — surging through you in wild, uncontrollable bursts of power.',
+             feature:{name:"Wild Force Surge (Wild Magic Surge)", desc:'After casting a Force power of 1st level or higher, roll a d20. On a 1, roll on the Wild Force Surge table — causing a random, unpredictable Force phenomenon such as spontaneous levitation or a burst of spectral fire.'}},
+            {id:'shadow', name:'Dark Lineage', dnd:'Shadow Magic', desc:'Your power flows from a bloodline touched by the Dark Side — through Sith alchemy, Nightsister rituals, or ancient Sith corruption passed through generations.',
+             feature:{name:"Force Darkness (Strength of the Grave)", desc:'When damage reduces you to 0 HP, make a CHA save (DC 5 + damage taken). On a success, drop to 1 HP instead. Dark Side energy refuses to let you fall. Doesn\'t work against radiant damage or critical hits.'}},
+            {id:'storm', name:'Storm Conduit', dnd:'Storm Sorcery', desc:'You channel the Force through raw elemental fury — commanding lightning, kinetic shockwaves, and tempest winds.',
+             feature:{name:"Tempest Aura (Tempestuous Magic)", desc:'Immediately after casting a Force power of 1st level or higher, use a bonus action to fly 10 feet without provoking opportunity attacks — propelled by a burst of Force-generated wind and kinetic energy.'}}
+        ],
+        levels: {
+            1: {features:['Innate Force Connection (Spellcasting): Your raw, instinctive link to the Force lets you channel powers through sheer willpower (CHA). 4 cantrips known, 2 powers known.','Sorcerous Origin: Choose how your Force power manifests — Wild, Dark, or Storm.']},
+            2: {features:['Sorcery Points: 2 pts (Font of Magic). Convert between sorcery points and power slots, representing your raw Force stamina.','3 powers known.']},
+            3: {features:['Metamagic (Force Manipulation): Choose 2 options. Bend the rules of your Force powers — twin them, hide them, accelerate them.','4 powers known. 2nd-level power slots.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','5 cantrips known. 5 powers known.']},
+            5: {features:['3rd-level Force powers unlocked (Sith Lightning, Force Storm).','5 sorcery points. 6 powers known.']},
+            6: {features:['Sorcerous Origin Feature: Your lineage deepens, granting a powerful new Dark Side, Wild, or Storm ability.','7 powers known.']},
+            7: {features:['4th-level Force powers unlocked (Plasma Barrier, Force Exile).','7 sorcery points. 8 powers known.']}
+        }
+    };
+
+    function getActiveClassData() {
+        return crState.cls === 'Sorcerer' ? crSorcererData : crRangerData;
+    }
+    function getActiveEquipment() {
+        return crEquipmentChoices[crState.cls] || crEquipmentChoices.Ranger;
+    }
     
     function openCreator() {
-        creatorStep = 1;
-        updateCreatorUI();
-        
-        const nameEl = document.getElementById('cr-name');
-        if (nameEl) nameEl.value = state.name;
-        const classEl = document.getElementById('cr-class');
-        if (classEl) classEl.value = state.cls || "";
-        const levelEl = document.getElementById('cr-level');
-        if (levelEl) levelEl.value = state.level || 1;
-        const levelDispEl = document.getElementById('cr-level-disp');
-        if (levelDispEl) levelDispEl.innerText = state.level || 1;
-
-        suggestStats(); 
-
-        ['str','dex','con','int','wis','cha'].forEach(s => {
-            const statEl = document.getElementById(`cr-${s}`);
-            if (statEl) statEl.value = state.stats[s] || 10;
-        });
-        const hpEl = document.getElementById('cr-hp');
-        if (hpEl) hpEl.value = state.hp.max || 10;
-        const acEl = document.getElementById('cr-ac');
-        if (acEl) acEl.value = state.ac || 10;
-        const speedEl = document.getElementById('cr-speed');
-        if (speedEl) speedEl.value = state.speed || 30;
-
-        const modal = document.getElementById('creator-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        try {
+            crStep = 1;
+            crState = {
+                name: state.name || '', 
+                species: 'human', 
+                cls: '', 
+                level: Math.min(parseInt(state.level) || 1, 7),
+                baseStats: {str:10,dex:10,con:10,int:10,wis:10,cha:10},
+                speciesBonuses: {}, 
+                fightingStyle: '', 
+                subclass: '', 
+                metamagic: [],
+                asi: {type:'',stat1:'',stat2:''},
+                selectedSkills: [], 
+                selectedEquipment: [], 
+                profSaves: []
+            };
+            const modal = document.getElementById('creator-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                // Force visibility and z-index
+                modal.style.opacity = '1';
+                modal.style.zIndex = '1000';
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+                renderCreatorWizard();
+            }
+        } catch (err) {
+            console.error("Failed to open creator:", err);
+            alert("System Error: Unable to initialize Dossier Wizard.");
         }
     }
 
@@ -2031,269 +2180,372 @@
         }
     }
 
-    function changeCreatorStep(dir) {
-        if(creatorStep === 2 && dir === 1) {
-            const strEl = document.getElementById('cr-str');
-            if (strEl) {
-                const s = parseInt(strEl.value);
-                if(isNaN(s) || s < 1 || s > 30) { alert("Please enter valid stats."); return; }
+    function crWizardNav(dir) {
+        if (dir === 1) {
+            if (crStep === 1 && !crState.species) { alert("Please select a species."); return; }
+            if (crStep === 2 && !crState.cls) { alert("Please select a class."); return; }
+            if (crStep === 5) {
+                const classData = getActiveClassData();
+                const limit = classData.numSkills + (crState.species === 'human' ? 1 : crState.species === 'twilek' ? 2 : 0);
+                if (crState.selectedSkills.length !== limit) { alert(`Please select exactly ${limit} skills.`); return; }
             }
         }
-
-        if(creatorStep === 3 && dir === 1) {
-            populateCreatorProficiencies();
-        }
-
-        creatorStep += dir;
-        if(creatorStep < 1) creatorStep = 1;
-        if(creatorStep > 4) creatorStep = 4;
-        updateCreatorUI();
+        crStep += dir;
+        if (crStep < 1) crStep = 1;
+        if (crStep > 7) crStep = 7;
+        renderCreatorWizard();
     }
 
-    function updateCreatorUI() {
-        [1,2,3,4].forEach(i => {
-            const el = document.getElementById(`creator-step-${i}`);
-            const dot = document.getElementById(`step-dot-${i}`);
-            if(i === creatorStep) {
-                if(el) el.classList.remove('hidden');
-                if(dot) dot.classList.add('active');
-            } else {
-                if(el) el.classList.add('hidden');
-                if(dot) dot.classList.remove('active');
-            }
-        });
-
-        const prevBtn = document.getElementById('cr-btn-prev');
-        if(prevBtn) prevBtn.classList.toggle('hidden', creatorStep === 1);
-        const nextBtn = document.getElementById('cr-btn-next');
-        if(nextBtn) nextBtn.classList.toggle('hidden', creatorStep === 4);
-        const finishBtn = document.getElementById('cr-btn-finish');
-        if(finishBtn) finishBtn.classList.toggle('hidden', creatorStep !== 4);
-    }
-
-    function suggestStats() {
-        const cEl = document.getElementById('cr-class');
-        if (!cEl) return;
-        const c = cEl.value;
-        const descEl = document.getElementById('cr-class-desc');
-        const sugEl = document.getElementById('cr-stat-suggest');
-        if(!c) { 
-            if(descEl) descEl.innerText = ""; 
-            if(sugEl) sugEl.classList.add('hidden'); 
-            return; 
-        }
-
-        const cData = classData.find(x => x.dnd === c);
-        if(cData) {
-            if(descEl) descEl.innerHTML = `<strong>${cData.sw}</strong>: ${cData.desc}`;
-            if(sugEl) {
-                sugEl.innerHTML = `Suggested Primary Stat(s): <strong>${cData.primary}</strong>`;
-                sugEl.classList.remove('hidden');
-            }
-        }
-    }
-
-    function applyStandardArray() {
-        const arr = [15, 14, 13, 12, 10, 8];
-        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-        
-        const cEl = document.getElementById('cr-class');
-        if (!cEl) return;
-        const c = cEl.value;
-        const cData = classData.find(x => x.dnd === c);
-        
-        let mapped = false;
-        if(cData) {
-            const primary = cData.primary.toLowerCase();
-            const trySet = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-            if(primary.includes('str') && primary.includes('cha')) { trySet('cr-str',15); trySet('cr-cha',14); trySet('cr-con',13); trySet('cr-dex',12); trySet('cr-wis',10); trySet('cr-int',8); mapped=true; }
-            else if(primary.includes('dex') && primary.includes('wis')) { trySet('cr-dex',15); trySet('cr-wis',14); trySet('cr-con',13); trySet('cr-str',12); trySet('cr-cha',10); trySet('cr-int',8); mapped=true; }
-            else if(primary.includes('int')) { trySet('cr-int',15); trySet('cr-con',14); trySet('cr-dex',13); trySet('cr-wis',12); trySet('cr-cha',10); trySet('cr-str',8); mapped=true; }
-            else if(primary.includes('wis')) { trySet('cr-wis',15); trySet('cr-con',14); trySet('cr-dex',13); trySet('cr-str',12); trySet('cr-cha',10); trySet('cr-int',8); mapped=true; }
-            else if(primary.includes('cha')) { trySet('cr-cha',15); trySet('cr-con',14); trySet('cr-dex',13); trySet('cr-wis',12); trySet('cr-str',10); trySet('cr-int',8); mapped=true; }
-            else if(primary.includes('dex')) { trySet('cr-dex',15); trySet('cr-con',14); trySet('cr-cha',13); trySet('cr-wis',12); trySet('cr-int',10); trySet('cr-str',8); mapped=true; }
-            else if(primary.includes('str')) { trySet('cr-str',15); trySet('cr-con',14); trySet('cr-dex',13); trySet('cr-wis',12); trySet('cr-cha',10); trySet('cr-int',8); mapped=true; }
-        }
-
-        if(!mapped) {
-            stats.forEach((s, i) => {
-                const el = document.getElementById(`cr-${s}`);
-                if (el) el.value = arr[i];
-            });
-        }
-
-        flashInputBackgrounds();
-    }
-
-    function roll4d6() {
-        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-        stats.forEach(s => {
-            let rolls = [];
-            for(let i=0; i<4; i++) rolls.push(Math.floor(Math.random() * 6) + 1);
-            rolls.sort((a,b)=>b-a); 
-            const total = rolls[0] + rolls[1] + rolls[2]; 
-            const el = document.getElementById(`cr-${s}`);
-            if (el) el.value = total;
-        });
-        flashInputBackgrounds();
-    }
-
-    function flashInputBackgrounds() {
-        const inputs = document.querySelectorAll('.creator-stat-input');
-        inputs.forEach(i => {
-            i.style.color = '#fff';
-            setTimeout(() => i.style.color = 'var(--accent)', 300);
-        });
-    }
-
-    function calcHP() {
-        const cEl = document.getElementById('cr-class');
-        if (!cEl) return;
-        const c = cEl.value;
-        const lvlEl = document.getElementById('cr-level');
-        const conEl = document.getElementById('cr-con');
-        const lvl = parseInt(lvlEl ? lvlEl.value : 1) || 1;
-        const conScore = parseInt(conEl ? conEl.value : 10) || 10;
-        const conMod = Math.floor((conScore - 10) / 2);
-
-        if(!c) { alert("Please select a Base Class in Step 1 first."); return; }
-        
-        const cData = classData.find(x => x.dnd === c);
-        if(!cData) return;
-
-        const hitDieMax = parseInt(cData.hitDie.replace('1d', ''));
-        const hitDieAvg = Math.ceil(hitDieMax / 2) + 1; 
-
-        let hp = hitDieMax + conMod; 
-        if(lvl > 1) {
-            hp += (hitDieAvg + conMod) * (lvl - 1);
-        }
-        
-        const hpInput = document.getElementById('cr-hp');
-        if (hpInput) {
-            hpInput.value = Math.max(1, hp);
-            hpInput.style.color = '#fff';
-            setTimeout(() => hpInput.style.color = '', 300);
-        }
-    }
-
-    let crProfSaves = [];
-    let crProfSkills = {};
-
-    function populateCreatorProficiencies() {
-        const cEl = document.getElementById('cr-class');
-        if (!cEl) return;
-        const c = cEl.value;
-        const cData = classData.find(x => x.dnd === c);
-        
-        crProfSaves = [];
-        if(cData) {
-            const saves = cData.saves.toLowerCase().split(', ');
-            saves.forEach(s => {
-                if(s.includes('str')) crProfSaves.push('str');
-                if(s.includes('dex')) crProfSaves.push('dex');
-                if(s.includes('con')) crProfSaves.push('con');
-                if(s.includes('int')) crProfSaves.push('int');
-                if(s.includes('wis')) crProfSaves.push('wis');
-                if(s.includes('cha')) crProfSaves.push('cha');
-            });
-        }
-
-        crProfSkills = { ...state.proficiencies.skills };
-        renderCreatorProficiencies();
-    }
-
-    function renderCreatorProficiencies() {
-        const saveGrid = document.getElementById('cr-saves-grid');
-        if (!saveGrid) return;
-        let savesHtml = '';
-        ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(stat => {
-            const active = crProfSaves.includes(stat);
-            savesHtml += `<button onclick="toggleCrSave('${stat}')" class="creator-btn text-xs ${active ? 'creator-btn-primary' : ''}">${stat.toUpperCase()}</button>`;
-        });
-        saveGrid.innerHTML = savesHtml;
-
-        const skillGrid = document.getElementById('cr-skills-grid');
-        if (!skillGrid) return;
-        let skillsHtml = '';
-        Object.keys(skillList).sort().forEach(skill => {
-            const dndName = skill.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-            const val = crProfSkills[skill] || 0;
+    function renderCreatorWizard() {
+        try {
+            const content = document.getElementById('cr-wizard-content');
+            if (!content) return;
             
-            let cls = '';
-            let indicator = '';
-            if(val === 1) { cls = 'bg-hud text-slate-900 border-hud'; indicator = 'P'; }
-            if(val === 2) { cls = 'bg-accent text-slate-900 border-accent'; indicator = 'E'; }
+            const stepNames = ["Species", "Class", "Ability Scores", "Features & Specialization", "Proficiencies", "Equipment", "Review"];
+            const labelEl = document.getElementById('cr-step-label');
+            if (labelEl) labelEl.innerText = `Step ${crStep} of 7: ${stepNames[crStep-1] || 'Unknown'}`;
+            
+            for(let i=1; i<=7; i++) {
+                const prog = document.getElementById(`cr-prog-${i}`);
+                if(prog) {
+                    if (i < crStep) prog.className = "cr-progress-seg flex-1 h-1.5 rounded-full bg-emerald-500 transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.5)]";
+                    else if (i === crStep) prog.className = "cr-progress-seg flex-1 h-1.5 rounded-full bg-indigo-500 transition-all duration-300 shadow-[0_0_8px_rgba(99,102,241,0.5)]";
+                    else prog.className = "cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300";
+                }
+            }
 
-            skillsHtml += `
-                <button onclick="toggleCrSkill('${skill}')" class="flex justify-between items-center text-xs p-2 rounded border border-slate-700 bg-slate-900 transition-colors ${cls}">
-                    <span>${dndName}</span>
-                    <span class="font-bold datapad-font">${indicator}</span>
-                </button>
-            `;
-        });
-        skillGrid.innerHTML = skillsHtml;
-    }
+            const prevBtn = document.getElementById('cr-btn-prev');
+            const nextBtn = document.getElementById('cr-btn-next');
+            const finishBtn = document.getElementById('cr-btn-finish');
+            if (prevBtn) prevBtn.classList.toggle('hidden', crStep === 1);
+            if (nextBtn) nextBtn.classList.toggle('hidden', crStep === 7);
+            if (finishBtn) finishBtn.classList.toggle('hidden', crStep !== 7);
 
-    function toggleCrSave(stat) {
-        if(crProfSaves.includes(stat)) crProfSaves = crProfSaves.filter(s => s !== stat);
-        else crProfSaves.push(stat);
-        renderCreatorProficiencies();
-    }
+            let html = '';
 
-    function toggleCrSkill(skill) {
-        const cur = crProfSkills[skill] || 0;
-        crProfSkills[skill] = (cur + 1) % 3;
-        renderCreatorProficiencies();
-    }
+            if (crStep === 1) { // SPECIES
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Select Your Origin</h3><div class="grid gap-3">`;
+                crSpeciesOptions.forEach(sp => {
+                    const active = crState.species === sp.id ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                    html += `
+                    <div class="border rounded p-3 cursor-pointer transition-colors ${active}" onclick="crState.species='${sp.id}'; renderCreatorWizard();">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-lg text-white display-font">${sp.sw}</span>
+                            <span class="text-[10px] uppercase text-slate-500 datapad-font tracking-widest">${sp.dnd} Equivalent</span>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-2">${sp.traits.join(' • ')}</p>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+            else if (crStep === 2) { // CLASS
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Choose Your Profession</h3>`;
+                html += `<p class="text-slate-400 text-sm mb-4">Select a class archetype. Each one maps to a D&D 5.5e base class with Star Wars flavor.</p>`;
+                
+                const classOptions = [
+                    {key:'Ranger', data: crRangerData},
+                    {key:'Sorcerer', data: crSorcererData}
+                ];
+                
+                html += `<div class="grid gap-3 mb-4">`;
+                classOptions.forEach(opt => {
+                    const active = crState.cls === opt.key ? 'border-emerald-500 bg-emerald-900/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                    html += `
+                    <div class="border rounded p-4 cursor-pointer transition-all ${active}" onclick="crState.cls='${opt.key}'; crState.fightingStyle=''; crState.subclass=''; crState.metamagic=[]; crState.selectedSkills=[]; crState.selectedEquipment=[]; renderCreatorWizard();">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-lg text-white display-font">${opt.data.sw}</span>
+                            <span class="text-[10px] uppercase text-slate-500 datapad-font tracking-widest border border-slate-700 px-2 py-0.5 rounded">Base: ${opt.data.dnd}</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-2">
+                            <div class="bg-slate-950 p-2 rounded border border-slate-800"><span class="text-[10px] text-slate-500 uppercase block font-bold">Hit Die</span><span class="text-emerald-400 font-mono">${opt.data.hitDie}</span></div>
+                            <div class="bg-slate-950 p-2 rounded border border-slate-800"><span class="text-[10px] text-slate-500 uppercase block font-bold">Primary</span><span class="text-white text-sm">${opt.data.primary}</span></div>
+                            <div class="bg-slate-950 p-2 rounded border border-slate-800"><span class="text-[10px] text-slate-500 uppercase block font-bold">Saves</span><span class="text-white text-xs uppercase">${opt.data.saves.join(', ')}</span></div>
+                        </div>
+                        <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                            <span class="text-[10px] text-slate-500 uppercase block font-bold">Proficiencies</span>
+                            <span class="text-white text-xs">${opt.data.armorProf ? opt.data.armorProf + '<br>' : ''}${opt.data.weaponProf}</span>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+                
+                html += `
+                <div class="mb-4">
+                    <label class="text-[10px] text-slate-500 uppercase block font-bold mb-1">Starting Level (1-7)</label>
+                    <input type="number" min="1" max="7" value="${crState.level}" onchange="crState.level = Math.min(parseInt(this.value)||1, 7); renderCreatorWizard();" class="w-full bg-slate-900 border border-slate-700 text-white rounded p-2 text-lg font-mono text-center">
+                </div>
+                `;
+            }
+            else if (crStep === 3) { // STATS
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Determine Ability Scores</h3>`;
+                html += `<p class="text-slate-400 text-sm mb-4">Standard Array applied. Modify as needed based on your species bonuses.</p>`;
+                
+                const sp = crSpeciesOptions.find(s=>s.id===crState.species);
+                let bonusStr = "None";
+                if(sp) {
+                    if(sp.bonus.choose2) bonusStr = "+1 to any two scores";
+                    else if(sp.bonus.choose1) {
+                        const k = Object.keys(sp.bonus).filter(k=>k!=='choose1')[0];
+                        bonusStr = `+2 ${k.toUpperCase()}, +1 to any other`;
+                    } else {
+                        bonusStr = Object.keys(sp.bonus).map(k=>`+${sp.bonus[k]} ${k.toUpperCase()}`).join(', ');
+                    }
+                }
+                html += `<div class="bg-indigo-900/20 border border-indigo-900 p-3 rounded mb-4"><span class="text-indigo-400 text-xs font-bold uppercase tracking-widest block mb-1">Species Bonuses</span><span class="text-white text-sm">${bonusStr}</span></div>`;
 
-    function finalizeCreator() {
-        const nameEl = document.getElementById('cr-name');
-        if (nameEl) state.name = nameEl.value || "Unknown Operative";
-        const clsEl = document.getElementById('cr-class');
-        if (clsEl) state.cls = clsEl.value;
-        const lvlEl = document.getElementById('cr-level');
-        if (lvlEl) state.level = parseInt(lvlEl.value) || 1;
+                html += `<div class="grid grid-cols-2 gap-3 mb-4">`;
+                ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(stat => {
+                    html += `
+                    <div class="bg-slate-900 border border-slate-700 rounded p-3 flex justify-between items-center">
+                        <span class="text-white font-bold uppercase tracking-widest text-sm">${stat}</span>
+                        <input type="number" value="${crState.baseStats[stat]}" onchange="crState.baseStats['${stat}'] = parseInt(this.value)||10" class="w-16 bg-slate-950 border border-slate-600 text-emerald-400 rounded p-1 text-lg font-mono text-center">
+                    </div>`;
+                });
+                html += `</div>`;
+                
+                html += `<div class="flex gap-2">
+                    <button onclick="crWizardApplyArray()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs uppercase tracking-widest py-2 rounded border border-slate-600 transition-colors">Standard Array</button>
+                </div>`;
+            }
+            else if (crStep === 4) { // FEATURES & SUBCLASS
+                const cd = getActiveClassData();
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Features & Specialization</h3>`;
+                html += `<p class="text-slate-500 text-[10px] uppercase tracking-widest mb-4 datapad-font">${cd.sw} <span class="text-slate-600">|</span> Base: ${cd.dnd}</p>`;
+                
+                // RANGER: Fighting Style (level 2+)
+                if(crState.cls === 'Ranger' && crState.level >= 2 && cd.fightingStyles) {
+                    html += `<div class="mb-5"><h4 class="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2 border-b border-indigo-900/50 pb-1">Combat Specialization <span class="text-slate-600 font-normal">(Fighting Style)</span></h4><div class="grid gap-2">`;
+                    cd.fightingStyles.forEach(fs => {
+                        const active = crState.fightingStyle === fs.id ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                        html += `<div class="border rounded p-2 cursor-pointer transition-colors ${active}" onclick="crState.fightingStyle='${fs.id}'; renderCreatorWizard();">
+                            <div class="flex justify-between items-center"><span class="font-bold text-sm text-white">${fs.name}</span><span class="text-[9px] text-slate-500 uppercase datapad-font">${fs.dnd}</span></div>
+                            <span class="text-xs text-slate-400 block mt-1">${fs.desc}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
 
-        ['str','dex','con','int','wis','cha'].forEach(s => {
-            const statEl = document.getElementById(`cr-${s}`);
-            if (statEl) state.stats[s] = parseInt(statEl.value) || 10;
-        });
+                // SORCERER: Metamagic (level 3+)
+                if(crState.cls === 'Sorcerer' && crState.level >= 3 && cd.metamagicOptions) {
+                    html += `<div class="mb-5"><h4 class="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2 border-b border-indigo-900/50 pb-1">Force Manipulation <span class="text-slate-600 font-normal">(Metamagic — choose 2)</span></h4><div class="grid gap-2">`;
+                    cd.metamagicOptions.forEach(mm => {
+                        const isSelected = crState.metamagic.includes(mm.id);
+                        const active = isSelected ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                        html += `<div class="border rounded p-2 cursor-pointer transition-colors ${active}" onclick="crWizardToggleMetamagic('${mm.id}')">
+                            <div class="flex justify-between items-center"><span class="font-bold text-sm text-white">${mm.name}</span><span class="text-[9px] text-slate-500 uppercase datapad-font">${mm.dnd}</span></div>
+                            <span class="text-xs text-slate-400 block mt-1">${mm.desc}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
 
-        const hpEl = document.getElementById('cr-hp');
-        const hpVal = parseInt(hpEl ? hpEl.value : 10) || 10;
-        state.hp.max = hpVal;
-        state.hp.current = hpVal; 
-        
-        const acEl = document.getElementById('cr-ac');
-        if (acEl) state.ac = parseInt(acEl.value) || 10;
-        
-        const speedEl = document.getElementById('cr-speed');
-        if (speedEl) state.speed = parseInt(speedEl.value) || 30;
+                // Subclass (level 1 for Sorc, level 3 for Ranger)
+                const subclassLevel = crState.cls === 'Sorcerer' ? 1 : 3;
+                if(crState.level >= subclassLevel && cd.subclasses) {
+                    const subLabel = crState.cls === 'Sorcerer' ? 'Sorcerous Origin' : 'Ranger Conclave';
+                    html += `<div class="mb-5"><h4 class="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2 border-b border-indigo-900/50 pb-1">${subLabel} <span class="text-slate-600 font-normal">(Subclass)</span></h4><div class="grid gap-2">`;
+                    cd.subclasses.forEach(sub => {
+                        const active = crState.subclass === sub.id ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                        html += `<div class="border rounded p-2 cursor-pointer transition-colors ${active}" onclick="crState.subclass='${sub.id}'; renderCreatorWizard();">
+                            <div class="flex justify-between items-center"><span class="font-bold text-sm text-white">${sub.name}</span><span class="text-[9px] text-slate-500 uppercase datapad-font">${sub.dnd}</span></div>
+                            <span class="text-xs text-slate-400 block mt-1">${sub.desc}</span>
+                            ${sub.feature ? `<div class="mt-2 bg-slate-950/80 border border-slate-800 rounded p-2"><span class="text-[9px] text-emerald-500 uppercase font-bold block mb-1">${sub.feature.name}</span><span class="text-[11px] text-slate-400">${sub.feature.desc || (sub.feature.choices ? sub.feature.choices.map(c => '<strong>' + c.name + '</strong>: ' + c.desc).join('<br>') : '')}</span></div>` : ''}
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                }
 
-        state.proficiencies.saves = [...crProfSaves];
-        state.proficiencies.skills = { ...crProfSkills };
+                html += `<h4 class="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2 border-b border-indigo-900/50 pb-1">Class Features Gained</h4>`;
+                html += `<div class="bg-slate-900/50 p-3 rounded border border-slate-800 space-y-2">`;
+                for(let i=1; i<=crState.level; i++) {
+                    const levelData = cd.levels[i];
+                    if(levelData && levelData.features) {
+                        html += `<div class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mt-2 first:mt-0">Level ${i}</div>`;
+                        levelData.features.forEach(f => {
+                            html += `<div class="text-xs text-slate-300 flex items-start gap-2"><span class="text-emerald-500 mt-0.5">•</span> <span>${f}</span></div>`;
+                        });
+                    }
+                }
+                html += `</div>`;
+            }
+            else if (crStep === 5) { // PROFICIENCIES
+                const cd = getActiveClassData();
+                let extra = 0;
+                if(crState.species === 'human') extra = 1;
+                if(crState.species === 'twilek') extra = 2;
+                const totalSkills = cd.numSkills + extra;
+                
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Proficiencies</h3>`;
+                html += `<p class="text-slate-400 text-sm mb-4">Choose exactly <strong class="text-emerald-400">${totalSkills}</strong> skills to become proficient in.</p>`;
+                
+                html += `<div class="grid grid-cols-2 gap-2 mb-4">`;
+                cd.skillChoices.forEach(sk => {
+                    const isSelected = crState.selectedSkills.includes(sk);
+                    const active = isSelected ? 'border-emerald-500 bg-emerald-900/20 text-emerald-400' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500 text-slate-300';
+                    const dndName = sk.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                    const swName = skillFlavor && skillFlavor[sk] ? `<span class="block text-[9px] mt-0.5 opacity-70">${skillFlavor[sk]}</span>` : '';
+                    html += `<div class="border rounded p-2 text-sm font-bold cursor-pointer transition-colors text-center datapad-font ${active}" onclick="crWizardToggleSkill('${sk}')">${dndName}${swName}</div>`;
+                });
+                html += `</div>`;
+            }
+            else if (crStep === 6) { // EQUIPMENT
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Starting Equipment</h3>`;
+                
+                const equipList = getActiveEquipment();
+                equipList.forEach((group, index) => {
+                    html += `<div class="mb-4"><h4 class="text-indigo-400 font-bold uppercase text-xs tracking-widest mb-2 border-b border-indigo-900/50 pb-1">${group.group}</h4><div class="grid gap-2">`;
+                    group.options.forEach(opt => {
+                        const isSelected = crState.selectedEquipment[index] === opt.id;
+                        const active = isSelected ? 'border-emerald-500 bg-emerald-900/20' : 'border-slate-700 bg-slate-900/50 hover:border-slate-500';
+                        html += `<div class="border rounded p-2 cursor-pointer transition-colors ${active}" onclick="crState.selectedEquipment[${index}]='${opt.id}'; renderCreatorWizard();">
+                            <span class="font-bold text-sm text-white block">${opt.name}</span>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                });
+            }
+            else if (crStep === 7) { // REVIEW
+                const cd = getActiveClassData();
+                html += `<h3 class="text-white font-bold text-xl mb-4 display-font">Finalize Dossier</h3>`;
+                html += `<input type="text" id="cr-wizard-name" value="${crState.name}" placeholder="Enter Operative Callsign" class="w-full bg-slate-900 border border-slate-600 text-white rounded p-3 text-lg font-bold uppercase tracking-widest datapad-font mb-4 focus:border-indigo-500 outline-none">`;
+                
+                html += `<div class="bg-slate-900/50 border border-slate-700 rounded p-3 mb-4 space-y-2">`;
+                html += `<div class="flex justify-between"><span class="text-slate-500 uppercase text-[10px] font-bold tracking-widest">Species</span><span class="text-white text-sm font-bold">${crSpeciesOptions.find(s=>s.id===crState.species)?.sw || 'Unknown'}</span></div>`;
+                html += `<div class="flex justify-between"><span class="text-slate-500 uppercase text-[10px] font-bold tracking-widest">Class</span><span class="text-white text-sm font-bold">${cd.sw} <span class="text-slate-500 text-[9px]">(${cd.dnd})</span> Lvl ${crState.level}</span></div>`;
+                
+                // Specialty line
+                let specialtyStr = '';
+                if (crState.cls === 'Ranger') {
+                    const fsName = cd.fightingStyles ? (cd.fightingStyles.find(f=>f.id===crState.fightingStyle)?.name || 'None') : 'None';
+                    const subName = cd.subclasses.find(s=>s.id===crState.subclass)?.name || 'None';
+                    specialtyStr = `${fsName} / ${subName}`;
+                } else {
+                    const subName = cd.subclasses.find(s=>s.id===crState.subclass)?.name || 'None';
+                    const mmNames = crState.metamagic.map(id => {
+                        const mm = cd.metamagicOptions.find(m=>m.id===id);
+                        return mm ? mm.name : id;
+                    }).join(', ') || 'None';
+                    specialtyStr = `${subName} — ${mmNames}`;
+                }
+                html += `<div class="flex justify-between"><span class="text-slate-500 uppercase text-[10px] font-bold tracking-widest">Specialty</span><span class="text-white text-sm font-bold text-right">${specialtyStr}</span></div>`;
+                html += `<div class="flex justify-between mt-2 pt-2 border-t border-slate-800"><span class="text-slate-500 uppercase text-[10px] font-bold tracking-widest">Skills</span><span class="text-white text-xs text-right">${crState.selectedSkills.map(s=>s.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())).join(', ')}</span></div>`;
+                html += `</div>`;
+                
+                html += `<div class="bg-indigo-900/20 border border-indigo-900 rounded p-3 flex justify-between items-center shadow-[0_0_15px_rgba(79,70,229,0.1)]">
+                    <span class="text-indigo-400 font-bold uppercase tracking-widest text-xs">Ready for Deployment</span>
+                    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>`;
+            }
 
-        const cData = classData.find(x => x.dnd === state.cls);
-        let res2Name = "Class Pts";
-        if(cData) {
-            if(state.cls==="Sorcerer") res2Name = "Force Pts";
-            if(state.cls==="Monk") res2Name = "Ki Pts";
-            if(state.cls==="Paladin" || state.cls==="Cleric") res2Name = "Divinity";
-            if(state.cls==="Fighter") res2Name = "Action Surge";
+            content.innerHTML = html;
+        } catch (err) {
+            console.error("Wizard Render Error:", err);
+            const content = document.getElementById('cr-wizard-content');
+            if (content) content.innerHTML = `<div class="p-10 text-center text-red-500 uppercase datapad-font">Critical Error in Wizard Logic<br><span class="text-[10px] text-slate-500 mt-2 block">${err.message}</span></div>`;
         }
+    }
+
+    function crWizardToggleSkill(sk) {
+        if(crState.selectedSkills.includes(sk)) {
+            crState.selectedSkills = crState.selectedSkills.filter(s=>s!==sk);
+        } else {
+            crState.selectedSkills.push(sk);
+        }
+        renderCreatorWizard();
+    }
+
+    function crWizardApplyArray() {
+        if (crState.cls === 'Sorcerer') {
+            crState.baseStats = {str:8,dex:13,con:14,int:10,wis:12,cha:15};
+        } else {
+            crState.baseStats = {str:10,dex:15,con:14,int:8,wis:13,cha:12};
+        }
+        renderCreatorWizard();
+    }
+
+    function crWizardToggleMetamagic(id) {
+        if(crState.metamagic.includes(id)) {
+            crState.metamagic = crState.metamagic.filter(m => m !== id);
+        } else {
+            if(crState.metamagic.length >= 2) {
+                crState.metamagic.shift();
+            }
+            crState.metamagic.push(id);
+        }
+        renderCreatorWizard();
+    }
+
+    function crWizardFinalize() {
+        const nameEl = document.getElementById('cr-wizard-name');
+        if(nameEl) crState.name = nameEl.value;
+        
+        const cd = getActiveClassData();
+        state.name = crState.name || "Unknown Operative";
+        state.cls = cd.dnd; 
+        state.level = crState.level;
+        
+        state.stats = { ...crState.baseStats };
+        const sp = crSpeciesOptions.find(s=>s.id===crState.species);
+        if(sp && sp.bonus) {
+            if(sp.bonus.str) state.stats.str += sp.bonus.str;
+            if(sp.bonus.dex) state.stats.dex += sp.bonus.dex;
+            if(sp.bonus.con) state.stats.con += sp.bonus.con;
+            if(sp.bonus.int) state.stats.int += sp.bonus.int;
+            if(sp.bonus.wis) state.stats.wis += sp.bonus.wis;
+            if(sp.bonus.cha) state.stats.cha += sp.bonus.cha;
+            if(sp.bonus.choose1) state.stats.con += 1;
+            if(sp.bonus.choose2) { state.stats.dex += 1; state.stats.con += 1; }
+        }
+        
+        // HP calculation based on class hit die
+        const conMod = Math.floor((state.stats.con - 10) / 2);
+        const hitDieMax = crState.cls === 'Sorcerer' ? 6 : 10;
+        const hitDieAvg = crState.cls === 'Sorcerer' ? 4 : 6;
+        let hp = hitDieMax + conMod;
+        if(state.level > 1) {
+            hp += (hitDieAvg + conMod) * (state.level - 1);
+        }
+        state.hp.max = Math.max(1, hp);
+        state.hp.current = state.hp.max;
+        
+        state.speed = sp ? sp.speed : 30;
+        if (crState.cls === 'Ranger' && state.level >= 6) state.speed += 5;
+        
+        // AC: Ranger gets armor, Sorcerer is unarmored
+        const dexMod = Math.floor((state.stats.dex - 10) / 2);
+        if (crState.cls === 'Sorcerer') {
+            state.ac = 10 + dexMod; // unarmored
+        } else {
+            state.ac = 11 + dexMod; // leather default
+        }
+        
+        state.proficiencies.saves = [...cd.saves];
+        state.proficiencies.skills = {};
+        crState.selectedSkills.forEach(s => state.proficiencies.skills[s] = 1);
+        
+        // Resources
+        state.resources[0].name = "Hit Dice";
         state.resources[0].max = state.level;
         state.resources[0].current = state.level;
-        state.resources[1].name = res2Name;
-        state.resources[1].max = state.level; 
-        state.resources[1].current = state.level;
-
-        state.editMode = false;
         
+        if (crState.cls === 'Sorcerer') {
+            state.resources[1].name = "Sorcery Pts";
+            state.resources[1].max = Math.max(0, state.level); // sorcery points = level (starting at level 2, but max = level)
+            state.resources[1].current = state.resources[1].max;
+        } else {
+            state.resources[1].name = "Spell Slots";
+            state.resources[1].max = state.level >= 2 ? state.level : 0;
+            state.resources[1].current = state.resources[1].max;
+        }
+        
+        state.editMode = false;
         saveState();
         closeCreator();
         
-        updateIdentity(); 
+        document.getElementById('setting-callsign').value = state.name;
+        document.getElementById('setting-class').value = state.cls;
+        document.getElementById('setting-level').value = state.level;
+        updateIdentity();
         switchMainTab('character');
         
         const charEl = document.getElementById('main-character');
@@ -2351,6 +2603,20 @@
         renderCharacterSheet(); 
     }
     
+    function editTitleInline() {
+        let milestone = "Operative";
+        if (typeof classMilestones !== 'undefined' && classMilestones[state.cls]) milestone = classMilestones[state.cls][(state.level || 1) - 1] || "Operative";
+        const current = (state.customTitle && state.customTitle.trim() !== '') ? state.customTitle : '';
+        const result = prompt(`Enter custom title/rank (leave blank for auto: "${milestone}"):`, current);
+        if (result !== null) {
+            state.customTitle = result;
+            const titleInput = document.getElementById('setting-custom-title');
+            if (titleInput) titleInput.value = result;
+            saveState();
+            updateIdentity();
+        }
+    }
+
     function updateCombatStat(stat, value) {
         if(stat === 'ac' || stat === 'speed') {
             state[stat] = parseInt(value) || 0;
@@ -2716,6 +2982,12 @@
         if (drawer.classList.contains('active')) {
             drawer.classList.remove('active');
         } else {
+            // Show/hide DM button based on verified status
+            const dmBtn = document.getElementById('nav-dm');
+            if (dmBtn) {
+                if (state.isDM) { dmBtn.classList.remove('hidden'); } 
+                else { dmBtn.classList.add('hidden'); }
+            }
             drawer.classList.add('active');
         }
     }
@@ -2760,18 +3032,26 @@
 
     function updateIdentity() {
         const nameInput = document.getElementById('setting-callsign').value;
+        const titleInput = document.getElementById('setting-custom-title');
         const classInput = document.getElementById('setting-class').value;
         const levelInput = document.getElementById('setting-level').value;
         
         document.getElementById('level-display').innerText = levelInput;
 
-        state.name = nameInput; state.cls = classInput; state.level = levelInput; saveState();
+        state.name = nameInput; state.cls = classInput; state.level = levelInput;
+        if (titleInput) state.customTitle = titleInput.value;
+        saveState();
 
         const displayName = nameInput.trim() === "" ? "Default User" : nameInput;
         let milestone = "Operative";
         if (typeof classMilestones !== 'undefined' && classMilestones[classInput]) milestone = classMilestones[classInput][levelInput - 1] || "Operative";
         
-        document.getElementById('header-callsign').innerText = `${displayName} // Lvl ${levelInput} ${milestone}`;
+        const displayTitle = (state.customTitle && state.customTitle.trim() !== '') ? state.customTitle : milestone;
+        document.getElementById('header-callsign').innerText = `${displayName} // Lvl ${levelInput} ${displayTitle}`;
+        
+        // Update character sheet title badge
+        const titleBadge = document.getElementById('char-title-display');
+        if (titleBadge) titleBadge.innerText = displayTitle;
         
         if(state.spellMine) { renderHolocronFilters(); renderHolocron(); }
         if(typeof renderCharacterSheet === 'function') renderCharacterSheet();
@@ -2875,6 +3155,9 @@
 
         const callsign = document.getElementById('setting-callsign');
         if (callsign) callsign.value = state.name || "";
+
+        const titleInput = document.getElementById('setting-custom-title');
+        if (titleInput) titleInput.value = state.customTitle || "";
         
         const clsSet = document.getElementById('setting-class');
         if (clsSet) clsSet.value = state.cls || "None";
@@ -2958,12 +3241,39 @@
             typeStr = "Heavy Cruiser";
             svgContent = `
             <g class="ship-path transition-all duration-300">
-                <path d="M 50 5 L 90 85 L 50 75 L 10 85 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
-                <path d="M 40 70 L 60 70 L 65 80 L 35 80 Z" fill="#334155" stroke="#64748b" stroke-width="1"/>
-                <circle cx="35" cy="82" r="4" fill="#38bdf8" class="animate-pulse"/>
-                <circle cx="50" cy="78" r="6" fill="#38bdf8" class="animate-pulse"/>
-                <circle cx="65" cy="82" r="4" fill="#38bdf8" class="animate-pulse"/>
-                <line x1="50" y1="5" x2="50" y2="75" stroke="#334155" stroke-width="2"/>
+                <!-- Main hull body (wide boxy center) -->
+                <rect x="25" y="20" width="50" height="45" rx="3" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <!-- Side wing extensions (port & starboard) -->
+                <path d="M 25 25 L 8 30 L 5 50 L 8 55 L 25 50 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 75 25 L 92 30 L 95 50 L 92 55 L 75 50 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <!-- Wing tip accents -->
+                <rect x="5" y="35" width="6" height="12" rx="2" fill="#334155" stroke="#64748b" stroke-width="0.5"/>
+                <rect x="89" y="35" width="6" height="12" rx="2" fill="#334155" stroke="#64748b" stroke-width="0.5"/>
+                <!-- Cockpit dome (top center) -->
+                <ellipse cx="50" cy="18" rx="12" ry="10" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
+                <ellipse cx="50" cy="16" rx="7" ry="5" fill="#0f172a" stroke="#38bdf8" stroke-width="0.5" opacity="0.8"/>
+                <circle cx="50" cy="16" r="2" fill="#38bdf8" opacity="0.6"/>
+                <!-- Hull panel lines -->
+                <line x1="50" y1="20" x2="50" y2="65" stroke="#334155" stroke-width="1"/>
+                <line x1="25" y1="40" x2="75" y2="40" stroke="#334155" stroke-width="0.5"/>
+                <!-- Lower cargo / engineering section -->
+                <path d="M 30 65 L 70 65 L 68 75 L 32 75 Z" fill="#3f4f63" stroke="#64748b" stroke-width="1"/>
+                <!-- Engine pylons connecting to nacelles -->
+                <rect x="28" y="75" width="10" height="12" fill="#475569" stroke="#64748b" stroke-width="0.8"/>
+                <rect x="62" y="75" width="10" height="12" fill="#475569" stroke="#64748b" stroke-width="0.8"/>
+                <!-- Engine nacelles (two large cylinders at bottom) -->
+                <rect x="25" y="85" width="16" height="10" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
+                <rect x="59" y="85" width="16" height="10" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
+                <!-- Engine glow -->
+                <ellipse cx="33" cy="96" rx="6" ry="3" fill="#38bdf8" opacity="0.4"/>
+                <ellipse cx="67" cy="96" rx="6" ry="3" fill="#38bdf8" opacity="0.4"/>
+                <rect x="29" y="93" width="8" height="3" rx="1" fill="#38bdf8" class="animate-pulse"/>
+                <rect x="63" y="93" width="8" height="3" rx="1" fill="#38bdf8" class="animate-pulse"/>
+                <!-- Hull detail lights -->
+                <circle cx="15" cy="42" r="1.5" fill="#f59e0b" opacity="0.8"/>
+                <circle cx="85" cy="42" r="1.5" fill="#f59e0b" opacity="0.8"/>
+                <circle cx="40" cy="70" r="1" fill="#38bdf8" opacity="0.5"/>
+                <circle cx="60" cy="70" r="1" fill="#38bdf8" opacity="0.5"/>
             </g>`;
         }
         document.getElementById('ship-class-display').innerText = typeStr;
@@ -3139,7 +3449,8 @@
             label.setAttribute("text-anchor", "middle");
             label.setAttribute("fill", isCurrent ? "#c7d2fe" : "#64748b");
             label.setAttribute("font-size", "2.2"); label.setAttribute("font-family", "'Share Tech Mono', monospace");
-            label.textContent = p.name.length > 12 ? p.name.substring(0,10) + ".." : p.name;
+            const shortName = p.name.includes(' (') ? p.name.split(' (')[0] : p.name;
+            label.textContent = shortName.length > 12 ? shortName.substring(0,10) + ".." : shortName;
             g.appendChild(label);
             
             planetsG.appendChild(g);
@@ -3366,6 +3677,111 @@
         }).join('');
     }
 
+    // --- SHIP ALERT SOUND SYSTEM ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const SHIP_ALERTS = [
+        {id:'red_alert', name:'Red Alert', icon:'🚨', color:'text-red-500 border-red-900 bg-red-950/50', colorHex:'#ef4444', desc:'Combat stations! All hands!', freq:[440,880], type:'square', pattern:[0.15,0.1,0.15,0.1,0.3]},
+        {id:'proximity', name:'Proximity Warning', icon:'📡', color:'text-amber-400 border-amber-900 bg-amber-950/50', colorHex:'#f59e0b', desc:'Unknown contacts detected', freq:[600,400], type:'sine', pattern:[0.3,0.2,0.3]},
+        {id:'hull_breach', name:'Hull Breach', icon:'💥', color:'text-orange-500 border-orange-900 bg-orange-950/50', colorHex:'#f97316', desc:'Structural integrity failing', freq:[200,150,100], type:'sawtooth', pattern:[0.5,0.1,0.5]},
+        {id:'power_fail', name:'Power Failure', icon:'⚡', color:'text-purple-400 border-purple-900 bg-purple-950/50', colorHex:'#a855f7', desc:'Main reactor offline', freq:[300,200], type:'triangle', pattern:[0.8,0.3,0.4]},
+        {id:'hyperdrive', name:'Hyperdrive Alert', icon:'🌀', color:'text-blue-400 border-blue-900 bg-blue-950/50', colorHex:'#60a5fa', desc:'Hyperdrive malfunction', freq:[500,700,900], type:'sine', pattern:[0.2,0.1,0.2,0.1,0.2]},
+        {id:'all_clear', name:'All Clear', icon:'✅', color:'text-emerald-400 border-emerald-900 bg-emerald-950/50', colorHex:'#34d399', desc:'Threat neutralized', freq:[523,659,784], type:'sine', pattern:[0.3,0.05,0.3,0.05,0.6]}
+    ];
+
+    function playAlertSound(alert) {
+        try {
+            audioCtx.resume();
+            let t = audioCtx.currentTime;
+            alert.freq.forEach((freq, fi) => {
+                alert.pattern.forEach((dur, i) => {
+                    if (i % 2 === 0) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = alert.type;
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.25, t);
+                        gain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(t);
+                        osc.stop(t + dur);
+                    }
+                    t += dur;
+                });
+            });
+        } catch(e) { console.warn('Audio failed:', e); }
+    }
+
+    function playTypeSound() {
+        try {
+            audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800 + Math.random() * 200, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        } catch(e) {}
+    }
+
+    function triggerShipAlert(alertId) {
+        const alert = SHIP_ALERTS.find(a => a.id === alertId);
+        if (!alert) return;
+        playAlertSound(alert);
+        const d20 = Math.floor(Math.random() * 20) + 1;
+        const showRoll = document.getElementById('dm-show-roll');
+        const rollStr = (showRoll && showRoll.checked) ? ` [🎲 d20: ${d20}]` : '';
+        const msg = `⚠ SHIP ALERT: ${alert.name.toUpperCase()} — ${alert.desc.toUpperCase()}${rollStr}`;
+        try { db.ref('shared/broadcast').set({ message: msg, timestamp: Date.now(), alertColor: alert.colorHex }); } catch(e){}
+    }
+
+    // --- DM RESET FUNCTIONS ---
+    function dmResetPlayer(slot) {
+        if (!confirm(`PURGE all data for ${slot}? This will wipe their character, stats, and equipment. This CANNOT be undone.`)) return;
+        const blank = { name: "New Operative", cls: "None", level: 1, hp: {current: 10, max: 10}, ac: 10, speed: 30, credits: 0, stats: {str:10,dex:10,con:10,int:10,wis:10,cha:10} };
+        try { db.ref('characters/' + slot).set(blank); } catch(e){}
+        partyData[slot] = blank;
+        if (state.activeSlot === slot) {
+            state.name = blank.name; state.cls = blank.cls; state.level = blank.level;
+            state.hp = {...blank.hp}; state.ac = blank.ac; state.speed = blank.speed;
+            state.credits = blank.credits; state.stats = {...blank.stats};
+            state.customTitle = ''; state.favorites = {armory:[], spells:[]};
+            state.proficiencies = {saves:[], skills:{}};
+            saveState(); loadSettingsUI(); renderCharacterSheet();
+        }
+        renderDM(); renderParty();
+    }
+
+    function dmResetShip() {
+        if (!confirm('PURGE all ship data? Hull, shields, stations, and location will be reset. This CANNOT be undone.')) return;
+        const freshShip = { name:"The Vanguard", type:"freighter", hullMax:100, hullCur:100, shieldsMax:25, shields:{front:25,back:25,port:25,starboard:25}, stations:{helm:null,gunnery:null,engineering:null}, location:"Coruscant" };
+        state.ship = freshShip;
+        saveState();
+        try { db.ref('shared/ship').set(freshShip); } catch(e){}
+        renderShip(); renderDM();
+    }
+
+    function dmResetAll() {
+        if (!confirm('⚠ TOTAL SYSTEM PURGE ⚠\n\nThis will wipe ALL player data, ship data, bounties, and custom content across the ENTIRE application.\n\nAre you ABSOLUTELY sure?')) return;
+        if (!confirm('FINAL CONFIRMATION: Type OK below to proceed with total purge.')) return;
+        ['slot1','slot2','slot3'].forEach(slot => {
+            const blank = { name: "New Operative", cls: "None", level: 1, hp: {current: 10, max: 10}, ac: 10, speed: 30, credits: 0, stats: {str:10,dex:10,con:10,int:10,wis:10,cha:10} };
+            try { db.ref('characters/' + slot).set(blank); } catch(e){}
+            partyData[slot] = blank;
+        });
+        dmResetShip();
+        state.bountiesStatus = {};
+        state.customBounties = [];
+        try { db.ref('shared/bounties').set({}); db.ref('shared/customBounties').set([]); } catch(e){}
+        saveState(); renderDM(); renderParty(); renderBounties();
+        alert('System purge complete. All operatives reset.');
+    }
+
     // --- DM MODE LOGIC ---
     function promptDMMode() {
         if (state.isDM) {
@@ -3378,6 +3794,8 @@
         if (pass === "ORGY") {
             state.isDM = true;
             saveState();
+            const dmBtn = document.getElementById('nav-dm');
+            if (dmBtn) dmBtn.classList.remove('hidden');
             closeSettingsModal();
             switchMainTab('dm');
             renderDM();
@@ -3407,6 +3825,16 @@
         if (!c) return;
 
         let html = `
+            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg> Ship Alert Board <label class="ml-auto flex items-center gap-1 cursor-pointer"><input type="checkbox" id="dm-show-roll" class="accent-red-500 w-3 h-3" checked><span class="text-[9px] text-slate-400 font-normal normal-case tracking-normal">Show d20</span></label></h4>
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                ${SHIP_ALERTS.map(a => `
+                    <button onclick="triggerShipAlert('${a.id}')" class="border rounded p-2 text-center transition-all hover:scale-105 active:scale-95 ${a.color}">
+                        <span class="text-xl block mb-1">${a.icon}</span>
+                        <span class="text-[9px] font-bold uppercase tracking-widest datapad-font block">${a.name}</span>
+                    </button>
+                `).join('')}
+            </div>
+
             <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1">Vessel Configuration</h4>
             <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4">
                 <div class="flex items-center justify-between mb-2">
@@ -3444,9 +3872,16 @@
             </div>
             <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4 mt-6">
                 <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg> Holonet Broadcast</h4>
-                <div class="flex gap-2">
+                <div class="flex gap-2 mb-4">
                     <input type="text" id="dm-broadcast-input" placeholder="ENTER CRITICAL ALERT..." class="flex-1 bg-slate-950 border border-red-900/50 rounded px-3 py-2 text-red-500 font-bold datapad-font focus:outline-none focus:border-red-500 uppercase">
                     <button onclick="sendBroadcast()" class="bg-red-900 hover:bg-red-700 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors">Send</button>
+                </div>
+                
+                <h4 class="text-hud font-bold uppercase tracking-widest text-[10px] mb-2 flex items-center gap-2">Ship's Log Transmissions</h4>
+                <textarea id="dm-shiplog-input" placeholder="ENTER LOG ENTRY DATA..." class="w-full h-32 bg-slate-950 border border-hud/30 rounded p-3 text-hud font-mono text-xs focus:outline-none focus:border-hud mb-2 custom-scrollbar uppercase"></textarea>
+                <div class="flex gap-2">
+                    <button onclick="sendShipLog('all')" class="flex-1 bg-hud/20 hover:bg-hud/40 text-hud border border-hud/40 px-3 py-2 rounded text-[10px] uppercase font-bold tracking-widest datapad-font transition-all">Show All</button>
+                    <button onclick="sendShipLog('scroll')" class="flex-1 bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-400 border border-indigo-700/50 px-3 py-2 rounded text-[10px] uppercase font-bold tracking-widest datapad-font transition-all">Scroll Mode</button>
                 </div>
             </div>
 
@@ -3484,8 +3919,21 @@
                         <input type="number" value="${data.credits || 0}" onchange="updateDMCharField('${slot}', 'credits', null, this.value)" class="w-16 bg-transparent text-amber-400 font-mono text-right text-xs outline-none">
                     </div>
                 </div>
+                <button onclick="dmResetPlayer('${slot}')" class="mt-2 w-full border border-red-900/50 text-red-500/70 hover:text-red-400 hover:bg-red-950/30 text-[9px] py-1 rounded uppercase font-bold tracking-widest datapad-font transition-colors">⚠ Purge Operative</button>
             </div>`;
         });
+
+        html += `
+            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1 mt-6 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                Danger Zone
+            </h4>
+            <div class="bg-red-950/20 border border-red-900/50 rounded p-3 space-y-2">
+                <button onclick="dmResetShip()" class="w-full border border-red-900 text-red-500 hover:bg-red-900/30 text-xs py-2 rounded uppercase font-bold tracking-widest datapad-font transition-colors">⚠ Reset Ship Data</button>
+                <button onclick="dmResetAll()" class="w-full bg-red-900/40 border border-red-700 text-red-300 hover:bg-red-800/60 text-xs py-2 rounded uppercase font-bold tracking-widest datapad-font transition-colors">☠ TOTAL SYSTEM PURGE</button>
+                <p class="text-[9px] text-red-500/50 text-center uppercase datapad-font">Warning: Purge operations are irreversible</p>
+            </div>
+        `;
 
         c.innerHTML = html;
     }
@@ -3517,7 +3965,7 @@
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         <h3 class="text-lg font-bold leading-tight display-font glow-text-hud text-white">${escapeHtml(data.name)}</h3>
-                        <span class="datapad-font text-[10px] uppercase tracking-widest mt-1 block" style="color: var(--accent);">${escapeHtml(data.cls)} // Lvl ${data.level || 1}</span>
+                        <span class="datapad-font text-[10px] uppercase tracking-widest mt-1 block" style="color: var(--accent);">${data.customTitle ? escapeHtml(data.customTitle) + ' — ' : ''}${escapeHtml(data.cls)} // Lvl ${data.level || 1}</span>
                     </div>
                 </div>
                 
@@ -3577,6 +4025,87 @@
         if(!bootSkipped) { setTimeout(() => { sessionStorage.setItem('sw5e_booted', 'true'); skipBoot(); }, 800); }
     }
 
+    function sendShipLog(mode) {
+        const input = document.getElementById('dm-shiplog-input');
+        if (!input) return;
+        const text = input.value;
+        if (!text) return;
+        try { db.ref('shared/shiplog').set({ text: text, mode: mode, timestamp: Date.now() }); } catch(e){}
+        input.value = '';
+    }
+
+    function showShipLog(text, mode) {
+        if (logScrollInterval) clearInterval(logScrollInterval);
+        
+        const overlay = document.getElementById('ship-log-overlay');
+        const textEl = document.getElementById('log-text');
+        const dismissBtn = document.getElementById('log-dismiss-btn');
+        const tsEl = document.getElementById('log-timestamp');
+        
+        if (!overlay || !textEl || !dismissBtn) return;
+
+        // Reset state
+        textEl.innerHTML = '';
+        textEl.classList.remove('opacity-0', 'translate-y-4');
+        textEl.classList.add('opacity-100', 'translate-y-0');
+        dismissBtn.classList.add('opacity-0', 'pointer-events-none');
+        tsEl.innerText = 'TS: ' + (Math.random() * 9000 + 1000).toFixed(4);
+        
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        setTimeout(() => overlay.style.opacity = '1', 10);
+        
+        if (mode === 'all') {
+            textEl.innerHTML = text.split('\n').map(line => `<div class="log-line">${line}</div>`).join('');
+            dismissBtn.classList.remove('opacity-0', 'pointer-events-none');
+        } else {
+            const lines = text.split('\n');
+            let currentLine = 0;
+            let currentChar = 0;
+            
+            logScrollInterval = setInterval(() => {
+                if (currentLine < lines.length) {
+                    // Check if we need to start a new line
+                    let lineDiv = textEl.querySelector(`.log-line:nth-child(${currentLine + 1})`);
+                    if (!lineDiv) {
+                        lineDiv = document.createElement('div');
+                        lineDiv.className = 'log-line';
+                        textEl.appendChild(lineDiv);
+                        currentChar = 0;
+                    }
+
+                    const lineText = lines[currentLine];
+                    if (currentChar < lineText.length) {
+                        lineDiv.innerText += lineText[currentChar];
+                        playTypeSound();
+                        currentChar++;
+                        
+                        // Auto scroll to bottom
+                        const container = document.getElementById('log-content-container');
+                        if (container) container.scrollTop = container.scrollHeight;
+                    } else {
+                        // Finished this line, move to next
+                        currentLine++;
+                    }
+                } else {
+                    clearInterval(logScrollInterval);
+                    dismissBtn.classList.remove('opacity-0', 'pointer-events-none');
+                }
+            }, 30); // 30ms per character
+        }
+    }
+
+    function dismissShipLog() {
+        if (logScrollInterval) clearInterval(logScrollInterval);
+        const overlay = document.getElementById('ship-log-overlay');
+        if (!overlay) return;
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        }, 500);
+    }
+
     function sendBroadcast() {
         const input = document.getElementById('dm-broadcast-input');
         if (!input || !input.value.trim()) return;
@@ -3587,9 +4116,20 @@
         } catch(e) {}
     }
 
-    function showHolonetAlert(msg) {
+    function showHolonetAlert(msg, alertColor) {
         document.getElementById('holonet-message').innerText = msg;
         const alertDiv = document.getElementById('holonet-alert');
+        const icon = alertDiv.querySelector('svg');
+        const title = alertDiv.querySelector('h1');
+        const btn = alertDiv.querySelector('button');
+        
+        // Apply color theme
+        const c = alertColor || '#dc2626'; // default red
+        alertDiv.style.background = `color-mix(in srgb, ${c} 15%, rgba(2,6,23,0.92))`;
+        if (icon) icon.style.color = c;
+        if (title) { title.style.color = c; title.style.textShadow = `0 0 30px ${c}80`; }
+        if (btn) { btn.style.borderColor = c; btn.style.color = c; }
+        
         alertDiv.classList.remove('hidden');
         alertDiv.classList.add('flex');
         setTimeout(() => { alertDiv.style.opacity = '1'; }, 10);
@@ -3776,6 +4316,11 @@
         <button onclick="switchMainTab('database')" id="nav-database" class="drawer-btn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3 3h10c1.5 0 3-1 3-3V7c0-2-1.5-3-3-3H7C5.5 4 4 5 4 7zm0 0h16M9 4v16"></path></svg>
             <span>Database</span>
+        </button>
+        <button onclick="switchMainTab('dm'); renderDM();" id="nav-dm" class="drawer-btn hidden col-span-2 relative overflow-hidden group" style="border-color: rgba(239,68,68,0.4); background: rgba(127,29,29,0.15);">
+            <div class="absolute inset-0 bg-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-red-400"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="text-red-400">DM Console</span>
         </button>
     </div>
 </div>
