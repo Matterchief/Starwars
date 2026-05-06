@@ -111,33 +111,96 @@
             97%, 100% { opacity: 0; }
         }
 
+        /* --- SHIP ANIMATIONS --- */
+        @keyframes ship-laser {
+            0% { opacity: 1; transform: translateY(0) scaleY(1); }
+            100% { opacity: 0; transform: translateY(-100px) scaleY(3); }
+        }
+        @keyframes ship-evade {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-20px) rotate(-10deg); }
+            75% { transform: translateX(20px) rotate(10deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+        @keyframes ship-hyperspace {
+            0% { transform: translateY(0) scaleY(1); opacity: 1; }
+            50% { transform: translateY(-200px) scaleY(5); opacity: 0; }
+            100% { transform: translateY(0) scaleY(1); opacity: 1; }
+        }
+        @keyframes ship-torpedo {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-150px) scale(0.5); }
+        }
+        @keyframes ship-sweep {
+            0% { r: 0; opacity: 0.8; stroke-width: 2; }
+            100% { r: 100; opacity: 0; stroke-width: 0; }
+        }
+        @keyframes ship-shield-pulse {
+            0% { opacity: 0.5; stroke-width: 4; }
+            50% { opacity: 1; stroke-width: 8; stroke: #60a5fa; }
+            100% { opacity: 0.5; stroke-width: 4; }
+        }
+        @keyframes ship-spark {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+        @keyframes ship-slice {
+            0% { opacity: 0; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+
+        .animate-ship-laser { animation: ship-laser 0.3s ease-out forwards; }
+        .animate-ship-evade { animation: ship-evade 0.6s ease-in-out forwards; }
+        .animate-ship-hyperspace { animation: ship-hyperspace 1s cubic-bezier(0.5, 0, 1, 1) forwards; }
+        .animate-ship-torpedo { animation: ship-torpedo 1s ease-in forwards; }
+        .animate-ship-sweep { animation: ship-sweep 1.5s linear forwards; }
+        .animate-ship-shield-pulse { animation: ship-shield-pulse 1s ease-in-out forwards; }
+        .animate-ship-spark { animation: ship-spark 0.5s ease-out forwards; }
+        .animate-ship-slice { animation: ship-slice 1s ease-out forwards; }
+        
+        .ship-path { transition: all 0.3s ease; }
+
         /* --- LAYOUT --- */
         .app-container { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; z-index: 10; overflow: hidden; }
         .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 2rem; scrollbar-width: none; }
         .scroll-area::-webkit-scrollbar { display: none; }
 
-        /* MAIN NAV (Now only 2 tabs, config moved to modal) */
-        .top-nav-bar {
-            display: flex; justify-content: space-between; width: 100%;
-            background: rgba(2, 6, 23, 0.4);
-            border-top: 1px solid rgba(255,255,255,0.05);
+        /* --- 9-DOT FAB APP DRAWER --- */
+        #fab-menu {
+            position: fixed; bottom: 20px; right: 20px; z-index: 999;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(15,23,42,0.9); border: 2px solid var(--hud);
+            box-shadow: 0 0 15px var(--hud-glow), inset 0 0 10px rgba(0,0,0,0.8);
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 14px;
+            cursor: pointer; transition: all 0.2s; backdrop-filter: blur(4px);
         }
-        .nav-btn {
-            flex: 1; padding: 12px 4px; display: flex; align-items: center; justify-content: center; gap: 8px;
-            color: #64748b; transition: all 0.2s ease; position: relative;
-            font-family: 'Share Tech Mono', monospace; text-transform: uppercase; font-size: 0.8rem; font-weight: bold; letter-spacing: 0.05em;
+        #fab-menu:active { transform: scale(0.9); }
+        #fab-menu .dot { background: var(--hud); border-radius: 50%; width: 100%; height: 100%; pointer-events: none; transition: background 0.2s; }
+        #fab-menu:hover .dot { background: #fff; box-shadow: 0 0 5px #fff; }
+        
+        #app-drawer {
+            position: fixed; inset: 0; background: rgba(2,6,23,0.95); backdrop-filter: blur(12px);
+            z-index: 998; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            display: flex; justify-content: center; align-items: center;
         }
-        .nav-btn::after {
-            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: transparent; transition: all 0.2s;
+        #app-drawer.active { opacity: 1; pointer-events: auto; }
+        
+        .drawer-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; max-width: 400px; padding: 2rem;
         }
-        .nav-btn.active {
-            color: var(--hud); text-shadow: 0 0 8px var(--hud-glow);
-            background: linear-gradient(0deg, color-mix(in srgb, var(--hud) 15%, transparent) 0%, transparent 100%);
+        .drawer-btn {
+            background: rgba(15,23,42,0.8); border: 1px solid var(--hud-deep); border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+            padding: 1.5rem 1rem; color: #94a3b8; transition: all 0.2s ease;
+            font-family: 'Share Tech Mono', monospace; text-transform: uppercase; font-size: 0.9rem; font-weight: bold; letter-spacing: 0.05em;
         }
-        .nav-btn.active::after {
-            background: var(--hud); box-shadow: 0 0 10px var(--hud-glow);
+        .drawer-btn svg { width: 32px; height: 32px; }
+        .drawer-btn:active { transform: scale(0.95); }
+        .drawer-btn.active {
+            color: var(--hud); border-color: var(--hud); box-shadow: 0 0 15px var(--hud-glow), inset 0 0 20px rgba(0,0,0,0.8);
+            background: color-mix(in srgb, var(--hud) 10%, transparent);
         }
-        .nav-btn svg { width: 18px; height: 18px; }
 
         /* DATABASE SUB-NAV */
         .db-nav { display: flex; gap: 6px; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
@@ -371,6 +434,35 @@
     </div>
 </div>
 
+<!-- Launch Profile Selector -->
+<div id="profile-selector" class="fixed inset-0 bg-[#020617] z-[10500] hidden flex-col items-center justify-center p-6 transition-opacity duration-500">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900/40 via-transparent to-transparent pointer-events-none"></div>
+    <div class="max-w-md w-full relative z-10">
+        <h2 class="display-font text-3xl font-black text-hud tracking-widest uppercase mb-2 text-center glow-text-hud">Select Profile</h2>
+        <p class="text-hud/70 text-xs uppercase datapad-font tracking-widest mb-8 text-center">Identification Required</p>
+        
+        <div class="space-y-4">
+            <button onclick="selectProfile('slot1')" class="w-full bg-slate-900/80 border border-slate-700 hover:border-hud text-white p-4 rounded font-bold uppercase tracking-widest datapad-font transition-all text-left flex justify-between items-center group">
+                <span id="profile-btn-slot1">Operative 1</span>
+                <svg class="w-5 h-5 text-slate-600 group-hover:text-hud transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button onclick="selectProfile('slot2')" class="w-full bg-slate-900/80 border border-slate-700 hover:border-hud text-white p-4 rounded font-bold uppercase tracking-widest datapad-font transition-all text-left flex justify-between items-center group">
+                <span id="profile-btn-slot2">Operative 2</span>
+                <svg class="w-5 h-5 text-slate-600 group-hover:text-hud transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <button onclick="selectProfile('slot3')" class="w-full bg-slate-900/80 border border-slate-700 hover:border-hud text-white p-4 rounded font-bold uppercase tracking-widest datapad-font transition-all text-left flex justify-between items-center group">
+                <span id="profile-btn-slot3">Operative 3</span>
+                <svg class="w-5 h-5 text-slate-600 group-hover:text-hud transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+            <div class="border-t border-slate-800 my-4"></div>
+            <button onclick="selectProfile('dm')" class="w-full bg-red-950/30 border border-red-900/50 hover:border-red-500 text-red-500 p-4 rounded font-bold uppercase tracking-widest datapad-font transition-all text-left flex justify-between items-center group">
+                <span>Living Force (DM)</span>
+                <svg class="w-5 h-5 text-red-900 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Dice Roller HUD -->
 <div id="dice-hud" onclick="closeDiceHUD()">
     <div class="text-hud display-font uppercase tracking-widest mb-2 text-center px-4" id="dice-label">Rolling...</div>
@@ -413,29 +505,7 @@
             </div>
         </header>
 
-        <!-- Main Navigation Bar -->
-        <nav class="top-nav-bar">
-            <button onclick="switchMainTab('character')" id="nav-character" class="nav-btn active">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <span>Character</span>
-            </button>
-            <button onclick="switchMainTab('party')" id="nav-party" class="nav-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                <span>Party</span>
-            </button>
-            <button onclick="switchMainTab('ship')" id="nav-ship" class="nav-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                <span>Ship</span>
-            </button>
-            <button onclick="switchMainTab('bounties')" id="nav-bounties" class="nav-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                <span>Bounties</span>
-            </button>
-            <button onclick="switchMainTab('database')" id="nav-database" class="nav-btn">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3 3h10c1.5 0 3-1 3-3V7c0-2-1.5-3-3-3H7C5.5 4 4 5 4 7zm0 0h16M9 4v16"></path></svg>
-                <span>Database</span>
-            </button>
-        </nav>
+        <!-- App Drawer moved to FAB -->
     </div>
 
     <!-- Scrollable Content Area -->
@@ -676,58 +746,170 @@
         </div>
 
         <!-- MAIN TAB: SHIP -->
-        <div id="main-ship" class="main-tab hidden">
-            <div class="mb-4 flex justify-between items-end border-b pb-2" style="border-color: var(--hud-deep);">
-                <div>
-                    <h2 class="display-font text-2xl font-black text-white tracking-wide uppercase">Vessel Interface</h2>
-                    <p id="ship-class-display" class="text-slate-400 text-xs mt-1 uppercase datapad-font tracking-widest">YT-1300 Light Freighter</p>
+        <div id="main-ship" class="main-tab hidden flex flex-col h-full">
+            <!-- Ship Sub-Navigation -->
+            <nav class="db-nav shrink-0">
+                <button onclick="switchShipTab('vessel')" id="ship-nav-vessel" class="db-nav-btn active">Vessel Status</button>
+                <button onclick="switchShipTab('navicomputer')" id="ship-nav-navicomputer" class="db-nav-btn">Navi-Computer</button>
+            </nav>
+
+            <!-- SUB-TAB: VESSEL -->
+            <div id="ship-tab-vessel" class="ship-tab flex flex-col flex-1 min-h-0">
+                <div class="mb-2 flex justify-between items-end border-b pb-2" style="border-color: var(--hud-deep);">
+                    <div>
+                        <h2 class="display-font text-2xl font-black text-white tracking-wide uppercase" id="ship-name-display">The Vanguard</h2>
+                        <p id="ship-class-display" class="text-slate-400 text-xs mt-1 uppercase datapad-font tracking-widest">Modified Light Freighter</p>
+                    </div>
+                    <button onclick="shipAction('hyperspace', 'None')" class="bg-indigo-950/40 border border-indigo-500 hover:bg-indigo-900/60 text-indigo-400 px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Hyper-Jump
+                    </button>
                 </div>
-            </div>
             
-            <div class="grid grid-cols-2 gap-2 mb-4">
-                <div class="stat-block no-click flex flex-col justify-center">
-                    <span class="stat-title text-emerald-400">Hull Integrity</span>
-                    <div class="flex items-center gap-2 mt-1 w-full justify-center">
-                        <button onclick="updateShipStat('hull', -1)" class="resource-btn border-emerald-900 text-emerald-400">-</button>
-                        <div class="flex items-baseline gap-0.5">
-                            <span class="stat-value text-emerald-400 text-base" id="ship-hull-cur">100</span><span class="text-[10px] text-slate-500 font-mono">/<span id="ship-hull-max">100</span></span>
-                        </div>
-                        <button onclick="updateShipStat('hull', 1)" class="resource-btn border-emerald-900 text-emerald-400">+</button>
+            <!-- Visual Dashboard -->
+            <div class="relative w-full h-64 bg-slate-950 border rounded-lg border-slate-800 overflow-hidden mb-4 flex items-center justify-center shrink-0">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900/50 via-slate-950 to-slate-950 pointer-events-none"></div>
+                <!-- Grid background -->
+                <div class="absolute inset-0" style="background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 20px 20px;"></div>
+                
+                <div class="relative w-48 h-48" id="ship-visual-container">
+                    <!-- Shield Arcs -->
+                    <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                        <path id="shield-front" d="M 20 20 Q 50 -10 80 20" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
+                        <path id="shield-back" d="M 20 80 Q 50 110 80 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
+                        <path id="shield-port" d="M 20 20 Q -10 50 20 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
+                        <path id="shield-starboard" d="M 80 20 Q 110 50 80 80" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" class="transition-colors duration-300"/>
+                    </svg>
+                    <!-- Ship Body (Injected dynamically) -->
+                    <div id="ship-svg-wrapper" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <!-- Example: Freighter -->
+                        <svg viewBox="0 0 100 100" class="w-32 h-32 text-slate-300 ship-path">
+                            <path d="M50 10 L60 30 L60 80 L40 80 L40 30 Z M30 40 L70 40 M20 60 L80 60" fill="currentColor"/>
+                        </svg>
                     </div>
-                </div>
-                <div class="stat-block no-click flex flex-col justify-center">
-                    <span class="stat-title text-blue-400">Deflector Shields</span>
-                    <div class="flex items-center gap-2 mt-1 w-full justify-center">
-                        <button onclick="updateShipStat('shields', -1)" class="resource-btn border-blue-900 text-blue-400">-</button>
-                        <div class="flex items-baseline gap-0.5">
-                            <span class="stat-value text-blue-400 text-base" id="ship-shields-cur">50</span><span class="text-[10px] text-slate-500 font-mono">/<span id="ship-shields-max">50</span></span>
-                        </div>
-                        <button onclick="updateShipStat('shields', 1)" class="resource-btn border-blue-900 text-blue-400">+</button>
-                    </div>
+                    <!-- VFX Overlays -->
+                    <svg id="ship-vfx" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100">
+                        <!-- Lasers, sweeps, etc injected here -->
+                    </svg>
+                    
+                    <!-- HP Badges -->
+                    <div id="hp-badge-front" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
+                    <div id="hp-badge-back" class="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
+                    <div id="hp-badge-port" class="absolute top-1/2 -left-6 -translate-y-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
+                    <div id="hp-badge-starboard" class="absolute top-1/2 -right-6 -translate-y-1/2 bg-slate-900 border border-slate-700 text-blue-400 text-[10px] font-mono px-1 rounded">25</div>
+                    
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-950/80 border border-emerald-900 text-emerald-400 text-xs font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10" id="ship-hull-badge">100 HP</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 mb-6">
-                <div class="stat-block no-click">
-                    <span class="stat-title">Speed</span>
-                    <div class="flex items-baseline gap-0.5 mt-1">
-                        <span class="stat-value" id="ship-speed">800</span><span class="text-[10px] text-slate-500 font-mono pb-1">km/h</span>
+            <!-- Manned Stations -->
+            <div class="flex-1 overflow-y-auto pr-1 pb-4 space-y-3 scroll-area">
+                <!-- Helm -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded p-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-slate-200 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            Station 1: Helm (Pilot)
+                        </h3>
+                        <button onclick="claimStation('helm')" id="btn-claim-helm" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold datapad-font transition-colors">Sit Here</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="shipAction('evade', 'dex', 'helm')" class="bg-slate-950 border border-slate-700 hover:border-emerald-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-emerald-500 mb-1">DEX</span> Evasive Maneuvers
+                        </button>
+                        <button onclick="shipAction('attack_run', 'wis', 'helm')" class="bg-slate-950 border border-slate-700 hover:border-emerald-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-emerald-500 mb-1">WIS</span> Attack Vector
+                        </button>
+                        <button onclick="shipAction('brace', 'con', 'helm')" class="bg-slate-950 border border-slate-700 hover:border-emerald-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-emerald-500 mb-1">CON</span> Brace for Impact
+                        </button>
                     </div>
                 </div>
-                <div class="stat-block no-click">
-                    <span class="stat-title">Hyperdrive</span>
-                    <div class="flex items-baseline gap-0.5 mt-1">
-                        <span class="text-[10px] text-slate-500 font-mono pb-1">Class</span><span class="stat-value ml-1" id="ship-hyperdrive">2.0</span>
+                <!-- Gunnery -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded p-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-slate-200 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.828 10.172a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-4 4a4 4 0 000 5.656zm12.344 3.656a4 4 0 00-5.656 0l-4 4a4 4 0 005.656 5.656l4-4a4 4 0 000-5.656z"></path></svg>
+                            Station 2: Gunnery (Weapons)
+                        </h3>
+                        <button onclick="claimStation('gunnery')" id="btn-claim-gunnery" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold datapad-font transition-colors">Sit Here</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="shipAction('fire_lasers', 'dex', 'gunnery')" class="bg-slate-950 border border-slate-700 hover:border-red-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-red-500 mb-1">DEX</span> Fire Cannons
+                        </button>
+                        <button onclick="shipAction('torpedo', 'int', 'gunnery')" class="bg-slate-950 border border-slate-700 hover:border-red-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-red-500 mb-1">INT</span> Proton Torpedo
+                        </button>
+                        <button onclick="shipAction('intimidate', 'cha', 'gunnery')" class="bg-slate-950 border border-slate-700 hover:border-red-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-red-500 mb-1">CHA</span> Warning Volley
+                        </button>
                     </div>
                 </div>
-                <div class="stat-block no-click">
-                    <span class="stat-title">Crew</span>
-                    <span class="stat-value mt-1" id="ship-crew">2</span>
+                <!-- Engineering -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded p-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-slate-200 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Station 3: Engineering (Systems)
+                        </h3>
+                        <button onclick="claimStation('engineering')" id="btn-claim-engineering" class="text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold datapad-font transition-colors">Sit Here</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="shipAction('reroute', 'int', 'engineering')" class="bg-slate-950 border border-slate-700 hover:border-blue-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-blue-500 mb-1">INT</span> Reroute Power
+                        </button>
+                        <button onclick="shipAction('patch', 'str', 'engineering')" class="bg-slate-950 border border-slate-700 hover:border-blue-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-blue-500 mb-1">STR</span> Emergency Patch
+                        </button>
+                        <button onclick="shipAction('overload', 'con', 'engineering')" class="bg-slate-950 border border-slate-700 hover:border-blue-500 text-slate-300 p-2 rounded text-[10px] uppercase font-bold datapad-font transition-colors text-center group">
+                            <span class="block text-blue-500 mb-1">CON</span> System Overload
+                        </button>
+                    </div>
                 </div>
             </div>
+            </div> <!-- End of Vessel Tab -->
 
-            <h3 class="text-white font-bold uppercase tracking-widest text-sm mb-3 pl-1 border-l-2 border-hud">// Cargo Hold</h3>
-            <div id="ship-cargo-container" class="grid-container mb-6"></div>
+            <!-- SUB-TAB: NAVI-COMPUTER -->
+            <div id="ship-tab-navicomputer" class="ship-tab hidden flex-col flex-1 min-h-0">
+                <div class="mb-3">
+                    <h2 class="display-font text-2xl font-black text-indigo-400 tracking-wide uppercase border-b border-indigo-900/50 pb-2">Astrogation Map</h2>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed flex justify-between">
+                        <span>Current Location: <strong id="ship-location-display" class="text-white">Coruscant</strong></span>
+                        <span class="text-[10px] text-indigo-400 datapad-font uppercase tracking-widest">Tap a system</span>
+                    </p>
+                </div>
+                <!-- Star Map Canvas -->
+                <div class="relative w-full bg-slate-950 border border-indigo-900/30 rounded-lg overflow-hidden" style="aspect-ratio: 1.3 / 1;">
+                    <div class="absolute inset-0" style="background-image: linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px); background-size: 10% 10%;"></div>
+                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(49,46,129,0.15),_transparent_70%)] pointer-events-none"></div>
+                    <svg id="starmap-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <!-- Jump route line rendered dynamically -->
+                        <line id="starmap-route" x1="0" y1="0" x2="0" y2="0" stroke="#6366f1" stroke-width="0.4" stroke-dasharray="1,1" opacity="0" class="transition-all duration-300"/>
+                        <!-- Planets rendered dynamically -->
+                        <g id="starmap-planets"></g>
+                    </svg>
+                </div>
+                <!-- Selected Planet Info Panel -->
+                <div id="starmap-info-panel" class="mt-3 bg-slate-900/80 border border-indigo-900/40 rounded-lg p-3 hidden">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 id="starmap-info-name" class="text-white font-bold text-lg display-font leading-tight truncate"></h3>
+                            <p id="starmap-info-desc" class="text-slate-400 text-xs mt-1 leading-snug"></p>
+                            <div class="flex items-center gap-3 mt-2">
+                                <span id="starmap-info-coords" class="text-[10px] text-slate-500 font-mono"></span>
+                                <span id="starmap-info-jumps" class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest bg-indigo-900/30 px-1.5 py-0.5 rounded"></span>
+                            </div>
+                        </div>
+                        <div class="shrink-0 flex flex-col gap-2">
+                            <button id="starmap-jump-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs shadow-[0_0_10px_rgba(79,70,229,0.5)]">Plot & Jump</button>
+                            <button id="starmap-dm-btn" class="hidden bg-red-900/50 hover:bg-red-800 border border-red-500 text-red-200 px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs">Override</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Scrollable planet list (compact fallback) -->
+                <div id="navicomputer-container" class="hidden"></div>
+            </div>
         </div>
 
         <!-- MAIN TAB: BOUNTIES -->
@@ -890,8 +1072,14 @@
                 </div>
                 
                 <div class="pb-10 space-y-3">
+                    <button onclick="switchProfile()" class="w-full py-2 datapad-font uppercase tracking-widest text-sm border rounded transition-colors" style="border-color: var(--hud-deep); color: var(--hud); background: rgba(15,23,42,0.5);">
+                        Switch Profile
+                    </button>
                     <button onclick="promptDMMode()" class="w-full py-2 datapad-font uppercase tracking-widest text-sm border rounded transition-colors" style="border-color: #4c1d95; color: #c4b5fd; background: rgba(76,29,149,0.15);">
                         Living Force Mode
+                    </button>
+                    <button onclick="lockDatapad()" class="w-full py-2 datapad-font uppercase tracking-widest text-sm border rounded transition-colors" style="border-color: #92400e; color: #fbbf24; background: rgba(146,64,14,0.15);">
+                        Lock Datapad
                     </button>
                     <button onclick="resetAll()" class="w-full py-2 datapad-font uppercase tracking-widest text-sm border rounded transition-colors" style="border-color: #7f1d1d; color: #fca5a5; background: rgba(127,29,29,0.15);">
                         Purge All Settings & Content
@@ -918,118 +1106,39 @@
     </div>
 </div>
 
-<!-- Character Creator Modal Overlay -->
+<!-- Character Creator Modal Overlay (D&D Beyond Style) -->
 <div id="creator-modal" class="fixed inset-0 bg-[#020617]/95 backdrop-blur-md z-[200] hidden flex-col transition-opacity duration-300 opacity-0">
-    <div class="bg-slate-800 border-b border-hud-deep p-4 flex justify-between items-center shadow-md">
+    <div class="bg-slate-800 border-b border-hud-deep p-4 flex justify-between items-center shadow-md shrink-0">
         <div>
-            <h2 class="text-xl font-black text-white tracking-wide uppercase display-font text-hud">Initialize Operative</h2>
-            <p class="text-[10px] uppercase datapad-font text-slate-400 tracking-widest">Protocol 5.5.0</p>
+            <h2 class="text-xl font-black text-white tracking-wide uppercase display-font text-hud">Operative Dossier</h2>
+            <p class="text-[10px] uppercase datapad-font text-slate-400 tracking-widest" id="cr-step-label">Step 1 of 7: Species</p>
         </div>
         <button onclick="closeCreator()" class="text-slate-400 hover:text-white p-1">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
     
-    <div class="flex justify-center gap-3 p-4 bg-slate-900/50 border-b border-slate-800">
-        <div class="creator-step-dot" id="step-dot-1"></div>
-        <div class="creator-step-dot" id="step-dot-2"></div>
-        <div class="creator-step-dot" id="step-dot-3"></div>
-        <div class="creator-step-dot" id="step-dot-4"></div>
+    <!-- Progress Bar -->
+    <div class="flex gap-1 px-4 py-2 bg-slate-900/50 border-b border-slate-800 shrink-0">
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-1"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-2"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-3"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-4"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-5"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-6"></div>
+        <div class="cr-progress-seg flex-1 h-1.5 rounded-full bg-slate-700 transition-all duration-300" id="cr-prog-7"></div>
     </div>
 
-    <div class="p-6 flex-1 overflow-y-auto modal-content-area pb-24">
-        
-        <!-- Step 1: Identity -->
-        <div id="creator-step-1" class="space-y-6">
-            <div>
-                <label class="text-hud font-bold uppercase tracking-widest text-xs mb-2 block">1. Operative Callsign</label>
-                <input type="text" id="cr-name" class="creator-input" placeholder="e.g., Kaelen Vex">
-            </div>
-            <div>
-                <label class="text-hud font-bold uppercase tracking-widest text-xs mb-2 block">2. Base Class (5.5e)</label>
-                <select id="cr-class" class="creator-input" onchange="suggestStats()">
-                    <option value="">— Select Class —</option>
-                </select>
-                <p id="cr-class-desc" class="text-xs text-slate-400 mt-2 italic"></p>
-            </div>
-            <div>
-                <label class="text-hud font-bold uppercase tracking-widest text-xs mb-2 block">3. Starting Level</label>
-                <div class="flex items-center gap-4">
-                    <input type="range" id="cr-level" min="1" max="20" value="1" oninput="document.getElementById('cr-level-disp').innerText=this.value" class="flex-1 slider">
-                    <span id="cr-level-disp" class="text-2xl font-bold font-mono text-white w-8 text-center">1</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 2: Attributes -->
-        <div id="creator-step-2" class="space-y-6 hidden">
-            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
-                <label class="text-hud font-bold uppercase tracking-widest text-xs">Base Attributes</label>
-                <div class="flex gap-2">
-                    <button onclick="applyStandardArray()" class="text-[9px] bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold">Standard Array</button>
-                    <button onclick="roll4d6()" class="text-[9px] bg-indigo-900 text-indigo-200 px-2 py-1 rounded border border-indigo-700 uppercase font-bold flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> Roll 4d6</button>
-                </div>
-            </div>
-            <p id="cr-stat-suggest" class="text-xs text-amber-500 mb-4 hidden"></p>
-            
-            <div class="grid grid-cols-3 gap-3">
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">STR</span><input type="number" id="cr-str" class="creator-stat-input" value="10"></div>
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">DEX</span><input type="number" id="cr-dex" class="creator-stat-input" value="10"></div>
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">CON</span><input type="number" id="cr-con" class="creator-stat-input" value="10"></div>
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">INT</span><input type="number" id="cr-int" class="creator-stat-input" value="10"></div>
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">WIS</span><input type="number" id="cr-wis" class="creator-stat-input" value="10"></div>
-                <div class="creator-stat-box"><span class="text-xs text-slate-400 font-bold block mb-1">CHA</span><input type="number" id="cr-cha" class="creator-stat-input" value="10"></div>
-            </div>
-        </div>
-
-        <!-- Step 3: Combat Specs -->
-        <div id="creator-step-3" class="space-y-6 hidden">
-            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-2">
-                <label class="text-hud font-bold uppercase tracking-widest text-xs">Combat Parameters</label>
-                <button onclick="calcHP()" class="text-[9px] bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold">Auto-Calc HP</button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="flex items-center justify-between bg-slate-900/50 p-3 border border-slate-800 rounded">
-                    <span class="text-sm font-bold text-slate-300">Max Hit Points</span>
-                    <input type="number" id="cr-hp" class="creator-stat-input !text-emerald-400 w-20 bg-slate-950 rounded border border-slate-700 p-1" value="10">
-                </div>
-                <div class="flex items-center justify-between bg-slate-900/50 p-3 border border-slate-800 rounded">
-                    <span class="text-sm font-bold text-slate-300">Armor Class (AC)</span>
-                    <input type="number" id="cr-ac" class="creator-stat-input w-20 bg-slate-950 rounded border border-slate-700 p-1" value="10">
-                </div>
-                <div class="flex items-center justify-between bg-slate-900/50 p-3 border border-slate-800 rounded">
-                    <span class="text-sm font-bold text-slate-300">Speed (ft)</span>
-                    <input type="number" id="cr-speed" class="creator-stat-input w-20 bg-slate-950 rounded border border-slate-700 p-1" value="30">
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 4: Proficiencies -->
-        <div id="creator-step-4" class="space-y-6 hidden">
-            <div>
-                <label class="text-hud font-bold uppercase tracking-widest text-xs mb-2 block">Saving Throws</label>
-                <p class="text-[10px] text-slate-400 mb-3 leading-tight">These have been pre-selected based on your class base, but you can override them below.</p>
-                <div class="grid grid-cols-3 gap-2" id="cr-saves-grid">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
-            
-            <div class="mt-6">
-                <label class="text-hud font-bold uppercase tracking-widest text-xs mb-3 block">Skill Proficiencies</label>
-                <div class="grid grid-cols-2 gap-2" id="cr-skills-grid">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
-        </div>
-
+    <!-- Dynamic Content Area -->
+    <div class="p-4 flex-1 overflow-y-auto modal-content-area pb-24" id="cr-wizard-content">
+        <!-- Rendered dynamically by renderCreatorWizard() -->
     </div>
 
     <!-- Footer Controls -->
-    <div class="absolute bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 flex justify-between gap-4">
-        <button id="cr-btn-prev" onclick="changeCreatorStep(-1)" class="creator-btn flex-1 hidden">Previous</button>
-        <button id="cr-btn-next" onclick="changeCreatorStep(1)" class="creator-btn creator-btn-primary flex-1">Continue</button>
-        <button id="cr-btn-finish" onclick="finalizeCreator()" class="creator-btn bg-emerald-600 text-white border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] flex-1 hidden">Compile Dossier</button>
+    <div class="absolute bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 flex justify-between gap-4 shrink-0">
+        <button id="cr-btn-prev" onclick="crWizardNav(-1)" class="creator-btn flex-1 hidden">Previous</button>
+        <button id="cr-btn-next" onclick="crWizardNav(1)" class="creator-btn creator-btn-primary flex-1">Continue</button>
+        <button id="cr-btn-finish" onclick="crWizardFinalize()" class="creator-btn bg-emerald-600 text-white border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] flex-1 hidden">Compile Dossier</button>
     </div>
 </div>
 
@@ -1166,7 +1275,13 @@
                 if(!state.resources) state.resources = [{ name: "Hit Dice", current: 1, max: 1 }, { name: "Force Pts", current: 0, max: 0 }];
                 if(typeof state.credits === 'undefined') state.credits = 0;
                 if(typeof state.beginnerMode === 'undefined') state.beginnerMode = false;
-                if(!state.ship) state.ship = { hullMax: 100, hullCur: 100, shieldsMax: 50, shieldsCur: 50, speed: 800, hyperdrive: 2.0, crew: 2, cargo: [ "10x Ration Packs", "50L Tibanna Gas", "Spare Fusion Cell" ] };
+                if(!state.ship || typeof state.ship.shieldsCur !== 'undefined') {
+                    const name = state.ship && state.ship.name ? state.ship.name : "The Vanguard";
+                    const type = state.ship && state.ship.type ? state.ship.type : "freighter";
+                    state.ship = { name, type, hullMax: 100, hullCur: 100, shieldsMax: 25, shields: { front: 25, back: 25, port: 25, starboard: 25 }, speed: 800, hyperdrive: 2.0, crew: 2, cargo: [] };
+                }
+                if(!state.ship.stations) state.ship.stations = { helm: null, gunnery: null, engineering: null };
+                if(!state.ship.location) state.ship.location = "Coruscant";
                 if(!state.bountiesStatus) state.bountiesStatus = {};
             }
         } catch(e){} 
@@ -1810,8 +1925,69 @@
         container.innerHTML = html;
     }
 
-    // --- CHARACTER CREATOR WIZARD ---
-    let creatorStep = 1;
+    // --- CHARACTER CREATOR WIZARD (D&D Beyond Style) ---
+    let crStep = 1;
+    const CR_TOTAL_STEPS = 7;
+    const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+    const STAT_NAMES = ['str','dex','con','int','wis','cha'];
+    const STAT_LABELS = {str:'Strength',dex:'Dexterity',con:'Constitution',int:'Intelligence',wis:'Wisdom',cha:'Charisma'};
+
+    let crState = {
+        name: '', species: '', cls: '', level: 1,
+        baseStats: {str:null,dex:null,con:null,int:null,wis:null,cha:null},
+        speciesBonuses: {}, fightingStyle: '', subclass: '', asi: {type:'',stat1:'',stat2:''},
+        selectedSkills: [], selectedEquipment: []
+    };
+
+    const crSpeciesOptions = [
+        {id:'human', name:'Human', sw:'Human', bonus:{choose2:true}, speed:30, traits:['Versatile: +1 to two ability scores of your choice','Extra Skill proficiency','Extra Language']},
+        {id:'twilek', name:"Half-Elf (Twi'lek)", sw:"Twi'lek", bonus:{cha:2,choose1:true}, speed:30, traits:['+2 CHA, +1 to one other score','Darkvision 60ft','Fey Ancestry (Adv vs Charm)','Two extra skill proficiencies']},
+        {id:'wookiee', name:'Half-Orc (Wookiee)', sw:'Wookiee', bonus:{str:2,con:1}, speed:30, traits:['+2 STR, +1 CON','Darkvision 60ft','Savage Attacks (extra crit die)','Relentless Endurance (drop to 1 HP once)']},
+        {id:'droid', name:'Warforged (Droid)', sw:'Droid', bonus:{con:2,choose1:true}, speed:30, traits:['+2 CON, +1 to one other','Integrated Protection (+1 AC)','No need to eat, drink, or breathe','Poison resistance']},
+        {id:'trandoshan', name:'Dragonborn (Trandoshan)', sw:'Trandoshan', bonus:{str:2,cha:1}, speed:30, traits:['+2 STR, +1 CHA','Breath Weapon (Acid/Fire)','Damage Resistance','Claws: 1d6 slashing unarmed']},
+        {id:'chiss', name:'High Elf (Chiss)', sw:'Chiss', bonus:{dex:2,int:1}, speed:30, traits:['+2 DEX, +1 INT','Darkvision 60ft','Keen Senses (Perception prof)','Extra cantrip (INT-based)']},
+        {id:'rodian', name:'Halfling (Rodian)', sw:'Rodian', bonus:{dex:2,cha:1}, speed:25, traits:['+2 DEX, +1 CHA','Lucky (reroll 1s on d20)','Brave (Adv vs Frightened)','Naturally Stealthy']},
+        {id:'zabrak', name:'Tiefling (Zabrak/Dathomirian)', sw:'Zabrak', bonus:{cha:2,int:1}, speed:30, traits:['+2 CHA, +1 INT','Darkvision 60ft','Hellish Resistance (fire)','Infernal Legacy (Thaumaturgy cantrip)']}
+    ];
+
+    const crRangerData = {
+        dnd: 'Ranger', sw: 'Bounty Hunter / Scout', hitDie: 'd10', primary: 'DEX & WIS',
+        saves: ['str','dex'], armorProf: 'Light, Medium armor, Shields', weaponProf: 'Simple & Martial weapons',
+        skillChoices: ['animalHandling','athletics','insight','investigation','nature','perception','stealth','survival'],
+        numSkills: 3,
+        fightingStyles: [
+            {id:'archery', name:'Precision Targeting', dnd:'Archery', desc:'+2 to ranged attack rolls. Your HUD auto-corrects targeting drift.'},
+            {id:'twf', name:'Dual Wielding', dnd:'Two-Weapon Fighting', desc:'Add ability modifier to off-hand damage. Twin blaster or vibroblade technique.'},
+            {id:'defense', name:'Hardened Plating', dnd:'Defense', desc:'+1 AC while wearing armor. Reinforced beskar or durasteel weave.'},
+            {id:'dueling', name:'Single-Weapon Mastery', dnd:'Dueling', desc:'+2 damage with one-handed weapon and no other weapon. Focused vibrorapier or blaster pistol style.'}
+        ],
+        subclasses: [
+            {id:'hunter', name:'Apex Predator', dnd:'Hunter', desc:'Specialize in taking down single dangerous targets or hordes of weaker foes.',
+             feature:{name:"Hunter's Prey", choices:[
+                {id:'colossus', name:'Colossus Slayer', desc:'Once per turn, deal extra 1d8 damage to a creature below its max HP.'},
+                {id:'giant', name:'Giant Killer', desc:'When a Large+ creature attacks you, use reaction to attack it.'},
+                {id:'horde', name:'Horde Breaker', desc:'Once per turn, make an additional attack against a different creature within 5ft of your original target.'}
+             ]}},
+            {id:'gloom', name:'Shadow Operative', dnd:'Gloom Stalker', desc:'Strike from the darkness. You are invisible to creatures relying on darkvision.',
+             feature:{name:"Dread Ambusher", desc:'On the first turn of combat, your speed increases by 10ft. If you take the Attack action, you make one additional weapon attack that deals an extra 1d8 damage.'}},
+            {id:'beast', name:'Creature Handler', dnd:'Beast Master', desc:'Form a bond with a loyal creature companion that fights alongside you.',
+             feature:{name:"Primal Companion", desc:'You gain a beast companion (Beast of the Land, Sea, or Sky). It obeys your commands and acts on your initiative.'}}
+        ],
+        levels: {
+            1: {features:['Favored Enemy (Bounty Target Lock): Free cast of Hunter\'s Mark, no concentration at low levels.','Deft Explorer (Canny): Gain expertise in one skill you\'re proficient in.']},
+            2: {features:['Spellcasting: Access to Ranger spell list (WIS-based). 2 spells known.','Fighting Style: Choose a combat specialization.']},
+            3: {features:['Ranger Conclave: Choose your subclass archetype.','3 spells known.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4 spells known.']},
+            5: {features:['Extra Attack: Attack twice per Attack action.','5 spells known. 2nd-level spell slots.']}
+        }
+    };
+
+    const crEquipmentChoices = [
+        {group:'Armor', options:[{id:'scale', name:'Durasteel Scale Mail (AC 14+DEX max 2)'},{id:'leather', name:'Nerf-Hide Jacket (Leather, AC 11+DEX)'}]},
+        {group:'Weapons', options:[{id:'2short', name:'Two Vibroblades (Shortswords)'},{id:'2simple', name:'Two Simple Melee Weapons'}]},
+        {group:'Pack', options:[{id:'dungeon', name:'Infiltration Kit (Dungeoneer\'s Pack)'},{id:'explorer', name:'Expedition Kit (Explorer\'s Pack)'}]},
+        {group:'Ranged', options:[{id:'longbow', name:'Blaster Rifle (Longbow) + 20 power cells'}]}
+    ];
     
     function openCreator() {
         creatorStep = 1;
@@ -2409,6 +2585,57 @@
         resEl.innerText = total;
     }
 
+    async function rollShipDice(label, modifier, diceCount = 1) {
+        const toast = document.getElementById('mini-dice-toast');
+        const resEl = document.getElementById('mini-dice-result');
+        if (!toast || !resEl) return;
+        
+        document.getElementById('mini-dice-label').innerText = label;
+        document.getElementById('mini-dice-mod').innerText = modifier >= 0 ? `+${modifier}` : modifier;
+        
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        resEl.classList.remove('text-emerald-400', 'text-red-500', 'text-amber-400');
+        resEl.classList.add('text-white');
+        resEl.innerText = '--';
+
+        // Adjust font size if there are multiple dice so they fit
+        resEl.style.fontSize = diceCount > 2 ? '1.25rem' : '1.875rem';
+
+        for(let i=0; i<10; i++) {
+            if (diceCount > 1) {
+                resEl.innerText = Array(diceCount).fill(0).map(() => Math.floor(Math.random() * 20) + 1).join('|');
+            } else {
+                resEl.innerText = Math.floor(Math.random() * 20) + 1;
+            }
+            await new Promise(r => setTimeout(r, 40));
+        }
+
+        let rolls = [];
+        let hasCrit = false;
+        let hasFail = false;
+        
+        for (let i = 0; i < diceCount; i++) {
+            const roll = Math.floor(Math.random() * 20) + 1;
+            if(roll === 20) hasCrit = true;
+            if(roll === 1) hasFail = true;
+            rolls.push(roll + modifier);
+        }
+        
+        if(hasCrit && hasFail) { 
+            resEl.classList.remove('text-white'); resEl.classList.add('text-amber-400');
+        } else if (hasCrit) { 
+            resEl.classList.remove('text-white'); resEl.classList.add('text-emerald-400');
+        } else if (hasFail) { 
+            resEl.classList.remove('text-white'); resEl.classList.add('text-red-500'); 
+        }
+        
+        resEl.innerText = rolls.join(' | ');
+        
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 4000);
+    }
+
     function closeDiceHUD() {
         const hud = document.getElementById('dice-hud');
         if(hud) hud.classList.remove('active');
@@ -2465,7 +2692,7 @@
         currentMainTab = id;
 
         document.querySelectorAll('.main-tab').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.drawer-btn').forEach(el => el.classList.remove('active'));
         
         const tabEl = document.getElementById(`main-${id}`);
         if(tabEl) tabEl.classList.remove('hidden');
@@ -2481,6 +2708,20 @@
         }
         
         document.getElementById('main-content').scrollTo({top:0, behavior:'smooth'});
+        closeAppDrawer();
+    }
+
+    function toggleAppDrawer() {
+        const drawer = document.getElementById('app-drawer');
+        if (drawer.classList.contains('active')) {
+            drawer.classList.remove('active');
+        } else {
+            drawer.classList.add('active');
+        }
+    }
+    
+    function closeAppDrawer() {
+        document.getElementById('app-drawer').classList.remove('active');
     }
 
     function switchDbTab(id) {
@@ -2680,36 +2921,396 @@
     }
 
     // --- SHIP LOGIC ---
-    function updateShipStat(stat, change) {
-        if (!state.ship) return;
-        if (stat === 'hull') {
-            state.ship.hullCur = Math.max(0, Math.min(state.ship.hullMax, state.ship.hullCur + change));
-            document.getElementById('ship-hull-cur').innerText = state.ship.hullCur;
-        } else if (stat === 'shields') {
-            state.ship.shieldsCur = Math.max(0, Math.min(state.ship.shieldsMax, state.ship.shieldsCur + change));
-            document.getElementById('ship-shields-cur').innerText = state.ship.shieldsCur;
+    function renderShip() {
+        if(!state.ship) return;
+        
+        document.getElementById('ship-name-display').innerText = state.ship.name || "Vessel Interface";
+        
+        let typeStr = "Light Freighter";
+        let svgContent = `
+            <g class="ship-path transition-all duration-300">
+                <circle cx="50" cy="55" r="35" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                <path d="M 25 35 L 25 5 L 40 5 L 45 30 Z" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                <path d="M 75 35 L 75 5 L 60 5 L 55 30 Z" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                <path d="M 82 45 L 95 35 L 90 60 L 85 55 Z" fill="#334155" stroke="#64748b" stroke-width="2"/>
+                <circle cx="90" cy="48" r="4" fill="#38bdf8"/>
+                <path d="M 25 85 Q 50 95 75 85" fill="none" stroke="#38bdf8" stroke-width="4" class="animate-pulse"/>
+                <circle cx="50" cy="55" r="15" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+                <circle cx="50" cy="55" r="5" fill="#0f172a"/>
+            </g>`;
+            
+        if (state.ship.type === 'gunship' || state.ship.type === 'fighter') {
+            typeStr = "Assault Gunship";
+            svgContent = `
+            <g class="ship-path transition-all duration-300">
+                <path d="M 40 20 L 60 20 L 65 50 L 60 85 L 40 85 L 35 50 Z" fill="#64748b" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 45 25 L 55 25 L 58 35 L 42 35 Z" fill="#0ea5e9"/>
+                <rect x="20" y="35" width="15" height="40" rx="5" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <rect x="65" y="35" width="15" height="40" rx="5" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <rect x="35" y="45" width="5" height="10" fill="#334155"/>
+                <rect x="60" y="45" width="5" height="10" fill="#334155"/>
+                <circle cx="27.5" cy="78" r="4" fill="#f59e0b" class="animate-pulse"/>
+                <circle cx="72.5" cy="78" r="4" fill="#f59e0b" class="animate-pulse"/>
+                <circle cx="45" cy="88" r="3" fill="#f59e0b" class="animate-pulse"/>
+                <circle cx="55" cy="88" r="3" fill="#f59e0b" class="animate-pulse"/>
+            </g>`;
+        } else if (state.ship.type === 'cruiser') {
+            typeStr = "Heavy Cruiser";
+            svgContent = `
+            <g class="ship-path transition-all duration-300">
+                <path d="M 50 5 L 90 85 L 50 75 L 10 85 Z" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+                <path d="M 40 70 L 60 70 L 65 80 L 35 80 Z" fill="#334155" stroke="#64748b" stroke-width="1"/>
+                <circle cx="35" cy="82" r="4" fill="#38bdf8" class="animate-pulse"/>
+                <circle cx="50" cy="78" r="6" fill="#38bdf8" class="animate-pulse"/>
+                <circle cx="65" cy="82" r="4" fill="#38bdf8" class="animate-pulse"/>
+                <line x1="50" y1="5" x2="50" y2="75" stroke="#334155" stroke-width="2"/>
+            </g>`;
         }
+        document.getElementById('ship-class-display').innerText = typeStr;
+        
+        const shipWrapper = document.getElementById('ship-svg-wrapper');
+        if (shipWrapper) {
+            shipWrapper.innerHTML = `<svg viewBox="0 0 100 100" class="w-32 h-32 drop-shadow-lg">${svgContent}</svg>`;
+        }
+        
+        // Update Shield Colors & Badges
+        const updateQuadrant = (id, val, max) => {
+            const arc = document.getElementById(`shield-${id}`);
+            const badge = document.getElementById(`hp-badge-${id}`);
+            if(!arc || !badge) return;
+            badge.innerText = val;
+            let color = "#3b82f6"; // blue
+            if (val <= max * 0.5) color = "#eab308"; // yellow
+            if (val <= max * 0.25) color = "#ef4444"; // red
+            if (val === 0) { color = "#1e293b"; arc.style.opacity = "0.2"; } else { arc.style.opacity = "1"; }
+            arc.style.stroke = color;
+            badge.style.color = val === 0 ? "#64748b" : color;
+        };
+        
+        if (state.ship.shields) {
+            updateQuadrant('front', state.ship.shields.front, state.ship.shieldsMax);
+            updateQuadrant('back', state.ship.shields.back, state.ship.shieldsMax);
+            updateQuadrant('port', state.ship.shields.port, state.ship.shieldsMax);
+            updateQuadrant('starboard', state.ship.shields.starboard, state.ship.shieldsMax);
+        }
+        
+        const hullBadge = document.getElementById('ship-hull-badge');
+        if (hullBadge) {
+            hullBadge.innerText = `${state.ship.hullCur} HP`;
+            hullBadge.className = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border text-xs font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 ${state.ship.hullCur < state.ship.hullMax * 0.3 ? 'bg-red-950/80 border-red-900 text-red-500 animate-pulse' : 'bg-slate-950/80 border-emerald-900 text-emerald-400'}`;
+        }
+
+        // Update Station Claim Buttons
+        if (state.ship.stations) {
+            ['helm', 'gunnery', 'engineering'].forEach(st => {
+                const btn = document.getElementById('btn-claim-' + st);
+                if (!btn) return;
+                const occupant = state.ship.stations[st];
+                if (occupant === state.activeSlot) {
+                    btn.innerText = "Unseat";
+                    btn.className = "text-[9px] bg-hud hover:bg-white text-slate-900 px-2 py-1 rounded border border-hud uppercase font-bold datapad-font transition-colors shadow-[0_0_10px_var(--hud-glow)]";
+                } else if (occupant) {
+                    const pName = (partyData[occupant] && partyData[occupant].name) ? partyData[occupant].name : "Occupied";
+                    btn.innerText = pName;
+                    btn.className = "text-[9px] bg-slate-800 text-slate-500 px-2 py-1 rounded border border-slate-700 uppercase font-bold datapad-font no-click opacity-50";
+                } else {
+                    btn.innerText = "Sit Here";
+                    btn.className = "text-[9px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-600 uppercase font-bold datapad-font transition-colors";
+                }
+            });
+        }
+    }
+
+    function switchShipTab(id) {
+        document.querySelectorAll('.ship-tab').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.db-nav-btn').forEach(el => el.classList.remove('active'));
+        
+        const tabEl = document.getElementById(`ship-tab-${id}`);
+        if(tabEl) tabEl.classList.remove('hidden');
+        
+        const navEl = document.getElementById(`ship-nav-${id}`);
+        if(navEl) navEl.classList.add('active');
+
+        if(id === 'navicomputer') renderNaviComputer();
+    }
+
+    function claimStation(stationId) {
+        if (!state.ship.stations) state.ship.stations = { helm: null, gunnery: null, engineering: null };
+        const currentlyOccupiedByMe = Object.keys(state.ship.stations).find(k => state.ship.stations[k] === state.activeSlot);
+        
+        if (state.ship.stations[stationId] === state.activeSlot) {
+            state.ship.stations[stationId] = null; // unseat
+        } else if (!state.ship.stations[stationId]) {
+            if(currentlyOccupiedByMe) state.ship.stations[currentlyOccupiedByMe] = null; // move from old seat
+            state.ship.stations[stationId] = state.activeSlot; // take new seat
+        }
+        
+        saveState();
+        try { db.ref('shared/ship').set(state.ship); } catch(e){}
+        renderShip();
+    }
+
+    const planetsList = [
+        { name: "Coruscant", x: 50, y: 50, desc: "Galactic capital and massive ecumenopolis." },
+        { name: "Tatooine", x: 80, y: 15, desc: "Harsh desert world controlled by Hutts." },
+        { name: "Hoth", x: 10, y: 20, desc: "Remote, icy wasteland." },
+        { name: "Endor", x: 30, y: 10, desc: "Forested moon home to Ewoks." },
+        { name: "Naboo", x: 60, y: 30, desc: "Lush world with human and Gungan societies." },
+        { name: "Kashyyyk", x: 65, y: 55, desc: "Forest planet of massive wroshyr trees." },
+        { name: "Mandalore", x: 70, y: 70, desc: "Outer Rim world of legendary warriors." },
+        { name: "Mustafar", x: 15, y: 80, desc: "Volcanic world rich in minerals." },
+        { name: "Kamino", x: 90, y: 90, desc: "Aquatic planet known for cloning facilities." },
+        { name: "Geonosis", x: 85, y: 10, desc: "Rocky planet and droid manufacturing hub." },
+        { name: "Alderaan (Asteroids)", x: 45, y: 45, desc: "Former core world, now an asteroid field." },
+        { name: "Yavin 4", x: 35, y: 75, desc: "Jungle moon containing ancient temples." },
+        { name: "Lothal", x: 25, y: 65, desc: "Outer Rim plains world with strong Force ties." },
+        { name: "Dathomir", x: 80, y: 85, desc: "Dark, red-lit planet of Nightsisters." },
+        { name: "Exegol", x: 5, y: 95, desc: "Hidden Sith redoubt in the Unknown Regions." }
+    ];
+
+    function calculateJumps(fromName, toName) {
+        if (fromName === toName) return 0;
+        const p1 = planetsList.find(p => p.name === fromName);
+        const p2 = planetsList.find(p => p.name === toName);
+        if (!p1 || !p2) return 1;
+        const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        if (dist < 20) return 1;
+        if (dist < 45) return 2;
+        if (dist < 75) return 3;
+        return 4;
+    }
+
+    let selectedPlanet = null;
+
+    function renderNaviComputer() {
+        const currentLocName = state.ship.location || "Coruscant";
+        const locDisplay = document.getElementById('ship-location-display');
+        if(locDisplay) locDisplay.innerText = currentLocName;
+        
+        const planetsG = document.getElementById('starmap-planets');
+        if (!planetsG) return;
+        
+        const svgNS = "http://www.w3.org/2000/svg";
+        planetsG.innerHTML = '';
+
+        const currentPlanet = planetsList.find(p => p.name === currentLocName);
+        const margin = 5;
+        
+        planetsList.forEach(p => {
+            const cx = margin + (p.x / 100) * (100 - margin * 2);
+            const cy = margin + (p.y / 100) * (100 - margin * 2);
+            const isCurrent = p.name === currentLocName;
+            const jumps = calculateJumps(currentLocName, p.name);
+            
+            const g = document.createElementNS(svgNS, "g");
+            g.style.cursor = "pointer";
+            g.addEventListener("click", () => selectPlanetOnMap(p.name));
+            
+            // Glow behind planet
+            const glow = document.createElementNS(svgNS, "circle");
+            glow.setAttribute("cx", cx); glow.setAttribute("cy", cy);
+            glow.setAttribute("r", isCurrent ? 3 : 1.5);
+            glow.setAttribute("fill", isCurrent ? "rgba(99,102,241,0.3)" : "rgba(148,163,184,0.1)");
+            g.appendChild(glow);
+            
+            // Current location pulse ring
+            if (isCurrent) {
+                const ring = document.createElementNS(svgNS, "circle");
+                ring.setAttribute("cx", cx); ring.setAttribute("cy", cy);
+                ring.setAttribute("r", 4);
+                ring.setAttribute("fill", "none"); ring.setAttribute("stroke", "#818cf8");
+                ring.setAttribute("stroke-width", "0.3");
+                ring.setAttribute("opacity", "0.6");
+                ring.innerHTML = `<animate attributeName="r" values="3;6;3" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0.1;0.6" dur="3s" repeatCount="indefinite"/>`;
+                g.appendChild(ring);
+            }
+            
+            // Planet dot
+            const dot = document.createElementNS(svgNS, "circle");
+            dot.setAttribute("cx", cx); dot.setAttribute("cy", cy);
+            dot.setAttribute("r", isCurrent ? 1.8 : 1.2);
+            const colors = { 0: "#818cf8", 1: "#6ee7b7", 2: "#fbbf24", 3: "#f87171", 4: "#ef4444" };
+            dot.setAttribute("fill", isCurrent ? "#818cf8" : (colors[jumps] || "#94a3b8"));
+            g.appendChild(dot);
+            
+            // Planet label
+            const label = document.createElementNS(svgNS, "text");
+            label.setAttribute("x", cx); label.setAttribute("y", cy - 2.5);
+            label.setAttribute("text-anchor", "middle");
+            label.setAttribute("fill", isCurrent ? "#c7d2fe" : "#64748b");
+            label.setAttribute("font-size", "2.2"); label.setAttribute("font-family", "'Share Tech Mono', monospace");
+            label.textContent = p.name.length > 12 ? p.name.substring(0,10) + ".." : p.name;
+            g.appendChild(label);
+            
+            planetsG.appendChild(g);
+        });
+        
+        // If a planet was selected, re-select it to update the route line
+        if (selectedPlanet) selectPlanetOnMap(selectedPlanet);
+    }
+
+    function selectPlanetOnMap(planetName) {
+        selectedPlanet = planetName;
+        const currentLocName = state.ship.location || "Coruscant";
+        const panel = document.getElementById('starmap-info-panel');
+        const route = document.getElementById('starmap-route');
+        if (!panel || !route) return;
+
+        const planet = planetsList.find(p => p.name === planetName);
+        if (!planet) return;
+        
+        const isCurrent = planetName === currentLocName;
+        const jumps = calculateJumps(currentLocName, planetName);
+        const margin = 5;
+        
+        // Draw route line from current to selected
+        const curPlanet = planetsList.find(p => p.name === currentLocName);
+        if (curPlanet && !isCurrent) {
+            const x1 = margin + (curPlanet.x / 100) * (100 - margin * 2);
+            const y1 = margin + (curPlanet.y / 100) * (100 - margin * 2);
+            const x2 = margin + (planet.x / 100) * (100 - margin * 2);
+            const y2 = margin + (planet.y / 100) * (100 - margin * 2);
+            route.setAttribute("x1", x1); route.setAttribute("y1", y1);
+            route.setAttribute("x2", x2); route.setAttribute("y2", y2);
+            route.setAttribute("opacity", "0.7");
+        } else {
+            route.setAttribute("opacity", "0");
+        }
+        
+        // Fill info panel
+        document.getElementById('starmap-info-name').innerText = planet.name;
+        document.getElementById('starmap-info-desc').innerText = planet.desc;
+        document.getElementById('starmap-info-coords').innerText = `X:${planet.x}  Y:${planet.y}`;
+        document.getElementById('starmap-info-jumps').innerText = isCurrent ? 'DOCKED' : jumps + ' HYPER-JUMPS';
+        
+        const jumpBtn = document.getElementById('starmap-jump-btn');
+        const dmBtn = document.getElementById('starmap-dm-btn');
+        
+        if (isCurrent) {
+            jumpBtn.innerText = "In Orbit";
+            jumpBtn.disabled = true;
+            jumpBtn.className = "bg-slate-800 text-slate-500 px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font text-xs opacity-50 cursor-not-allowed";
+        } else {
+            jumpBtn.innerText = "Plot & Jump";
+            jumpBtn.disabled = false;
+            jumpBtn.className = "bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold uppercase tracking-widest datapad-font transition-colors text-xs shadow-[0_0_10px_rgba(79,70,229,0.5)]";
+            jumpBtn.onclick = () => jumpToPlanet(planet.name, jumps);
+        }
+        
+        if (state.isDM && !isCurrent) {
+            dmBtn.classList.remove('hidden');
+            dmBtn.onclick = () => forceJumpDM(planet.name);
+        } else {
+            dmBtn.classList.add('hidden');
+        }
+        
+        panel.classList.remove('hidden');
+    }
+
+    function jumpToPlanet(targetName, jumps) {
+        if (!state.ship.stations) return;
+        
+        // Find who is sitting in helm
+        const pilotSlot = state.ship.stations.helm;
+        let pilotMod = 0;
+        
+        if (pilotSlot && partyData[pilotSlot] && partyData[pilotSlot].stats) {
+            // Assume Intelligence (Astrogation) is used for jumping safely
+            const intel = partyData[pilotSlot].stats['int'] || 10;
+            pilotMod = Math.floor((intel - 10) / 2);
+        }
+
+        // Trigger ship VFX
+        const shipWrapper = document.getElementById('ship-svg-wrapper');
+        if(shipWrapper) {
+            switchShipTab('vessel');
+            shipWrapper.classList.remove('animate-ship-hyperspace');
+            void shipWrapper.offsetWidth; 
+            shipWrapper.classList.add('animate-ship-hyperspace');
+        }
+
+        // Send chat alert
+        const alertMsg = `JUMPING TO ${targetName.toUpperCase()}: INITIATING ${jumps} HYPER-JUMPS.`;
+        try { db.ref('shared/broadcast').set({ message: alertMsg, timestamp: Date.now() }); } catch(e){}
+
+        // Roll the dice for hazards
+        rollShipDice(`JUMP: ${targetName}`, pilotMod, jumps);
+        
+        // Update Location
+        state.ship.location = targetName;
         saveState();
         try { db.ref('shared/ship').set(state.ship); } catch(e){}
     }
 
-    function renderShip() {
-        if (!state.ship) return;
-        const hc = document.getElementById('ship-hull-cur'); if(hc) hc.innerText = state.ship.hullCur;
-        const hm = document.getElementById('ship-hull-max'); if(hm) hm.innerText = state.ship.hullMax;
-        const sc = document.getElementById('ship-shields-cur'); if(sc) sc.innerText = state.ship.shieldsCur;
-        const sm = document.getElementById('ship-shields-max'); if(sm) sm.innerText = state.ship.shieldsMax;
-        const sp = document.getElementById('ship-speed'); if(sp) sp.innerText = state.ship.speed;
-        const hd = document.getElementById('ship-hyperdrive'); if(hd) hd.innerText = state.ship.hyperdrive;
-        const cr = document.getElementById('ship-crew'); if(cr) cr.innerText = state.ship.crew;
+    function forceJumpDM(targetName) {
+        state.ship.location = targetName;
+        saveState();
+        try { db.ref('shared/ship').set(state.ship); } catch(e){}
+        renderNaviComputer();
+    }
 
-        const cargoContainer = document.getElementById('ship-cargo-container');
-        if (cargoContainer && state.ship.cargo) {
-            cargoContainer.innerHTML = state.ship.cargo.map(item => `
-                <div class="data-card p-3">
-                    <span class="font-bold text-white text-sm display-font">${escapeHtml(item)}</span>
-                </div>
-            `).join('');
+    function shipAction(action, statStr, stationId) {
+        const shipWrapper = document.getElementById('ship-svg-wrapper');
+        const vfx = document.getElementById('ship-vfx');
+        
+        if (action === 'hyperspace') {
+            shipWrapper.classList.remove('animate-ship-hyperspace');
+            void shipWrapper.offsetWidth; 
+            shipWrapper.classList.add('animate-ship-hyperspace');
+            switchShipTab('navicomputer');
+            return;
+        }
+        
+        if (action === 'fire_lasers') {
+            vfx.innerHTML = `<rect x="48" y="0" width="4" height="20" fill="#22c55e" class="animate-ship-laser"/>`;
+        } else if (action === 'evade') {
+            shipWrapper.classList.remove('animate-ship-evade');
+            void shipWrapper.offsetWidth;
+            shipWrapper.classList.add('animate-ship-evade');
+        } else if (action === 'torpedo') {
+            vfx.innerHTML = `<circle cx="50" cy="50" r="5" fill="#60a5fa" class="animate-ship-torpedo" style="filter: drop-shadow(0 0 10px #3b82f6);"/>`;
+        } else if (action === 'attack_run') {
+            vfx.innerHTML = `<circle cx="50" cy="50" r="100" fill="none" stroke="#ef4444" stroke-width="2" class="animate-ship-sweep"/>`;
+        } else if (action === 'intimidate') {
+            vfx.innerHTML = `<rect x="30" y="0" width="2" height="20" fill="#ef4444" class="animate-ship-laser"/><rect x="70" y="0" width="2" height="20" fill="#ef4444" class="animate-ship-laser"/>`;
+        } else if (action === 'reroute') {
+            vfx.innerHTML = `<circle cx="50" cy="50" r="45" fill="none" stroke="#3b82f6" stroke-width="4" class="animate-ship-shield-pulse"/>`;
+        } else if (action === 'patch') {
+            vfx.innerHTML = `
+                <circle cx="50" cy="50" r="2" fill="#facc15" style="--tx: -30px; --ty: -30px;" class="animate-ship-spark"/>
+                <circle cx="50" cy="50" r="2" fill="#facc15" style="--tx: 30px; --ty: -10px;" class="animate-ship-spark"/>
+                <circle cx="50" cy="50" r="2" fill="#facc15" style="--tx: -10px; --ty: 40px;" class="animate-ship-spark"/>
+            `;
+        } else if (action === 'overload') {
+            vfx.innerHTML = `<circle cx="50" cy="50" r="20" fill="none" stroke="#a855f7" stroke-width="4" class="animate-ship-slice"/>`;
+        } else if (action === 'brace') {
+            shipWrapper.classList.remove('animate-ship-evade');
+            void shipWrapper.offsetWidth;
+            shipWrapper.style.transform = "scale(0.95)";
+            setTimeout(() => { shipWrapper.style.transform = "scale(1)"; }, 300);
+        }
+
+        setTimeout(() => { if(vfx) vfx.innerHTML = ''; }, 1500);
+
+        if (statStr !== 'None') {
+            let activeMod = 0;
+            const occupantSlot = (state.ship.stations && stationId) ? state.ship.stations[stationId] : null;
+            
+            if (occupantSlot && partyData[occupantSlot] && partyData[occupantSlot].stats) {
+                const score = partyData[occupantSlot].stats[statStr] || 10;
+                // Add prof bonus? The user might not have standard prof. Let's just use the party member's level.
+                const profBonus = Math.floor(((partyData[occupantSlot].level || 1) - 1) / 4) + 2;
+                activeMod = Math.floor((score - 10) / 2) + profBonus;
+            } else {
+                activeMod = Math.floor(((state.stats[statStr] || 10) - 10) / 2) + getProfBonus();
+            }
+
+            let labelStr = action.replace(/_/g, ' ').toUpperCase();
+            if (occupantSlot && partyData[occupantSlot].name) {
+                labelStr = `${partyData[occupantSlot].name}: ${labelStr}`;
+            }
+            
+            rollShipDice(labelStr, activeMod, 1);
         }
     }
 
@@ -2756,7 +3357,10 @@
                 <div class="flex gap-2">
                     <button onclick="updateBountyStatus('${b.id}', 'Captured')" class="flex-1 border border-emerald-900 text-emerald-500 text-xs py-1 rounded bg-slate-900 hover:bg-emerald-900/30 uppercase datapad-font transition-colors">Capture</button>
                     <button onclick="updateBountyStatus('${b.id}', 'Terminated')" class="flex-1 border border-red-900 text-red-500 text-xs py-1 rounded bg-slate-900 hover:bg-red-900/30 uppercase datapad-font transition-colors">Terminate</button>
-                    <button onclick="updateBountyStatus('${b.id}', 'Active')" class="flex-1 border border-slate-700 text-slate-400 text-xs py-1 rounded bg-slate-900 hover:bg-slate-800 uppercase datapad-font transition-colors">Reset</button>
+                    ${b.id.startsWith('custom_') ? 
+                        `<button onclick="deleteCustomBounty('${b.id}')" class="flex-1 border border-red-900 text-red-500 text-xs py-1 rounded bg-slate-900 hover:bg-red-900/30 uppercase datapad-font transition-colors">Delete</button>` :
+                        `<button onclick="updateBountyStatus('${b.id}', 'Active')" class="flex-1 border border-slate-700 text-slate-400 text-xs py-1 rounded bg-slate-900 hover:bg-slate-800 uppercase datapad-font transition-colors">Reset</button>`
+                    }
                 </div>
             </div>`;
         }).join('');
@@ -2803,13 +3407,40 @@
         if (!c) return;
 
         let html = `
-            <div class="bg-slate-900/80 border border-slate-700 p-3 rounded flex items-center justify-between mb-2">
-                <span class="text-white font-bold text-sm">Ship Hull Max</span>
-                <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-mono w-24 text-right" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
-            </div>
-            <div class="bg-slate-900/80 border border-slate-700 p-3 rounded flex items-center justify-between mb-4">
-                <span class="text-white font-bold text-sm">Ship Shields Max</span>
-                <input type="number" value="${state.ship ? state.ship.shieldsMax : 50}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-blue-400 font-mono w-24 text-right" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+            <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 border-b border-red-900/50 pb-1">Vessel Configuration</h4>
+            <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white font-bold text-xs uppercase datapad-font">Name</span>
+                    <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font w-40 text-right" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                </div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white font-bold text-xs uppercase datapad-font">Class</span>
+                    <select class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-300 text-xs w-40" onchange="if(state.ship) { state.ship.type=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                        <option value="freighter" ${state.ship && state.ship.type==='freighter' ? 'selected' : ''}>Light Freighter</option>
+                        <option value="gunship" ${state.ship && (state.ship.type==='gunship' || state.ship.type==='fighter') ? 'selected' : ''}>Assault Gunship</option>
+                        <option value="cruiser" ${state.ship && state.ship.type==='cruiser' ? 'selected' : ''}>Heavy Cruiser</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800">
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 font-bold text-[10px] uppercase datapad-font">Hull Max</span>
+                        <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-emerald-400 font-mono w-full text-right" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-slate-500 font-bold text-[10px] uppercase datapad-font">Quad Max</span>
+                        <input type="number" value="${state.ship ? state.ship.shieldsMax : 25}" class="bg-slate-950 border border-slate-700 rounded px-2 py-1 text-blue-400 font-mono w-full text-right" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); }">
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-1 mt-2">
+                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">F</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.front : 25}" onchange="if(state.ship){state.ship.shields.front=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
+                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">B</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.back : 25}" onchange="if(state.ship){state.ship.shields.back=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
+                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">P</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.port : 25}" onchange="if(state.ship){state.ship.shields.port=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
+                    <div class="flex flex-col"><span class="text-[9px] text-slate-500 uppercase font-bold text-center">S</span><input type="number" value="${state.ship && state.ship.shields ? state.ship.shields.starboard : 25}" onchange="if(state.ship){state.ship.shields.starboard=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-blue-400 rounded px-1 py-1 text-xs text-center"></div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-[9px] text-slate-500 uppercase font-bold">Hull Cur</span>
+                    <input type="number" value="${state.ship ? state.ship.hullCur : 100}" onchange="if(state.ship){state.ship.hullCur=parseInt(this.value); saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip();}" class="bg-slate-950 border border-slate-700 text-emerald-400 rounded px-2 py-1 w-full text-right mt-1">
+                </div>
             </div>
             <div class="bg-slate-900/80 border border-slate-700 p-3 rounded mb-4 mt-6">
                 <h4 class="text-red-400 font-bold uppercase tracking-widest text-xs mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg> Holonet Broadcast</h4>
@@ -2990,8 +3621,36 @@
         state.customBounties.push(newBounty);
         saveState();
         try { db.ref('shared/customBounties').set(state.customBounties); } catch(e){}
+        
+        const alertMsg = `NEW BOUNTY ISSUED: ${name.toUpperCase()} - REWARD: ${reward.toUpperCase()}`;
+        try { db.ref('shared/broadcast').set({ message: alertMsg, timestamp: Date.now() }); } catch(e){}
+        
         renderDM();
         renderBounties();
+    }
+
+    function deleteCustomBounty(id) {
+        if(!state.customBounties) return;
+        state.customBounties = state.customBounties.filter(b => b.id !== id);
+        if(state.bountiesStatus && state.bountiesStatus[id]) {
+            delete state.bountiesStatus[id];
+        }
+        saveState();
+        try { 
+            db.ref('shared/customBounties').set(state.customBounties); 
+            if(state.bountiesStatus) db.ref('shared/bounties').set(state.bountiesStatus);
+        } catch(e){}
+        renderBounties();
+    }
+
+    function switchProfile() {
+        localStorage.removeItem('sw5e_profile');
+        location.reload();
+    }
+    
+    function lockDatapad() {
+        localStorage.removeItem('sw5e_gateway_auth');
+        location.reload();
     }
 
     const PASSCODE = "IG-88";
@@ -3003,7 +3662,7 @@
             localStorage.setItem('sw5e_gateway_auth', 'true');
             const gateway = document.getElementById('security-gateway');
             gateway.style.opacity = '0';
-            startApplication();
+            checkProfileOnLoad();
             setTimeout(() => {
                 gateway.style.display = 'none';
             }, 500);
@@ -3014,10 +3673,44 @@
         }
     }
 
+    function checkProfileOnLoad() {
+        const savedProfile = localStorage.getItem('sw5e_profile');
+        if (savedProfile) {
+            startApplication();
+        } else {
+            if (partyData.slot1 && partyData.slot1.name) document.getElementById('profile-btn-slot1').innerText = partyData.slot1.name;
+            if (partyData.slot2 && partyData.slot2.name) document.getElementById('profile-btn-slot2').innerText = partyData.slot2.name;
+            if (partyData.slot3 && partyData.slot3.name) document.getElementById('profile-btn-slot3').innerText = partyData.slot3.name;
+            document.getElementById('profile-selector').style.display = 'flex';
+        }
+    }
+
+    function selectProfile(slot) {
+        if (slot === 'dm') {
+            const pass = prompt("Enter Protocol Override Code:");
+            if (pass !== "ORGY") { alert("Access Denied."); return; }
+            localStorage.setItem('sw5e_profile', 'dm');
+            loadState();
+            state.isDM = true;
+            saveState();
+        } else {
+            localStorage.setItem('sw5e_profile', slot);
+            loadState();
+            state.isDM = false;
+            state.activeSlot = slot;
+            saveState();
+        }
+        
+        const selector = document.getElementById('profile-selector');
+        selector.style.opacity = '0';
+        startApplication();
+        setTimeout(() => { selector.style.display = 'none'; }, 500);
+    }
+
     function checkAuthOnLoad() {
         if (localStorage.getItem('sw5e_gateway_auth') === 'true') {
             document.getElementById('security-gateway').style.display = 'none';
-            startApplication();
+            checkProfileOnLoad();
         }
     }
 
@@ -3049,6 +3742,50 @@
     // --- INIT ---
     checkAuthOnLoad();
 </script>
+
+<!-- SMALL DICE TOAST -->
+<div id="mini-dice-toast" class="fixed bottom-24 right-4 bg-slate-900 border border-hud rounded shadow-[0_0_15px_rgba(59,130,246,0.3)] p-3 z-[200] transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none w-48">
+    <div class="text-[10px] text-hud uppercase tracking-widest font-bold mb-1" id="mini-dice-label">Action</div>
+    <div class="flex items-end gap-2 justify-between border-t border-slate-800 pt-2">
+        <div class="text-3xl text-white font-mono leading-none" id="mini-dice-result">--</div>
+        <div class="text-xs text-slate-500 font-mono mb-1" id="mini-dice-mod">+0</div>
+    </div>
+</div>
+
+<!-- APP DRAWER OVERLAY -->
+<div id="app-drawer" onclick="if(event.target===this) closeAppDrawer()">
+    <h2 class="display-font text-3xl font-black text-hud tracking-widest uppercase mb-6 glow-text-hud">Datapad Uplink</h2>
+    <div class="drawer-grid">
+        <button onclick="switchMainTab('character')" id="nav-character" class="drawer-btn active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span>Character</span>
+        </button>
+        <button onclick="switchMainTab('party')" id="nav-party" class="drawer-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span>Party</span>
+        </button>
+        <button onclick="switchMainTab('ship')" id="nav-ship" class="drawer-btn col-span-2 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-hud/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            <span>Vessel & Navi-Computer</span>
+        </button>
+        <button onclick="switchMainTab('bounties')" id="nav-bounties" class="drawer-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <span>Bounties</span>
+        </button>
+        <button onclick="switchMainTab('database')" id="nav-database" class="drawer-btn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3 3h10c1.5 0 3-1 3-3V7c0-2-1.5-3-3-3H7C5.5 4 4 5 4 7zm0 0h16M9 4v16"></path></svg>
+            <span>Database</span>
+        </button>
+    </div>
+</div>
+
+<!-- FLOATING ACTION BUTTON -->
+<button id="fab-menu" onclick="toggleAppDrawer()">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+</button>
 
 </body>
 </html>
