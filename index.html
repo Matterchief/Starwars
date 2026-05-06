@@ -994,6 +994,37 @@
                 </div>
             </div>
 
+            <!-- More Readable Stats Below -->
+            <div id="ship-stats-panel" class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-slate-900/40 border border-emerald-900/30 rounded p-3 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] uppercase font-bold text-emerald-500/70 tracking-[0.2em]">Vessel Hull</span>
+                        <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span id="ship-stat-hull-cur" class="text-2xl font-bold text-emerald-400 font-mono leading-none">100</span>
+                        <span class="text-emerald-900 font-mono text-sm">/</span>
+                        <span id="ship-stat-hull-max" class="text-emerald-900 font-mono text-sm">100</span>
+                    </div>
+                    <div class="text-[8px] text-emerald-700 uppercase font-black tracking-tighter mt-1">INTEGRITY: OPTIMAL</div>
+                </div>
+                
+                <div class="bg-slate-900/40 border border-blue-900/30 rounded p-3 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] uppercase font-bold text-blue-400/70 tracking-[0.2em]">Shield Array</span>
+                        <svg class="w-3 h-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <span id="ship-stat-shields-cur" class="text-2xl font-bold text-blue-400 font-mono leading-none">50</span>
+                        <span class="text-blue-900 font-mono text-sm">/</span>
+                        <span id="ship-stat-shields-max" class="text-blue-900 font-mono text-sm">50</span>
+                    </div>
+                    <div class="text-[8px] text-blue-700 uppercase font-black tracking-tighter mt-1">OUTPUT: CONSOLIDATED</div>
+                </div>
+            </div>
+
             <!-- Enemy Scanners -->
             <div id="enemy-scanner-panel" class="mb-4 space-y-2 hidden">
                 <h3 class="text-[9px] uppercase tracking-[0.3em] font-bold text-red-500 mb-2 flex items-center gap-2">
@@ -1555,6 +1586,7 @@
                     saveState(); 
                     renderShip(); 
                     renderNaviComputer();
+                    if(state.isDM) renderDMVesselStatus();
                 }
             });
             db.ref('shared/bounties').on('value', snap => {
@@ -1568,11 +1600,12 @@
             db.ref('characters').on('value', snap => {
                 const data = snap.val();
                 if (data) {
-                    partyData = { ...partyData, ...data };
+                    partyData = data;
                     renderParty();
-                    if(state.isDM) renderDM();
+                    if(state.isDM) renderDMTelemetry();
                 }
             });
+
             db.ref('shared/broadcast').on('value', snap => {
                 const data = snap.val();
                 if (data && data.message && data.timestamp > lastBroadcastTime) {
@@ -4105,9 +4138,23 @@
         
         const hullBadge = document.getElementById('ship-hull-badge');
         if (hullBadge) {
-            hullBadge.innerText = `${state.ship.hullCur} HP`;
-            hullBadge.className = `absolute top-4 right-4 border text-[10px] font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 ${state.ship.hullCur < state.ship.hullMax * 0.3 ? 'bg-red-950/80 border-red-900 text-red-500 animate-pulse' : 'bg-slate-950/80 border-emerald-900 text-emerald-400'}`;
+            const hCur = state.ship.hullCur || 0;
+            const hMax = state.ship.hullMax || 100;
+            hullBadge.innerText = `${hCur} HP`;
+            hullBadge.className = `absolute top-4 right-4 border text-[10px] font-bold font-mono px-2 py-0.5 rounded-full backdrop-blur-sm z-10 ${hCur < hMax * 0.3 ? 'bg-red-950/80 border-red-900 text-red-500 animate-pulse' : 'bg-slate-950/80 border-emerald-900 text-emerald-400'}`;
+            
+            // Fill readable panel
+            const hCurEl = document.getElementById('ship-stat-hull-cur');
+            const hMaxEl = document.getElementById('ship-stat-hull-max');
+            if(hCurEl) hCurEl.innerText = hCur;
+            if(hMaxEl) hMaxEl.innerText = hMax;
         }
+
+        // Fill readable panel for shields
+        const sCurEl = document.getElementById('ship-stat-shields-cur');
+        const sMaxEl = document.getElementById('ship-stat-shields-max');
+        if(sCurEl) sCurEl.innerText = state.ship.shieldsCur || 0;
+        if(sMaxEl) sMaxEl.innerText = state.ship.shieldsMax || 0;
 
         // Update Station Claim Buttons
         if (state.ship.stations) {
@@ -4712,7 +4759,14 @@
 
     function dmResetShip() {
         if (!confirm('PURGE all ship data? Hull, shields, stations, and location will be reset. This CANNOT be undone.')) return;
-        const freshShip = { name:"The Vanguard", type:"freighter", hullMax:100, hullCur:100, shieldsMax:25, shields:{front:25,back:25,port:25,starboard:25}, stations:{helm:null,gunnery:null,engineering:null}, location:"Coruscant" };
+        const freshShip = { 
+            name:"The Vanguard", 
+            type:"freighter", 
+            hullMax:100, hullCur:100, 
+            shieldsMax:50, shieldsCur:50,
+            stations:{helm:null,gunnery:null,engineering:null}, 
+            location:"Coruscant" 
+        };
         state.ship = freshShip;
         saveState();
         try { db.ref('shared/ship').set(freshShip); } catch(e){}
@@ -4890,17 +4944,29 @@
                     <div class="bg-slate-900 border border-slate-800 p-4 rounded">
                         <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-hud/20 pb-1">Vital Statistics</h4>
                         <div class="space-y-3">
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
                                 <span class="text-[9px] text-slate-500 uppercase font-bold">Class</span>
-                                <span class="text-[10px] text-white font-bold uppercase">${data.cls} (Lvl ${data.level})</span>
+                                <input type="text" value="${data.cls}" onchange="updateDMCharField('${slotId}', 'cls', null, this.value)" class="bg-slate-950 border border-slate-800 text-white font-bold uppercase text-[10px] w-1/2 text-right px-1 rounded">
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Lvl</span>
+                                <input type="number" value="${data.level}" onchange="updateDMCharField('${slotId}', 'level', null, this.value)" class="bg-slate-950 border border-slate-800 text-white font-bold text-[10px] w-1/4 text-right px-1 rounded">
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">HP Current</span>
+                                <input type="number" value="${data.hp.current}" onchange="updateDMCharField('${slotId}', 'hp', 'current', this.value)" class="bg-slate-950 border border-slate-800 text-emerald-400 font-bold text-[10px] w-1/4 text-right px-1 rounded">
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">HP Max</span>
+                                <input type="number" value="${data.hp.max}" onchange="updateDMCharField('${slotId}', 'hp', 'max', this.value)" class="bg-slate-950 border border-slate-800 text-emerald-900 font-bold text-[10px] w-1/4 text-right px-1 rounded">
+                            </div>
+                            <div class="flex justify-between items-center">
                                 <span class="text-[9px] text-slate-500 uppercase font-bold">Armor Class</span>
-                                <span class="text-[10px] text-white font-mono">${data.ac}</span>
+                                <input type="number" value="${data.ac}" onchange="updateDMCharField('${slotId}', 'ac', null, this.value)" class="bg-slate-950 border border-slate-800 text-white font-mono text-[10px] w-1/4 text-right px-1 rounded">
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-[9px] text-slate-500 uppercase font-bold">Speed</span>
-                                <span class="text-[10px] text-white font-mono">${data.speed} ft</span>
+                            <div class="flex justify-between items-center">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold">Speed (ft)</span>
+                                <input type="number" value="${data.speed}" onchange="updateDMCharField('${slotId}', 'speed', null, this.value)" class="bg-slate-950 border border-slate-800 text-white font-mono text-[10px] w-1/4 text-right px-1 rounded">
                             </div>
                         </div>
                     </div>
@@ -4916,7 +4982,7 @@
                             `).join('')}
                             <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
                                 <span class="text-[9px] text-slate-400 uppercase font-bold">Credits</span>
-                                <span class="text-[10px] text-amber-400 font-mono">${(data.credits || 0).toLocaleString()} cr</span>
+                                <input type="number" value="${data.credits || 0}" onchange="updateDMCharField('${slotId}', 'credits', null, this.value)" class="bg-transparent border-none text-right text-amber-400 font-mono text-[10px] w-1/2 focus:ring-0 p-0">
                             </div>
                         </div>
                     </div>
