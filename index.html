@@ -2456,71 +2456,56 @@
         rollDice(title, mod, noRoll);
     }
 
-    function rollDice(label, modifier, noRoll = false) {
+    async function rollDice(label, modifier, noRoll = false) {
+        const hud = document.getElementById('dice-hud');
+        const resEl = document.getElementById('dice-result');
+        if (!hud || !resEl) return;
+
         if (noRoll) {
-            const resEl = document.getElementById('dice-result');
-            const hud = document.getElementById('dice-hud');
-            if (hud && resEl) {
-                document.getElementById('dice-label').innerText = label;
-                document.getElementById('dice-mod').innerText = '--';
-                resEl.innerText = 'OK';
-                hud.classList.add('active');
-                setTimeout(() => closeDiceHUD(), 1500);
-            }
-            // Log the DC or utility action
+            document.getElementById('dice-label').innerText = label;
+            document.getElementById('dice-mod').innerText = '--';
+            resEl.innerText = 'OK';
+            hud.classList.add('active');
+            setTimeout(() => closeDiceHUD(), 1500);
+            
             try {
-                const logRef = db.ref('shared/gamelog').push();
-                logRef.set({
+                db.ref('shared/gamelog').push().set({
                     name: state.name || "Unknown",
-                    label: label,
-                    mod: 0,
-                    result: 'INF',
-                    timestamp: Date.now()
+                    label: label, mod: 0, result: 'INF', timestamp: Date.now()
                 });
             } catch(e){}
             return;
         }
-        
-        const hud = document.getElementById('dice-hud');
-        const resEl = document.getElementById('dice-result');
-        if (!hud || !resEl) return;
-        
+
         document.getElementById('dice-label').innerText = `Rolling ${label}`;
         document.getElementById('dice-mod').innerText = modifier >= 0 ? `+${modifier}` : modifier;
         
         hud.classList.add('active');
-        resEl.classList.remove('dice-crit', 'dice-fail');
+        resEl.classList.remove('dice-crit', 'dice-fail', 'glow-text-hud');
         resEl.innerText = '--';
 
         const logRef = db.ref('shared/gamelog').push();
         logRef.set({
             name: state.name || "Unknown",
-            label: label,
-            mod: modifier,
-            result: 0,
-            timestamp: Date.now()
+            label: label, mod: modifier, result: '...', timestamp: Date.now()
         });
 
-        // Animation loop
-        let currentRoll = 1;
-        const interval = setInterval(() => {
-            currentRoll = Math.floor(Math.random() * 20) + 1;
-            resEl.innerText = currentRoll + modifier;
-        }, 50);
+        // Animation
+        for(let i=0; i<12; i++) {
+            resEl.innerText = Math.floor(Math.random() * 20) + 1;
+            await new Promise(r => setTimeout(r, 45));
+        }
 
-        setTimeout(() => {
-            clearInterval(interval);
-            const roll = Math.floor(Math.random() * 20) + 1;
-            const total = roll + modifier;
-            
-            logRef.update({ result: total });
-            
-            if(roll === 20) resEl.classList.add('dice-crit', 'glow-text-hud');
-            if(roll === 1) resEl.classList.add('dice-fail');
-            
-            resEl.innerText = total;
-            setTimeout(() => closeDiceHUD(), 2500);
-        }, 800);
+        const roll = Math.floor(Math.random() * 20) + 1;
+        const total = roll + modifier;
+        
+        if(roll === 20) resEl.classList.add('dice-crit', 'glow-text-hud');
+        if(roll === 1) resEl.classList.add('dice-fail');
+        
+        resEl.innerText = total;
+        logRef.update({ result: total });
+        
+        setTimeout(() => closeDiceHUD(), 2000);
     }
 
     function consumeSlot(lvl) {
@@ -3851,36 +3836,7 @@
         }
     }
 
-    async function rollDice(label, modifier) {
-        const hud = document.getElementById('dice-hud');
-        const resEl = document.getElementById('dice-result');
-        if (!hud || !resEl) return;
-        
-        document.getElementById('dice-label').innerText = `Rolling ${label}`;
-        document.getElementById('dice-mod').innerText = modifier >= 0 ? `+${modifier}` : modifier;
-        
-        hud.classList.add('active');
-        resEl.classList.remove('dice-crit', 'dice-fail');
-        resEl.innerText = '--';
 
-        for(let i=0; i<10; i++) {
-            resEl.innerText = Math.floor(Math.random() * 20) + 1;
-            await new Promise(r => setTimeout(r, 40));
-        }
-
-        const roll = Math.floor(Math.random() * 20) + 1;
-        const total = roll + modifier;
-        
-        // Final Broadcast
-        logRef.update({ result: total });
-        
-        if(roll === 20) resEl.classList.add('dice-crit', 'glow-text-hud');
-        if(roll === 1) resEl.classList.add('dice-fail');
-        
-        resEl.innerText = total;
-        
-        setTimeout(() => closeDiceHUD(), 2000);
-    }
 
     function closeDiceHUD() {
         const hud = document.getElementById('dice-hud');
