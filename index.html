@@ -1557,7 +1557,7 @@
     }
 
     function syncToFirebase() {
-        if (!state.activeSlot) return;
+        if (!state.activeSlot || state.activeSlot === 'slot4') return;
         const charData = {
             name: state.name || "Unknown",
             customTitle: state.customTitle || "",
@@ -5486,9 +5486,9 @@
         if (!c) return;
         
         let html = '';
-        const slots = ['slot1', 'slot2', 'slot3'];
-        slots.forEach(slot => {
-            if (slot === state.activeSlot) return; // Skip own slot
+        // Iterate through all slots in partyData, excluding self and DM
+        Object.keys(partyData).sort().forEach(slot => {
+            if (slot === state.activeSlot || slot === 'slot4') return;
             const data = partyData[slot];
             if (!data) {
                 html += `<div class="data-card p-4 text-center opacity-50"><span class="text-xs uppercase datapad-font text-slate-500">No Telemetry for ${slot}</span></div>`;
@@ -5860,6 +5860,9 @@
                 return; 
             }
             localStorage.setItem('sw5e_profile', 'dm');
+            
+            // Clear DM shell from party data so players don't see it
+            try { db.ref('characters/slot4').remove(); } catch(e){}
             
             // 1. Load general state first
             loadState();
