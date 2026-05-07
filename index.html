@@ -2233,8 +2233,13 @@
                     <div class="flex flex-wrap gap-1">${tags}</div>
                 </div>
             </div>
-            
-            <p class="text-sm text-slate-400 leading-snug border-t border-slate-800 pt-2 card-desc pr-8">${highlight(s.desc, q)}</p>
+
+            <div class="flex justify-between items-end border-t border-slate-800 pt-2 mt-2">
+                <p class="text-xs text-slate-400 leading-snug card-desc pr-4 flex-1">${highlight(s.desc, q)}</p>
+                ${s.type === 'Attack' ? `
+                    <button onclick="event.stopPropagation(); rollSpellAttack('${s.sw}')" class="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/30 px-3 py-1 rounded text-[10px] font-bold uppercase transition-all shadow-[0_0_10px_rgba(153,27,27,0.2)]">Roll Attack</button>
+                ` : ''}
+            </div>
         </div>`;
     }
 
@@ -2372,9 +2377,16 @@
                 
                 <div class="flex gap-3 pt-4 border-t border-slate-800">
                     ${learned ? `
-                        <button onclick="closeDetails(); rollItem(event, ${index}, 'spell')" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-                            Deploy Power
-                        </button>
+                        <div class="flex flex-col flex-1 gap-2">
+                            <button onclick="closeDetails(); rollItem(event, ${index}, 'spell')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded font-bold uppercase tracking-widest text-xs transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                                Deploy Power
+                            </button>
+                            ${data.type === 'Attack' ? `
+                                <button onclick="rollSpellAttack('${data.sw}')" class="w-full bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/30 py-2 rounded text-[10px] font-bold uppercase transition-all shadow-[0_0_10px_rgba(153,27,27,0.2)]">
+                                    Roll Attack Roll
+                                </button>
+                            ` : ''}
+                        </div>
                         <button onclick="toggleKnownPower(event, ${index}); openDetails('spell', ${index});" class="px-4 bg-slate-800 hover:bg-red-900/30 text-slate-400 hover:text-red-400 py-3 rounded font-bold uppercase tracking-widest text-[10px] transition-all border border-slate-700 hover:border-red-900/50">
                             Unlearn
                         </button>
@@ -3511,6 +3523,18 @@
     }
 
     // --- CHARACTER SHEET FUNCTIONS ---
+    function getSpellMod() {
+        const cls = state.cls || "";
+        let stat = "int"; // Default
+        if (["Sorcerer", "Paladin", "Bard", "Warlock"].includes(cls)) stat = "cha";
+        if (["Cleric", "Druid", "Ranger", "Monk"].includes(cls)) stat = "wis";
+        return getMod(stat) + getProfBonus();
+    }
+
+    function rollSpellAttack(label) {
+        rollDice(`${label} Attack`, getSpellMod());
+    }
+
     function getMod(stat) {
         const score = state.stats[stat] || 10;
         return Math.floor((score - 10) / 2);
