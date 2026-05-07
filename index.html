@@ -2446,9 +2446,9 @@
 
     function getMaxKnownPowers(level, cls) {
         const table = {
-            "Sorcerer": { 1:2, 2:3, 3:4, 4:5, 5:6, 6:7, 7:8 },
-            "Ranger": { 1:0, 2:2, 3:3, 4:3, 5:4, 6:4, 7:5 },
-            "Cleric": { 1:4, 2:5, 3:6, 4:7, 5:9, 6:10, 7:11 } 
+            "Sorcerer": { 1:2, 2:4, 3:6, 4:7, 5:9, 6:10, 7:11 },
+            "Ranger": { 1:2, 2:3, 3:4, 4:5, 5:6, 6:6, 7:7 },
+            "Cleric": { 1:2, 2:4, 3:6, 4:7, 5:9, 6:10, 7:11 } 
         };
         return (table[cls] && table[cls][level]) || 99;
     }
@@ -2713,13 +2713,13 @@
              feature:{name:"Primal Companion", desc:'You gain a beast companion (Beast of the Land, Sea, or Sky). It obeys your commands and acts on your initiative.'}}
         ],
         levels: {
-            1: {features:['Favored Enemy (Bounty Target Lock): Free cast of Hunter\'s Mark, no concentration at low levels.','Deft Explorer (Canny): Gain expertise in one skill you\'re proficient in.']},
-            2: {features:['Spellcasting: Access to Ranger spell list (WIS-based). 2 spells known.','Fighting Style: Choose a combat specialization.']},
-            3: {features:['Ranger Conclave: Choose your subclass archetype.','3 spells known.']},
-            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4 spells known.']},
-            5: {features:['Extra Attack: Attack twice per Attack action.','5 spells known. 2nd-level spell slots.']},
+            1: {features:['Favored Enemy (Bounty Target Lock): Free cast of Hunter\'s Mark, no concentration at low levels.','Deft Explorer (Canny): Gain expertise in one skill you\'re proficient in.','2 powers known.']},
+            2: {features:['Spellcasting: Access to Ranger spell list (WIS-based). 3 powers known.','Fighting Style: Choose a combat specialization.']},
+            3: {features:['Ranger Conclave: Choose your subclass archetype.','4 powers known.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','5 powers known.']},
+            5: {features:['Extra Attack: Attack twice per Attack action.','6 powers known. 2nd-level spell slots.']},
             6: {features:['Roving: Your speed increases by 5 feet, and you gain a climbing and swimming speed.','Favored Enemy (Bounty Target Lock) Improvement: Damage increases.']},
-            7: {features:['Subclass Feature: Gain an archetype ability (e.g. Defensive Tactics for Hunter).','6 spells known.']}
+            7: {features:['Subclass Feature: Gain an archetype ability (e.g. Defensive Tactics for Hunter).','7 powers known.']}
         }
     };
 
@@ -2756,13 +2756,13 @@
              feature:{name:"Warding Flare", desc:'When you are attacked by a creature within 30 feet that you can see, you can use your reaction to impose disadvantage on the attack roll.'}}
         ],
         levels: {
-            1: {features:['Force Sensitivity (Spellcasting): You channel the Force through wisdom and empathy (WIS). 3 cantrips known.','Divine Domain (Mystic Path): Choose your focus — Sage or Seer.']},
-            2: {features:['Force Channeling (Channel Divinity): Twice per short rest, you can unleash a powerful burst of Force energy.','Harness Force Energy: Regain an expended 1st-level power slot as an action.']},
-            3: {features:['2nd-level Force powers unlocked.','Aura of Vitality / Aid.']},
-            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4th cantrip known.']},
-            5: {features:['3rd-level Force powers unlocked (Force Sever, Revivify).','Destroy Droids (Destroy Undead): When you use Force Channeling (Turn Droids), you can destroy droids of CR 1/2 or lower.']},
-            6: {features:['Force Channeling (3/rest).','Subclass Feature: Gain an archetype ability.']},
-            7: {features:['4th-level Force powers unlocked (Force Stasis, Banishment).']}
+            1: {features:['Force Sensitivity (Spellcasting): You channel the Force through wisdom and empathy (WIS). 3 cantrips known. 2 powers known.','Divine Domain (Mystic Path): Choose your focus — Sage or Seer.']},
+            2: {features:['Force Channeling (Channel Divinity): Twice per short rest, you can unleash a powerful burst of Force energy.','Harness Force Energy: Regain an expended 1st-level power slot as an action.','4 powers known.']},
+            3: {features:['2nd-level Force powers unlocked. 6 powers known.','Aura of Vitality / Aid.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','4th cantrip known. 7 powers known.']},
+            5: {features:['3rd-level Force powers unlocked (Force Sever, Revivify). 9 powers known.','Destroy Droids (Destroy Undead): When you use Force Channeling (Turn Droids), you can destroy droids of CR 1/2 or lower.']},
+            6: {features:['Force Channeling (3/rest). 10 powers known.','Subclass Feature: Gain an archetype ability.']},
+            7: {features:['4th-level Force powers unlocked (Force Stasis, Banishment). 11 powers known.']}
         }
     };
 
@@ -2787,12 +2787,12 @@
         ],
         levels: {
             1: {features:['Innate Force Connection (Spellcasting): Your raw, instinctive link to the Force lets you channel powers through sheer willpower (CHA). 4 cantrips known, 2 powers known.','Sorcerous Origin: Choose how your Force power manifests — Wild, Dark, or Storm.']},
-            2: {features:['Sorcery Points: 2 pts (Font of Magic). Convert between sorcery points and power slots, representing your raw Force stamina.','3 powers known.']},
-            3: {features:['Metamagic (Force Manipulation): Choose 2 options. Bend the rules of your Force powers — twin them, hide them, accelerate them.','4 powers known. 2nd-level power slots.']},
-            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','5 cantrips known. 5 powers known.']},
-            5: {features:['3rd-level Force powers unlocked (Sith Lightning, Force Storm).','5 sorcery points. 6 powers known.']},
-            6: {features:['Sorcerous Origin Feature: Your lineage deepens, granting a powerful new Dark Side, Wild, or Storm ability.','7 powers known.']},
-            7: {features:['4th-level Force powers unlocked (Plasma Barrier, Force Exile).','7 sorcery points. 8 powers known.']}
+            2: {features:['Sorcery Points: 2 pts (Font of Magic). Convert between sorcery points and power slots, representing your raw Force stamina.','4 powers known.']},
+            3: {features:['Metamagic (Force Manipulation): Choose 2 options. Bend the rules of your Force powers — twin them, hide them, accelerate them.','6 powers known. 2nd-level power slots.']},
+            4: {features:['Ability Score Improvement: +2 to one score OR +1 to two scores.','5 cantrips known. 7 powers known.']},
+            5: {features:['3rd-level Force powers unlocked (Sith Lightning, Force Storm).','5 sorcery points. 9 powers known.']},
+            6: {features:['Sorcerous Origin Feature: Your lineage deepens, granting a powerful new Dark Side, Wild, or Storm ability.','10 powers known.']},
+            7: {features:['4th-level Force powers unlocked (Plasma Barrier, Force Exile).','7 sorcery points. 11 powers known.']}
         }
     };
 
