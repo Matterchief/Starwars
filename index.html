@@ -1880,16 +1880,21 @@
     }
 
     const planetData = [
-        { name: "Coruscant", capital: "Galactic City", terrain: "Cityscape", desc: "The heart of the galaxy. An ecumenopolis where the entire surface is covered by one massive city.", background: "For millennia, Coruscant has served as the political hub of the galaxy. It is home to the Galactic Senate and the Jedi Temple. Its upper levels are a display of extreme wealth, while the lower levels (down to Level 1313) are hubs of crime and poverty." },
-        { name: "Tatooine", capital: "Bestine", terrain: "Desert", desc: "A harsh desert world in the Outer Rim, ruled by Hutt cartels and scavengers.", background: "Orbiting twin suns (Tatoo I and II), this world is sparsely populated. Bestine is the administrative capital, though Mos Eisley and Mos Espa are more famous spaceports. It is the homeworld of the Skywalker lineage and the infamous Jawa and Sand People species." },
-        { name: "Naboo", capital: "Theed", terrain: "Plains, Swamps, Oceans", desc: "A peaceful, lush world known for its high culture, beautiful architecture, and Gungan underwater cities.", background: "Naboo is unique for its hollow core filled with water, allowing Gungans to traverse the planet's interior. The surface is home to the Naboo people, led by a democratically elected monarch. It played a pivotal role in the rise of the Empire." },
-        { name: "Alderaan", capital: "Aldera", terrain: "Mountains, Grasslands", desc: "The 'bright center of the galaxy,' known for its pacifism and stunning natural beauty.", background: "A core world with no standing army, Alderaan was a center of arts, culture, and diplomacy. It was a key founding world of the Rebel Alliance, which eventually led to its tragic destruction by the first Death Star as a display of Imperial terror." },
-        { name: "Hoth", capital: "Echo Base (Defunct)", terrain: "Ice, Snow", desc: "A remote, frozen wasteland in the Anoat sector. Home to the tauntaun and the deadly wampa.", background: "Hoth has no indigenous sentient population and very few visitors. It served as the secret headquarters for the Rebel Alliance until the Imperial discovery and the subsequent Battle of Hoth. Its surface temperatures are lethal without specialized gear." },
-        { name: "Mustafar", capital: "Fralideja", terrain: "Volcanic", desc: "A tiny, volatile planet rich in minerals, dominated by rivers of lava and obsidian mountains.", background: "Mustafar was a stronghold for the Techno Union and later the site of the final duel between Anakin Skywalker and Obi-Wan Kenobi. Darth Vader eventually constructed his personal fortress here, drawing power from the planet's dark side locus." },
-        { name: "Kamino", capital: "Tipoca City", terrain: "Ocean", desc: "An aquatic world perpetually covered in storms. Known for the Tipoca City cloning facilities.", background: "Located just outside the Rishi Maze, Kamino is home to the Kaminoans — masters of genetic engineering. They produced the Grand Army of the Republic. The planet is entirely covered by water, with cities built on massive stilts above the crashing waves." },
-        { name: "Geonosis", capital: "Stalgasin Hive", terrain: "Desert, Canyons", desc: "A rocky, ringed planet inhabited by insectoid Geonosians. Primary site of droid foundries.", background: "The site of the first battle of the Clone Wars. The Geonosians are expert engineers who helped design the Death Star. After the war, the Empire sterilized the planet to keep its construction projects secret." },
-        { name: "Bespin", capital: "Cloud City", terrain: "Gas Giant", desc: "A massive gas giant with a thin layer of breathable atmosphere where Tibanna gas is mined.", background: "Bespin is a key source of Tibanna gas, used in blaster weapons and hyperdrives. Cloud City is a major luxury resort and industrial hub suspended in the atmosphere. It was famously governed by Lando Calrissian before being occupied by the Empire." },
-        { name: "Endor", capital: "Bright Tree Village", terrain: "Forests, Mountains", desc: "The 'Forest Moon' orbits a massive gas giant. Home to the Ewoks and giant trees.", background: "Endor is a remote world that became the staging ground for the final battle against the second Death Star. Its dense forests are inhabited by primitive but resourceful Ewoks. The moon's gravity is maintained by the gas giant it orbits." }
+        { name: "Coruscant", x: 50, y: 50, capital: "Galactic City", terrain: "Ecumenopolis", env: "Urban / Cityscape", climate: "Controlled / Temperate", color: "from-amber-900 to-slate-900", desc: "The heart of the galaxy. An ecumenopolis where the entire surface is covered by one massive city.", background: "For millennia, Coruscant has served as the political hub of the galaxy. It is home to the Galactic Senate and the Jedi Temple. Its upper levels are a display of extreme wealth, while the lower levels (down to Level 1313) are hubs of crime and poverty." },
+        { name: "Tatooine", x: 80, y: 15, capital: "Bestine", terrain: "Desert", env: "Desert / Wasteland", climate: "Arid / Dual Suns", color: "from-orange-900 to-yellow-900", desc: "A harsh desert world in the Outer Rim, ruled by Hutt cartels and scavengers.", background: "Orbiting twin suns (Tatoo I and II), this world is sparsely populated. Bestine is the administrative capital, though Mos Eisley and Mos Espa are more famous spaceports. It is the homeworld of the Skywalker lineage and the infamous Jawa and Sand People species." },
+        { name: "Naboo", x: 60, y: 30, capital: "Theed", terrain: "Plains, Swamps, Oceans", env: "Plains / Swamps / Oceans", climate: "Temperate / Ideal", color: "from-teal-900 to-emerald-950", desc: "A peaceful, lush world known for its high culture, beautiful architecture, and Gungan underwater cities.", background: "Naboo is unique for its hollow core filled with water, allowing Gungans to traverse the planet's interior. The surface is home to the Naboo people, led by a democratically elected monarch. It played a pivotal role in the rise of the Empire." },
+        { name: "Alderaan", x: 45, y: 45, capital: "Aldera", terrain: "Mountains, Grasslands", env: "Mountains / Grasslands", climate: "Temperate / Scenic", color: "from-blue-700 to-emerald-900", desc: "The 'bright center of the galaxy,' known for its pacifism and stunning natural beauty. (Post-Imperial status: Debris Field).", background: "A core world with no standing army, Alderaan was a center of arts, culture, and diplomacy. It was a key founding world of the Rebel Alliance, which eventually led to its tragic destruction by the first Death Star as a display of Imperial terror." },
+        { name: "Hoth", x: 10, y: 20, capital: "Echo Base (Defunct)", terrain: "Ice, Snow", env: "Glacial / Tundra", climate: "Frozen / Sub-Zero", color: "from-blue-900 to-slate-100/10", desc: "A remote, frozen wasteland in the Anoat sector. Home to the tauntaun and the deadly wampa.", background: "Hoth has no indigenous sentient population and very few visitors. It served as the secret headquarters for the Rebel Alliance until the Imperial discovery and the subsequent Battle of Hoth. Its surface temperatures are lethal without specialized gear." },
+        { name: "Mustafar", x: 15, y: 80, capital: "Fralideja", terrain: "Volcanic", env: "Lava / Volcanic", climate: "Extreme / Molten", color: "from-red-900 to-orange-950", desc: "A tiny, volatile planet rich in minerals, dominated by rivers of lava and obsidian mountains.", background: "Mustafar was a stronghold for the Techno Union and later the site of the final duel between Anakin Skywalker and Obi-Wan Kenobi. Darth Vader eventually constructed his personal fortress here, drawing power from the planet's dark side locus." },
+        { name: "Kamino", x: 90, y: 90, capital: "Tipoca City", terrain: "Ocean", env: "Global Ocean", climate: "Stormy / Raining", color: "from-cyan-900 to-blue-950", desc: "An aquatic world perpetually covered in storms. Known for the Tipoca City cloning facilities.", background: "Located just outside the Rishi Maze, Kamino is home to the Kaminoans — masters of genetic engineering. They produced the Grand Army of the Republic. The planet is entirely covered by water, with cities built on massive stilts above the crashing waves." },
+        { name: "Geonosis", x: 85, y: 10, capital: "Stalgasin Hive", terrain: "Desert, Canyons", env: "Canyons / Spires", climate: "Hot / Arid", color: "from-red-800 to-amber-900", desc: "A rocky, ringed planet inhabited by insectoid Geonosians. Primary site of droid foundries.", background: "The site of the first battle of the Clone Wars. The Geonosians are expert engineers who helped design the Death Star. After the war, the Empire sterilized the planet to keep its construction projects secret." },
+        { name: "Bespin", x: 50, y: 70, capital: "Cloud City", terrain: "Gas Giant", env: "Gas Giant / Atmosphere", climate: "Temperate (Sky Level)", color: "from-orange-800 to-pink-900", desc: "A massive gas giant with a thin layer of breathable atmosphere where Tibanna gas is mined.", background: "Bespin is a key source of Tibanna gas, used in blaster weapons and hyperdrives. Cloud City is a major luxury resort and industrial hub suspended in the atmosphere. It was famously governed by Lando Calrissian before being occupied by the Empire." },
+        { name: "Endor", x: 30, y: 10, capital: "Bright Tree Village", terrain: "Forests, Mountains", env: "Forest / Jungle", climate: "Temperate / Humid", color: "from-emerald-900 to-green-950", desc: "The 'Forest Moon' orbits a massive gas giant. Home to the Ewoks and giant trees.", background: "Endor is a remote world that became the staging ground for the final battle against the second Death Star. Its dense forests are inhabited by primitive but resourceful Ewoks. The moon's gravity is maintained by the gas giant it orbits." },
+        { name: "Kashyyyk", x: 65, y: 55, capital: "Kachirho", terrain: "Jungle / Arboreal", env: "Massive Wroshyr Forests", climate: "Humid / Tropical", color: "from-green-900 to-amber-950", desc: "Homeworld of the Wookiees, dominated by towering forests and diverse wildlife.", background: "Kashyyyk is famous for its wroshyr trees, which can reach several kilometers in height. Wookiees build their cities in the upper canopies. The planet has been the site of numerous battles, particularly during the Clone Wars and the Imperial era." },
+        { name: "Mandalore", x: 70, y: 70, capital: "Sundari", terrain: "Waste / Biodomes", env: "Desertified / War-torn", climate: "Hostile / Dry", color: "from-slate-800 to-red-950", desc: "Outer Rim world of legendary warriors, once lush but now devastated by centuries of warfare.", background: "Mandalore's surface was scorched during the Great Clan Wars, forcing its inhabitants into large domed cities like Sundari. It is the spiritual home of the Mandalorian people and their unique culture of honor and combat." },
+        { name: "Yavin 4", x: 35, y: 75, capital: "Great Temple (Base)", terrain: "Ancient Jungle", env: "Tropical / Ruins", climate: "Warm / Humid", color: "from-emerald-800 to-yellow-950", desc: "A moon orbiting Yavin Prime, containing ancient temples built by the Massassi.", background: "Yavin 4 served as the primary headquarters for the Rebel Alliance during the Battle of Yavin. The moon is covered in dense jungles and littered with ancient stone temples that resonate with the Force." },
+        { name: "Dathomir", x: 80, y: 85, capital: "Nightsister Stronghold", terrain: "Red Forest / Swamp", env: "Dark / Eerie", climate: "Toxic / Unsettling", color: "from-red-950 to-purple-950", desc: "A dark, red-lit planet strong in the dark side of the Force. Home to the Nightsisters.", background: "Dathomir is a world of rugged beauty and deadly mystery. It is ruled by the Nightsisters, a clan of Force-sensitive witches who use dark magics. The planet's atmosphere is tinted red by its sun, giving it a perpetually ominous appearance." },
+        { name: "Exegol", x: 5, y: 95, capital: "Sith Citadel", terrain: "Barren / Stormy", env: "Desert / Sith Redoubt", climate: "Deadly / Constant Lightning", color: "from-slate-900 to-blue-950", desc: "A hidden Sith world in the Unknown Regions, serving as a bastion for the Dark Side.", background: "Exegol is a barren, rocky world where the veil between the living and the dead is thin. It was a secret stronghold for the Sith Eternal and the site of the Final Order's fleet construction." }
     ];
 
     const spellData = [
@@ -4519,33 +4524,10 @@
         renderShip();
     }
 
-    const planetsList = [
-        { name: "Coruscant", x: 50, y: 50, desc: "Galactic capital and massive ecumenopolis.", env: "Urban / Ecumenopolis", climate: "Controlled / Temperate", color: "from-amber-900 to-slate-900" },
-        { name: "Tatooine", x: 80, y: 15, desc: "Harsh desert world controlled by Hutts.", env: "Desert / Wasteland", climate: "Arid / Dual Suns", color: "from-orange-900 to-yellow-900" },
-        { name: "Hoth", x: 10, y: 20, desc: "Remote, icy wasteland.", env: "Glacial / Tundra", climate: "Frozen / Sub-Zero", color: "from-blue-900 to-slate-100/10" },
-        { name: "Endor", x: 30, y: 10, desc: "Forested moon home to Ewoks.", env: "Forest / Jungle", climate: "Temperate / Humid", color: "from-emerald-900 to-green-950" },
-        { name: "Naboo", x: 60, y: 30, desc: "Lush world with human and Gungan societies.", env: "Plains / Swamps / Oceans", climate: "Temperate / Ideal", color: "from-teal-900 to-emerald-950" },
-        { name: "Kashyyyk", x: 65, y: 55, desc: "Forest planet of massive wroshyr trees.", env: "Jungle / Arboreal", climate: "Humid / Tropical", color: "from-green-900 to-amber-950" },
-        { name: "Mandalore", x: 70, y: 70, desc: "Outer Rim world of legendary warriors.", env: "Waste / Biodomes", climate: "Hostile / Dry", color: "from-slate-800 to-red-950" },
-        { name: "Concord Dawn", x: 75, y: 68, desc: "Agricultural world and home to the Mandalorian Protectors.", env: "Plains / Fractured Moon", climate: "Temperate / Fertile", color: "from-amber-700 to-emerald-900" },
-        { name: "Dxun", x: 62, y: 72, desc: "The Demon Moon of Onderon; site of legendary jungle warfare.", env: "Predatory Jungle", climate: "Dense / Hostile", color: "from-green-950 to-red-950" },
-        { name: "Malachor V", x: 42, y: 88, desc: "Site of the cataclysmic final battle of the Mandalorian Wars.", env: "Cracked / Stormy", climate: "Lethal / Unstable", color: "from-purple-950 to-slate-950" },
-        { name: "Cathar", x: 55, y: 42, desc: "World of the feline Cathar; devastated during the Mandalorian Crusades.", env: "Savannah / Steppes", climate: "Arid / Warm", color: "from-yellow-800 to-orange-950" },
-        { name: "Althir", x: 82, y: 50, desc: "Key sector and site of major naval conflict in the Outer Rim.", env: "Oceanic / Rocky", climate: "Stormy / Cold", color: "from-blue-950 to-slate-900" },
-        { name: "Mustafar", x: 15, y: 80, desc: "Volcanic world rich in minerals.", env: "Lava / Volcanic", climate: "Extreme / Molten", color: "from-red-900 to-orange-950" },
-        { name: "Kamino", x: 90, y: 90, desc: "Aquatic planet known for cloning facilities.", env: "Global Ocean", climate: "Stormy / Raining", color: "from-cyan-900 to-blue-950" },
-        { name: "Geonosis", x: 85, y: 10, desc: "Rocky planet and droid manufacturing hub.", env: "Canyons / Spires", climate: "Hot / Arid", color: "from-red-800 to-amber-900" },
-        { name: "Alderaan (Asteroids)", x: 45, y: 45, desc: "Former core world, now an asteroid field.", env: "Debris Field", climate: "Vacuum", color: "from-slate-700 to-slate-950" },
-        { name: "Yavin 4", x: 35, y: 75, desc: "Jungle moon containing ancient temples.", env: "Ancient Jungle", climate: "Tropical", color: "from-emerald-800 to-yellow-950" },
-        { name: "Lothal", x: 25, y: 65, desc: "Outer Rim plains world with strong Force ties.", env: "Grassy Plains", climate: "Temperate", color: "from-emerald-700 to-blue-900" },
-        { name: "Dathomir", x: 80, y: 85, desc: "Dark, red-lit planet of Nightsisters.", env: "Red Forest / Swamp", climate: "Eerie / Toxic", color: "from-red-950 to-purple-950" },
-        { name: "Exegol", x: 5, y: 95, desc: "Hidden Sith redoubt in the Unknown Regions.", env: "Barren / Stormy", climate: "Deadly / Constant Lightning", color: "from-slate-900 to-blue-950" }
-    ];
-
     function calculateJumps(fromName, toName) {
         if (fromName === toName) return 0;
-        const p1 = planetsList.find(p => p.name === fromName);
-        const p2 = planetsList.find(p => p.name === toName);
+        const p1 = planetData.find(p => p.name === fromName);
+        const p2 = planetData.find(p => p.name === toName);
         if (!p1 || !p2) return 1;
         const dist = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
         if (dist < 20) return 1;
@@ -4567,10 +4549,10 @@
         const svgNS = "http://www.w3.org/2000/svg";
         planetsG.innerHTML = '';
 
-        const currentPlanet = planetsList.find(p => p.name === currentLocName);
+        const currentPlanet = planetData.find(p => p.name === currentLocName);
         const margin = 5;
         
-        planetsList.forEach(p => {
+        planetData.forEach(p => {
             const cx = margin + (p.x / 100) * (100 - margin * 2);
             const cy = margin + (p.y / 100) * (100 - margin * 2);
             const isCurrent = p.name === currentLocName;
@@ -4631,7 +4613,7 @@
         const route = document.getElementById('starmap-route');
         if (!panel || !route) return;
 
-        const planet = planetsList.find(p => p.name === planetName);
+        const planet = planetData.find(p => p.name === planetName);
         if (!planet) return;
         
         const isCurrent = planetName === currentLocName;
@@ -4639,7 +4621,7 @@
         const margin = 5;
         
         // Draw route line from current to selected
-        const curPlanet = planetsList.find(p => p.name === currentLocName);
+        const curPlanet = planetData.find(p => p.name === currentLocName);
         if (curPlanet && !isCurrent) {
             const x1 = margin + (curPlanet.x / 100) * (100 - margin * 2);
             const y1 = margin + (curPlanet.y / 100) * (100 - margin * 2);
@@ -5381,13 +5363,10 @@
                         <input type="text" value="${state.ship ? (state.ship.name||'') : ''}" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font text-xs" onchange="if(state.ship) { state.ship.name=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderDMVesselStatus(); }">
                     </div>
                     <div>
-                        <label class="text-[9px] text-slate-500 uppercase block mb-1">Bridge Status</label>
-                        <div class="flex gap-1 pt-1">
-                            ${['helm', 'gunnery', 'engineering'].map(s => {
-                                const occ = state.ship.stations[s];
-                                return `<div class="w-5 h-5 rounded border border-slate-700 flex items-center justify-center text-[8px] font-bold ${occ ? 'bg-emerald-500/20 text-emerald-400 border-emerald-900' : 'bg-slate-800 text-slate-500'}" title="${s.toUpperCase()}: ${occ || 'EMPTY'}">${s.charAt(0).toUpperCase()}</div>`;
-                            }).join('')}
-                        </div>
+                        <label class="text-[9px] text-indigo-400 uppercase font-bold block mb-1">System Override</label>
+                        <select class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white font-bold datapad-font text-xs" onchange="if(state.ship) { state.ship.location=this.value; saveState(); try{db.ref('shared/ship').set(state.ship);}catch(e){} renderShip(); renderNaviComputer(); renderDMVesselStatus(); }">
+                            ${planetData.map(p => `<option value="${p.name}" ${state.ship.location===p.name?'selected':''}>${p.name}</option>`).join('')}
+                        </select>
                     </div>
                 </div>
 
