@@ -1680,6 +1680,7 @@
                 if(typeof state.credits === 'undefined') state.credits = 0;
                 if(typeof state.beginnerMode === 'undefined') state.beginnerMode = false;
                 if(typeof state.customTitle === 'undefined') state.customTitle = '';
+                if(!state.feats) state.feats = [];
                 if(!state.ship || typeof state.ship.shieldsCur === 'undefined') {
                     const name = state.ship && state.ship.name ? state.ship.name : "The Vanguard";
                     const type = state.ship && state.ship.type ? state.ship.type : "freighter";
@@ -2620,10 +2621,45 @@
                     <p class="text-xs text-slate-300 leading-relaxed">${f.text}</p>
                 </div>
             `).join('');
+
+            // Add Custom Feats
+            const customHtml = (state.feats || []).map((feat, idx) => `
+                <div class="bg-slate-900 border border-slate-700 p-3 rounded relative group mt-2">
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-400 block mb-1">Custom Feat / Specialty</span>
+                    <p class="text-xs text-slate-100">${feat}</p>
+                    ${state.editMode ? `<button onclick="removeFeat(${idx})" class="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>` : ''}
+                </div>
+            `).join('');
+            
+            feaContainer.innerHTML += customHtml;
+            
+            if (state.editMode) {
+                feaContainer.innerHTML += `
+                    <button onclick="addFeat()" class="w-full mt-2 py-3 border-2 border-dashed border-slate-800 rounded text-slate-500 uppercase font-bold text-[10px] tracking-widest hover:border-hud-soft hover:text-hud-soft transition-all">+ Add New Feat / Specialty</button>
+                `;
+            }
         }
         
         // Ensure correct tab is visible
         if (state.loadoutTab) switchLoadoutTab(state.loadoutTab);
+    }
+
+    function addFeat() {
+        const f = prompt("Enter Feat Name or Custom Specialty:");
+        if (f) {
+            if(!state.feats) state.feats = [];
+            state.feats.push(f);
+            saveState();
+            renderCharacterSheet();
+        }
+    }
+
+    function removeFeat(idx) {
+        state.feats.splice(idx, 1);
+        saveState();
+        renderCharacterSheet();
     }
 
     // --- CHARACTER CREATOR WIZARD (D&D Beyond Style) ---
@@ -4974,16 +5010,23 @@
                     <div class="bg-slate-900 border border-slate-800 p-4 rounded">
                         <h4 class="text-hud text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-hud/20 pb-1">Resources</h4>
                         <div class="space-y-2">
-                            ${(data.resources || []).map(r => `
-                                <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
-                                    <span class="text-[9px] text-slate-400 uppercase font-bold">${r.name}</span>
-                                    <span class="text-[10px] text-emerald-400 font-mono">${r.current} / ${r.max}</span>
+                            ${(data.resources || []).map((r, i) => `
+                                <div class="bg-slate-950 p-2 rounded border border-slate-800 space-y-2">
+                                    <input type="text" value="${r.name}" onchange="updateDMResource('${slotId}', ${i}, 'name', this.value)" class="bg-transparent border-none text-[9px] text-slate-400 uppercase font-bold w-full focus:ring-0 p-0">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex gap-1 items-center">
+                                            <input type="number" value="${r.current}" onchange="updateDMResource('${slotId}', ${i}, 'current', this.value)" class="bg-slate-900 border border-slate-800 text-[10px] text-emerald-400 font-mono w-10 text-center rounded px-1">
+                                            <span class="text-slate-600">/</span>
+                                            <input type="number" value="${r.max}" onchange="updateDMResource('${slotId}', ${i}, 'max', this.value)" class="bg-slate-900 border border-slate-800 text-[10px] text-emerald-900 font-mono w-10 text-center rounded px-1">
+                                        </div>
+                                    </div>
                                 </div>
                             `).join('')}
                             <div class="flex justify-between items-center bg-slate-950 p-2 rounded border border-slate-800">
                                 <span class="text-[9px] text-slate-400 uppercase font-bold">Credits</span>
                                 <input type="number" value="${data.credits || 0}" onchange="updateDMCharField('${slotId}', 'credits', null, this.value)" class="bg-transparent border-none text-right text-amber-400 font-mono text-[10px] w-1/2 focus:ring-0 p-0">
                             </div>
+                            <button onclick="addDMResource('${slotId}')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 text-[9px] py-1.5 rounded uppercase font-bold border border-slate-700 mt-2 transition-colors">+ Add Resource Pool</button>
                         </div>
                     </div>
                 </div>
@@ -5011,7 +5054,20 @@
                                     <div class="text-[10px] text-blue-400 font-bold uppercase mb-1">${f.name}</div>
                                     <div class="text-[9px] text-slate-400 leading-tight">${f.desc || 'No description available.'}</div>
                                 </div>
-                            `).join('') : '<div class="py-6 text-center text-slate-600 uppercase text-[10px] tracking-widest">No active traits extracted.</div>'}
+                            `).join('') : ''}
+                            
+                            <!-- Custom Feats -->
+                            ${(data.feats || []).map((feat, idx) => `
+                                <div class="bg-slate-900 border border-slate-800 p-3 rounded relative group">
+                                    <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-400 block mb-1">Custom Feat / Specialty</span>
+                                    <p class="text-[10px] text-slate-100">${feat}</p>
+                                    <button onclick="removeDMFeat('${slotId}', ${idx})" class="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            `).join('')}
+                            
+                            <button onclick="addDMFeat('${slotId}')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 text-[9px] py-1.5 rounded uppercase font-bold border border-slate-700 mt-2 transition-colors">+ Grant New Feat</button>
                         </div>
                     </div>
                 </div>
@@ -5049,11 +5105,45 @@
     function updateDMCharField(slot, field, subfield, value) {
         if(!partyData[slot]) return;
         if(subfield) {
-            partyData[slot][field][subfield] = parseInt(value);
+            partyData[slot][field][subfield] = isNaN(value) ? value : parseInt(value);
         } else {
-            partyData[slot][field] = parseInt(value);
+            partyData[slot][field] = isNaN(value) ? value : parseInt(value);
         }
         try { db.ref('characters/' + slot).set(partyData[slot]); } catch(e){}
+    }
+
+    function updateDMResource(slot, resIdx, field, value) {
+        if(!partyData[slot] || !partyData[slot].resources[resIdx]) return;
+        const res = partyData[slot].resources[resIdx];
+        if(field === 'name') res.name = value;
+        else res[field] = parseInt(value);
+        try { db.ref('characters/' + slot).set(partyData[slot]); } catch(e){}
+    }
+
+    function addDMResource(slotId) {
+        if(!partyData[slotId]) return;
+        if(!partyData[slotId].resources) partyData[slotId].resources = [];
+        partyData[slotId].resources.push({ name: "NEW RESOURCE", current: 0, max: 0 });
+        try { db.ref('characters/' + slotId).set(partyData[slotId]); } catch(e){}
+        inspectOperative(slotId); // Refresh modal
+    }
+
+    function addDMFeat(slotId) {
+        if(!partyData[slotId]) return;
+        const f = prompt("Enter Feat Name or Custom Specialty to grant:");
+        if (f) {
+            if(!partyData[slotId].feats) partyData[slotId].feats = [];
+            partyData[slotId].feats.push(f);
+            try { db.ref('characters/' + slotId).set(partyData[slotId]); } catch(e){}
+            inspectOperative(slotId);
+        }
+    }
+
+    function removeDMFeat(slotId, idx) {
+        if(!partyData[slotId] || !partyData[slotId].feats) return;
+        partyData[slotId].feats.splice(idx, 1);
+        try { db.ref('characters/' + slotId).set(partyData[slotId]); } catch(e){}
+        inspectOperative(slotId);
     }
 
     function renderDM() {
