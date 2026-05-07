@@ -425,11 +425,11 @@
         /* --- BOOT SEQUENCE --- */
         #boot-screen {
             position: fixed; inset: 0; background-color: #020617; z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; padding: 2rem;
+            display: none; flex-direction: column; justify-content: center; padding: 2rem;
             font-family: 'Share Tech Mono', monospace; color: var(--hud); text-shadow: 0 0 8px var(--hud-glow);
-            transition: opacity 0.4s ease-out;
+            transition: opacity 0.6s ease-out; opacity: 0;
         }
-        .boot-line { margin-bottom: 0.5rem; opacity: 0; font-size: 0.9rem; }
+        .boot-line { margin-bottom: 0.5rem; opacity: 0; font-size: 0.9rem; transition: opacity 0.3s ease-out; }
         @media (min-width: 768px) { .boot-line { font-size: 1.2rem; } }
         .cursor { display: inline-block; width: 10px; height: 1.1em; background-color: var(--hud); animation: blinker 1s infinite; vertical-align: bottom; margin-left: 4px; }
 
@@ -5427,6 +5427,7 @@
         }
     }
     async function runBootSequence() {
+        bootSkipped = false;
         if (sessionStorage.getItem('sw5e_booted')) { 
             const bootScreen = document.getElementById('boot-screen');
             if (bootScreen) bootScreen.style.display = 'none'; 
@@ -5434,12 +5435,13 @@
         }
         const bootContent = document.getElementById('boot-content');
         if (!bootContent) return;
+        bootContent.innerHTML = '';
         const lines = ["ALLIANCE_OS v5.5.0 INITIALIZING...", "ESTABLISHING SECURE CONNECTION... [OK]", "DECRYPTING OPERATIVE PROTOCOLS... [OK]", "LOADING ARMORY DATABANKS... [OK]", "ACCESSING JEDI HOLOCRON... [WARNING: RESTRICTED]", "OVERRIDING ENCRYPTION... [OK]", "WELCOME, OPERATIVE."];
         for (let i = 0; i < lines.length; i++) {
             if(bootSkipped) break;
             const p = document.createElement('div'); p.className = 'boot-line'; p.innerHTML = `> ${lines[i]}<span class="cursor"></span>`; bootContent.appendChild(p);
-            setTimeout(() => { p.style.opacity = '1'; }, 50);
-            await new Promise(r => setTimeout(r, Math.random() * 250 + 250));
+            requestAnimationFrame(() => { p.style.opacity = '1'; });
+            await new Promise(r => setTimeout(r, Math.random() * 200 + 200));
             const cursor = p.querySelector('.cursor'); if(cursor) cursor.remove();
         }
         if(!bootSkipped) { setTimeout(() => { sessionStorage.setItem('sw5e_booted', 'true'); skipBoot(); }, 800); }
