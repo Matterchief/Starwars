@@ -836,7 +836,15 @@
                     <div id="loadout-inventory-view" class="">
                         <div class="flex justify-between items-center mb-3 pr-1">
                             <h3 class="text-white font-bold uppercase tracking-widest text-[10px] pl-1 border-l-2 border-hud">Tactical Arsenal</h3>
-                            <button onclick="switchMainTab('database'); switchDbTab('armory');" class="bg-slate-800 hover:bg-slate-700 text-hud text-[9px] font-bold uppercase px-2 py-1 rounded border border-hud-soft transition-all shadow-lg">+ Add Item</button>
+                            <button onclick="switchMainTab('database'); switchDbTab('armory');" class="bg-slate-800 hover:bg-slate-700 text-hud text-[9px] font-bold uppercase px-2 py-1 rounded border border-hud-soft transition-all shadow-lg">+ Acquire Gear</button>
+                        </div>
+                        
+                        <!-- ACTIVE LOADOUT HEADER -->
+                        <div class="mb-4 bg-slate-900/80 border border-hud/20 rounded p-2">
+                            <span class="text-[8px] uppercase font-bold text-hud/60 datapad-font tracking-widest block mb-1 px-1">Combat Loadout Status</span>
+                            <div class="grid grid-cols-3 gap-1" id="active-loadout-slots">
+                                <!-- Populated by JS -->
+                            </div>
                         </div>
                         <div id="char-inventory-container" class="space-y-2"></div>
                         <div id="char-inventory-empty" class="text-center p-6 border border-slate-800 border-dashed rounded-lg text-slate-500 hidden">
@@ -1511,7 +1519,10 @@
     let state = {
         activeSlot: "slot1",
         name: "", customTitle: "", cls: "", level: 1, alignment: 1, skin: "rebellion", scan: 30, static: 10, flicker: 5,
-        favorites: { armory: [], spells: [] }, spellLevel: "All", spellMine: false, spellReady: false, armoryCat: "All", viewmode: "standard", uiscale: "md",
+        favorites: { armory: [], spells: [] }, 
+        inventory: [], 
+        loadout: { armor: null, main: null, off: null },
+        spellLevel: "All", spellMine: false, spellReady: false, armoryCat: "All", viewmode: "standard", uiscale: "md",
         beginnerMode: false,
         editMode: false,
         stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
@@ -1685,6 +1696,9 @@
                 if(typeof state.beginnerMode === 'undefined') state.beginnerMode = false;
                 if(typeof state.customTitle === 'undefined') state.customTitle = '';
                 if(!state.feats) state.feats = [];
+                if(!state.inventory) state.inventory = [];
+                if(!state.loadout) state.loadout = { armor: null, main: null, off: null };
+                if(!state.knownPowers) state.knownPowers = [];
                 if(!state.ship || typeof state.ship.shieldsCur === 'undefined') {
                     const name = state.ship && state.ship.name ? state.ship.name : "The Vanguard";
                     const type = state.ship && state.ship.type ? state.ship.type : "freighter";
@@ -2234,7 +2248,18 @@
                         <span class="text-hud text-sm font-bold">${data.props}</span>
                     </div>
                 </div>
-                <div class="text-slate-300 space-y-3 leading-relaxed border-t border-slate-800 pt-3">${data.fullDesc.replace(/\n/g, '<br>')}</div>
+                <div class="text-slate-300 space-y-3 leading-relaxed border-t border-slate-800 pt-3 mb-6">${data.fullDesc.replace(/\n/g, '<br>')}</div>
+                <div class="flex gap-3 pt-4 border-t border-slate-800">
+                    ${(state.inventory || []).includes(index) ? `
+                        <button class="flex-1 bg-slate-900 border border-hud/30 text-hud opacity-50 py-3 rounded font-bold uppercase tracking-widest text-xs cursor-default">
+                            Already In Inventory
+                        </button>
+                    ` : `
+                        <button onclick="addToInventory(${index}); openDetails('armory', ${index});" class="flex-1 bg-hud/20 border border-hud/50 text-hud py-3 rounded font-bold uppercase tracking-widest text-xs hover:bg-hud/40 transition-all">
+                            Acquire Gear
+                        </button>
+                    `}
+                </div>
             `;
         }
         else if (type === 'spell') {
@@ -2503,6 +2528,69 @@
         renderLoadout();
     }
 
+    // --- INVENTORY & LOADOUT LOGIC ---
+    function addToInventory(index) {
+        if (!state.inventory) state.inventory = [];
+        if (state.inventory.includes(index)) return;
+        state.inventory.push(index);
+        saveState();
+        renderArmory();
+        renderLoadout();
+        showHolonetAlert("Item acquired and stored in inventory.", "border-hud bg-hud/10");
+    }
+
+    function removeFromInventory(index) {
+        const idx = state.inventory.indexOf(index);
+        if (idx > -1) {
+            state.inventory.splice(idx, 1);
+            // Also unequip if it was equipped
+            if (state.loadout.armor === index) state.loadout.armor = null;
+            if (state.loadout.main === index) state.loadout.main = null;
+            if (state.loadout.off === index) state.loadout.off = null;
+            saveState();
+            renderArmory();
+            renderLoadout();
+            renderCharacterSheet();
+        }
+    }
+
+    function equipItem(index, slot) {
+        if (!state.loadout) state.loadout = { armor: null, main: null, off: null };
+        const item = armoryData[index];
+        if (!item) return;
+
+        // Auto-assign slot if not provided based on category
+        if (!slot) {
+            if (item.cat === "Armor") slot = "armor";
+            else if (state.loadout.main === null) slot = "main";
+            else slot = "off";
+        }
+
+        state.loadout[slot] = index;
+
+        // If it's armor, update AC
+        if (slot === 'armor') {
+            const acMatch = item.dmg.match(/\d+/);
+            if (acMatch) {
+                state.ac = parseInt(acMatch[0]);
+            }
+        }
+
+        saveState();
+        renderLoadout();
+        renderCharacterSheet();
+        showHolonetAlert(`${item.sw} equipped to ${slot.toUpperCase()} slot.`, "border-emerald-500 bg-emerald-950/30");
+    }
+
+    function unequipItem(slot) {
+        if (!state.loadout) return;
+        state.loadout[slot] = null;
+        if (slot === 'armor') state.ac = 10; // Default AC
+        saveState();
+        renderLoadout();
+        renderCharacterSheet();
+    }
+
     function switchLoadoutTab(tab) {
         state.loadoutTab = tab;
         const tabs = ['inv', 'abi', 'fea'];
@@ -2536,30 +2624,59 @@
         const invEmpty = document.getElementById('char-inventory-empty');
         const abiEmpty = document.getElementById('char-abilities-empty');
         const feaEmpty = document.getElementById('char-features-empty');
+        const loadoutSlots = document.getElementById('active-loadout-slots');
         
         if (!invContainer || !abiContainer || !feaContainer) return;
 
+        // Render Active Slots
+        if (loadoutSlots) {
+            const slots = ['armor', 'main', 'off'];
+            const labels = { armor: 'Armor', main: 'Main', off: 'Off' };
+            loadoutSlots.innerHTML = slots.map(slot => {
+                const itemIdx = state.loadout[slot];
+                const item = itemIdx !== null ? armoryData[itemIdx] : null;
+                return `
+                    <div class="bg-black/40 border border-slate-800 rounded p-1.5 flex flex-col justify-between min-h-[50px] relative group">
+                        <span class="text-[7px] uppercase text-slate-500 datapad-font">${labels[slot]}</span>
+                        ${item ? `
+                            <span class="text-[9px] text-hud font-bold truncate leading-tight">${item.sw}</span>
+                            <button onclick="unequipItem('${slot}')" class="absolute -top-1 -right-1 bg-red-900 text-white w-3 h-3 rounded-full flex items-center justify-center text-[7px] opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                        ` : `
+                            <span class="text-[8px] text-slate-700 italic">Empty</span>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
         const knownSpells = state.knownPowers || [];
-        const favArmory = state.favorites.armory || [];
+        const inventory = state.inventory || [];
 
         // Render Inventory
-        if (favArmory.length === 0) {
+        if (inventory.length === 0) {
             invContainer.innerHTML = '';
             invEmpty.classList.remove('hidden');
         } else {
             invEmpty.classList.add('hidden');
             let html = '';
-            favArmory.forEach(index => {
+            inventory.forEach(index => {
                 const item = armoryData[index];
                 if(!item) return;
+                const isEquipped = state.loadout.armor === index || state.loadout.main === index || state.loadout.off === index;
                 html += `
-                    <div class="data-card p-2 mb-2 clickable border-slate-800 hover:border-hud transition-all" onclick="openDetails('armory', ${index})">
-                        <div class="flex justify-between items-center pr-2">
-                            <div>
-                                <span class="font-bold text-white text-xs leading-tight block">${item.sw}</span>
-                                <span class="text-[9px] font-bold font-mono mt-0.5 block" style="color: var(--accent);">${item.dmg}</span>
-                            </div>
+                    <div class="data-card p-2 mb-2 border-slate-800 hover:border-hud transition-all flex justify-between items-center ${isEquipped ? 'bg-hud/5 border-hud/30' : ''}">
+                        <div class="clickable flex-1" onclick="openDetails('armory', ${index})">
+                            <span class="font-bold text-white text-xs leading-tight block">${item.sw}</span>
+                            <span class="text-[9px] font-bold font-mono mt-0.5 block" style="color: var(--accent);">${item.dmg}</span>
+                        </div>
+                        <div class="flex gap-1">
+                            ${!isEquipped ? `
+                                <button onclick="equipItem(${index})" class="bg-hud/20 hover:bg-hud/40 text-hud border border-hud/30 px-2 py-1 rounded text-[8px] font-bold uppercase transition-all">Equip</button>
+                            ` : `
+                                <span class="text-[8px] text-hud/60 font-bold uppercase px-2 py-1 border border-hud/10 rounded">Equipped</span>
+                            `}
                             <button onclick="rollItem(event, ${index}, 'armory')" class="quick-roll-btn">Roll</button>
+                            <button onclick="removeFromInventory(${index})" class="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/30 px-2 py-1 rounded text-[8px] font-bold uppercase transition-all">Discard</button>
                         </div>
                     </div>
                 `;
