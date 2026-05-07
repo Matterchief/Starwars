@@ -897,6 +897,7 @@
             <nav class="db-nav">
                 <button onclick="switchDbTab('profiles')" id="db-nav-profiles" class="db-nav-btn active">Profiles</button>
                 <button onclick="switchDbTab('species')" id="db-nav-species" class="db-nav-btn">Species</button>
+                <button onclick="switchDbTab('planets')" id="db-nav-planets" class="db-nav-btn">Planets</button>
                 <button onclick="switchDbTab('armory')" id="db-nav-armory" class="db-nav-btn">Armory</button>
                 <button onclick="switchDbTab('holocron')" id="db-nav-holocron" class="db-nav-btn">Holocron</button>
             </nav>
@@ -913,10 +914,19 @@
             <!-- SUB-TAB: SPECIES -->
             <div id="db-tab-species" class="db-tab hidden">
                 <div class="mb-4">
-                    <h2 class="display-font text-2xl font-black text-white tracking-wide uppercase border-b pb-2" style="border-color: var(--hud-deep);">Species Index</h2>
-                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">Map your 5.5e race to a Star Wars species. Tap for details.</p>
+                    <h2 class="display-font text-2xl font-black text-white tracking-wide uppercase border-b pb-2" style="border-color: var(--hud-deep);">Species Records</h2>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">Biological and cultural data on the galaxy's diverse inhabitants.</p>
                 </div>
                 <div id="species-container" class="grid-container pb-6"></div>
+            </div>
+
+            <!-- SUB-TAB: PLANETS -->
+            <div id="db-tab-planets" class="db-tab hidden">
+                <div class="mb-4">
+                    <h2 class="display-font text-2xl font-black text-white tracking-wide uppercase border-b pb-2" style="border-color: var(--hud-deep);">Planetary Atlas</h2>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">Strategic data on major systems, including capital cities and environmental classifications.</p>
+                </div>
+                <div id="planets-container" class="grid-container pb-6"></div>
             </div>
 
             <!-- SUB-TAB: ARMORY -->
@@ -1869,6 +1879,19 @@
         }
     }
 
+    const planetData = [
+        { name: "Coruscant", capital: "Galactic City", terrain: "Cityscape", desc: "The heart of the galaxy. An ecumenopolis where the entire surface is covered by one massive city.", background: "For millennia, Coruscant has served as the political hub of the galaxy. It is home to the Galactic Senate and the Jedi Temple. Its upper levels are a display of extreme wealth, while the lower levels (down to Level 1313) are hubs of crime and poverty." },
+        { name: "Tatooine", capital: "Bestine", terrain: "Desert", desc: "A harsh desert world in the Outer Rim, ruled by Hutt cartels and scavengers.", background: "Orbiting twin suns (Tatoo I and II), this world is sparsely populated. Bestine is the administrative capital, though Mos Eisley and Mos Espa are more famous spaceports. It is the homeworld of the Skywalker lineage and the infamous Jawa and Sand People species." },
+        { name: "Naboo", capital: "Theed", terrain: "Plains, Swamps, Oceans", desc: "A peaceful, lush world known for its high culture, beautiful architecture, and Gungan underwater cities.", background: "Naboo is unique for its hollow core filled with water, allowing Gungans to traverse the planet's interior. The surface is home to the Naboo people, led by a democratically elected monarch. It played a pivotal role in the rise of the Empire." },
+        { name: "Alderaan", capital: "Aldera", terrain: "Mountains, Grasslands", desc: "The 'bright center of the galaxy,' known for its pacifism and stunning natural beauty.", background: "A core world with no standing army, Alderaan was a center of arts, culture, and diplomacy. It was a key founding world of the Rebel Alliance, which eventually led to its tragic destruction by the first Death Star as a display of Imperial terror." },
+        { name: "Hoth", capital: "Echo Base (Defunct)", terrain: "Ice, Snow", desc: "A remote, frozen wasteland in the Anoat sector. Home to the tauntaun and the deadly wampa.", background: "Hoth has no indigenous sentient population and very few visitors. It served as the secret headquarters for the Rebel Alliance until the Imperial discovery and the subsequent Battle of Hoth. Its surface temperatures are lethal without specialized gear." },
+        { name: "Mustafar", capital: "Fralideja", terrain: "Volcanic", desc: "A tiny, volatile planet rich in minerals, dominated by rivers of lava and obsidian mountains.", background: "Mustafar was a stronghold for the Techno Union and later the site of the final duel between Anakin Skywalker and Obi-Wan Kenobi. Darth Vader eventually constructed his personal fortress here, drawing power from the planet's dark side locus." },
+        { name: "Kamino", capital: "Tipoca City", terrain: "Ocean", desc: "An aquatic world perpetually covered in storms. Known for the Tipoca City cloning facilities.", background: "Located just outside the Rishi Maze, Kamino is home to the Kaminoans — masters of genetic engineering. They produced the Grand Army of the Republic. The planet is entirely covered by water, with cities built on massive stilts above the crashing waves." },
+        { name: "Geonosis", capital: "Stalgasin Hive", terrain: "Desert, Canyons", desc: "A rocky, ringed planet inhabited by insectoid Geonosians. Primary site of droid foundries.", background: "The site of the first battle of the Clone Wars. The Geonosians are expert engineers who helped design the Death Star. After the war, the Empire sterilized the planet to keep its construction projects secret." },
+        { name: "Bespin", capital: "Cloud City", terrain: "Gas Giant", desc: "A massive gas giant with a thin layer of breathable atmosphere where Tibanna gas is mined.", background: "Bespin is a key source of Tibanna gas, used in blaster weapons and hyperdrives. Cloud City is a major luxury resort and industrial hub suspended in the atmosphere. It was famously governed by Lando Calrissian before being occupied by the Empire." },
+        { name: "Endor", capital: "Bright Tree Village", terrain: "Forests, Mountains", desc: "The 'Forest Moon' orbits a massive gas giant. Home to the Ewoks and giant trees.", background: "Endor is a remote world that became the staging ground for the final battle against the second Death Star. Its dense forests are inhabited by primitive but resourceful Ewoks. The moon's gravity is maintained by the gas giant it orbits." }
+    ];
+
     const spellData = [
         { lvl: "Cantrip", dnd: "Fire Bolt", sw: "Force Combustion", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Fire. Agitate molecules in the air through the Force.", fullDesc: "You channel the Force to hyper-agitate molecules. Make a ranged spell attack. On a hit, 1d10 fire damage. Damage increases at level 5 (2d10), 11 (3d10), and 17 (4d10)." },
         { lvl: "Cantrip", dnd: "Mage Hand", sw: "Force Pull/Push (Minor)", type: "Utility", classes: ["Sor", "Wiz", "Brd", "War"], cast: "1 Action", range: "30 ft", dur: "1 Minute", comp: "Somatic", desc: "Telekinetically manipulate objects up to 30ft away.", fullDesc: "You create an invisible, telekinetic grip. You can use your action to manipulate an object, open a door, or retrieve an item. Max 10 lbs." },
@@ -1969,6 +1992,28 @@
                     <p class="text-xs text-slate-400 datapad-font">${sp.stats}</p>
                 </div>
             </div>`).join('');
+    }
+
+    function renderPlanets() {
+        const c = document.getElementById('planets-container');
+        if (!c) return;
+        c.innerHTML = planetData.map((p, i) => `
+            <div class="data-card p-4 clickable border-l-2 border-transparent hover:border-hud transition-all group" onclick="openDetails('planet', ${i})">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="text-[9px] uppercase font-bold text-slate-500 datapad-font tracking-widest block mb-1">World Signal</span>
+                        <h3 class="text-white font-black text-xl display-font uppercase tracking-tight group-hover:text-hud transition-colors">${p.name}</h3>
+                    </div>
+                    <div class="bg-slate-900 px-2 py-1 rounded border border-slate-800">
+                        <span class="text-[10px] text-hud font-mono uppercase">${p.terrain}</span>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-slate-900">
+                    <span class="text-[9px] uppercase font-bold text-slate-600 datapad-font block mb-1">Capital Designation</span>
+                    <span class="text-xs text-slate-300 font-bold uppercase tracking-wide">${p.capital}</span>
+                </div>
+            </div>
+        `).join('');
     }
 
     // --- RENDER: ARMORY ---
@@ -2259,6 +2304,30 @@
                             Acquire Gear
                         </button>
                     `}
+                </div>
+            `;
+        }
+        else if (type === 'planet') {
+            const data = planetData[index];
+            title.innerText = data.name; subtitle.innerText = `Planetary Dossier`;
+            html = `
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="bg-slate-900 border border-slate-700 p-2 rounded">
+                        <span class="text-[10px] text-slate-500 uppercase block font-bold">Capital City</span>
+                        <span class="text-hud font-bold text-sm uppercase">${data.capital}</span>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-700 p-2 rounded">
+                        <span class="text-[10px] text-slate-500 uppercase block font-bold">Primary Terrain</span>
+                        <span class="text-white font-bold text-xs uppercase">${data.terrain}</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <span class="text-[10px] text-slate-500 uppercase block font-bold mb-1">Environmental Scan</span>
+                    <p class="text-slate-200 text-sm italic leading-relaxed">"${data.desc}"</p>
+                </div>
+                <div class="text-slate-300 space-y-3 leading-relaxed border-t border-slate-800 pt-3">
+                    <span class="text-[10px] text-hud uppercase block font-bold mb-1">Historical Background</span>
+                    ${data.background}
                 </div>
             `;
         }
@@ -3973,8 +4042,17 @@
         document.querySelectorAll('.db-tab').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.db-nav-btn').forEach(el => el.classList.remove('active'));
         
-        document.getElementById(`db-tab-${id}`).classList.remove('hidden');
-        document.getElementById(`db-nav-${id}`).classList.add('active');
+        const target = document.getElementById(`db-tab-${id}`);
+        if(target) target.classList.remove('hidden');
+        
+        const nav = document.getElementById(`db-nav-${id}`);
+        if(nav) nav.classList.add('active');
+
+        if (id === 'profiles') renderClasses();
+        if (id === 'species') renderSpecies();
+        if (id === 'planets') renderPlanets();
+        if (id === 'armory') { renderArmoryFilters(); renderArmory(); }
+        if (id === 'holocron') { renderHolocronFilters(); renderHolocron(); }
     }
 
     function toggleViewMode() {
