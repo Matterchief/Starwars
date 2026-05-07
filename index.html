@@ -1896,31 +1896,31 @@
         { name: "Dathomir", x: 80, y: 85, capital: "Nightsister Stronghold", terrain: "Red Forest / Swamp", env: "Dark / Eerie", climate: "Toxic / Unsettling", color: "from-red-950 to-purple-950", desc: "A dark, red-lit planet strong in the dark side of the Force. Home to the Nightsisters.", background: "Dathomir is a world of rugged beauty and deadly mystery. It is ruled by the Nightsisters, a clan of Force-sensitive witches who use dark magics. The planet's atmosphere is tinted red by its sun, giving it a perpetually ominous appearance." },
         { name: "Exegol", x: 5, y: 95, capital: "Sith Citadel", terrain: "Barren / Stormy", env: "Desert / Sith Redoubt", climate: "Deadly / Constant Lightning", color: "from-slate-900 to-blue-950", desc: "A hidden Sith world in the Unknown Regions, serving as a bastion for the Dark Side.", background: "Exegol is a barren, rocky world where the veil between the living and the dead is thin. It was a secret stronghold for the Sith Eternal and the site of the Final Order's fleet construction." }
     ];
-
+    
     const spellData = [
-        { lvl: "Cantrip", dnd: "Fire Bolt", sw: "Force Combustion", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Fire. Agitate molecules in the air through the Force.", fullDesc: "You channel the Force to hyper-agitate molecules. Make a ranged spell attack. On a hit, 1d10 fire damage. Damage increases at level 5 (2d10), 11 (3d10), and 17 (4d10)." },
+        { lvl: "Cantrip", dnd: "Fire Bolt", sw: "Force Combustion", type: "Attack", dmg: "1d10", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Fire. Agitate molecules in the air through the Force.", fullDesc: "You channel the Force to hyper-agitate molecules. Make a ranged spell attack. On a hit, 1d10 fire damage. Damage increases at level 5 (2d10), 11 (3d10), and 17 (4d10)." },
         { lvl: "Cantrip", dnd: "Mage Hand", sw: "Force Pull/Push (Minor)", type: "Utility", classes: ["Sor", "Wiz", "Brd", "War"], cast: "1 Action", range: "30 ft", dur: "1 Minute", comp: "Somatic", desc: "Telekinetically manipulate objects up to 30ft away.", fullDesc: "You create an invisible, telekinetic grip. You can use your action to manipulate an object, open a door, or retrieve an item. Max 10 lbs." },
-        { lvl: "Cantrip", dnd: "Ray of Frost", sw: "Force Chill / Cryo", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Cold, slows movement. Drain thermal energy.", fullDesc: "Make a ranged spell attack. On a hit, 1d8 cold damage, and its speed is reduced by 10 feet. Damage scales at higher levels." },
-        { lvl: "Cantrip", dnd: "Vicious Mockery", sw: "Mind Trick (Doubt)", type: "Save", saveStat: "WIS", classes: ["Brd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "1d4 Psychic, Disadv. Plant fear in a weak mind.", fullDesc: "Target must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on its next attack roll." },
-        { lvl: "Cantrip", dnd: "Eldritch Blast", sw: "Focused Force Push", type: "Attack", classes: ["War"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Force. Unerring telekinetic blasts.", fullDesc: "Make a ranged spell attack. On a hit, 1d10 force damage. Creates more beams at level 5, 11, and 17." },
-        { lvl: "Cantrip", dnd: "Shocking Grasp", sw: "Minor Force Lightning", type: "Attack", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Lightning. Prevents reactions. Short-circuit a droid.", fullDesc: "Melee spell attack. Advantage if target is metal/Droid. On hit, 1d8 lightning damage, and no reactions until next turn." },
+        { lvl: "Cantrip", dnd: "Ray of Frost", sw: "Force Chill / Cryo", type: "Attack", dmg: "1d8", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Cold, slows movement. Drain thermal energy.", fullDesc: "Make a ranged spell attack. On a hit, 1d8 cold damage, and its speed is reduced by 10 feet. Damage scales at higher levels." },
+        { lvl: "Cantrip", dnd: "Vicious Mockery", sw: "Mind Trick (Doubt)", type: "Save", saveStat: "WIS", dmg: "1d4", classes: ["Brd"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "1d4 Psychic, Disadv. Plant fear in a weak mind.", fullDesc: "Target must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on its next attack roll." },
+        { lvl: "Cantrip", dnd: "Eldritch Blast", sw: "Focused Force Push", type: "Attack", dmg: "1d10", classes: ["War"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "1d10 Force. Unerring telekinetic blasts.", fullDesc: "Make a ranged spell attack. On a hit, 1d10 force damage. Creates more beams at level 5, 11, and 17." },
+        { lvl: "Cantrip", dnd: "Shocking Grasp", sw: "Minor Force Lightning", type: "Attack", dmg: "1d8", classes: ["Sor", "Wiz", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "1d8 Lightning. Prevents reactions. Short-circuit a droid.", fullDesc: "Melee spell attack. Advantage if target is metal/Droid. On hit, 1d8 lightning damage, and no reactions until next turn." },
         { lvl: "Cantrip", dnd: "Guidance", sw: "Force Premonition", type: "Utility", classes: ["Clr", "Drd", "Art"], cast: "1 Action", range: "Touch", dur: "Concentration, 1 min", comp: "Somatic", desc: "Add 1d4 to a check. Glimpse the immediate future.", fullDesc: "Target rolls a d4 and adds it to one ability check of its choice." },
-        { lvl: "Cantrip", dnd: "Sacred Flame", sw: "Force Judgment", type: "Save", saveStat: "DEX", classes: ["Clr"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 Radiant, ignores cover. Light Side energy.", fullDesc: "Target must succeed on a Dexterity saving throw or take 1d8 radiant damage. No benefit from cover." },
+        { lvl: "Cantrip", dnd: "Sacred Flame", sw: "Force Judgment", type: "Save", saveStat: "DEX", dmg: "1d8", classes: ["Clr"], cast: "1 Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 Radiant, ignores cover. Light Side energy.", fullDesc: "Target must succeed on a Dexterity saving throw or take 1d8 radiant damage. No benefit from cover." },
         { lvl: "Cantrip", dnd: "Mending", sw: "Tech Repair", type: "Utility", classes: ["Brd", "Clr", "Drd", "Sor", "Wiz", "Art"], cast: "1 Minute", range: "Touch", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "Restore a single break or tear. Field repair gear.", fullDesc: "Repairs a single break or tear in an object. Max 1 foot dimension." },
-        { lvl: "Cantrip", dnd: "Sorcerer's Burst", sw: "Force Surge / Pulse", type: "Attack", classes: ["Sor"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 variable damage. Explodes on an 8.", fullDesc: "Make a ranged spell attack. On a hit, 1d8 damage of a type you choose (Acid, Cold, Fire, Force, Lightning, Poison, Psychic, or Thunder). If you roll an 8 on the d8, roll an additional d8 and add it to the damage. Damage scales at level 5, 11, and 17." },
+        { lvl: "Cantrip", dnd: "Sorcerer's Burst", sw: "Force Surge / Pulse", type: "Attack", dmg: "1d8", classes: ["Sor"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "1d8 variable damage. Explodes on an 8.", fullDesc: "Make a ranged spell attack. On a hit, 1d8 damage of a type you choose (Acid, Cold, Fire, Force, Lightning, Poison, Psychic, or Thunder). If you roll an 8 on the d8, roll an additional d8 and add it to the damage. Damage scales at level 5, 11, and 17." },
         
-        { lvl: "1st", dnd: "Magic Missile", sw: "Force Barrage", type: "Auto", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 darts, 1d4+1 Force. Unerring telekinetic strikes.", fullDesc: "Three glowing darts of Force energy. Each hits automatically. 1d4 + 1 force damage each." },
+        { lvl: "1st", dnd: "Magic Missile", sw: "Force Barrage", type: "Auto", dmg: "3d4+3", classes: ["Sor", "Wiz"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic", desc: "3 darts, 1d4+1 Force. Unerring telekinetic strikes.", fullDesc: "Three glowing darts of Force energy. Each hits automatically. 1d4 + 1 force damage each." },
         { lvl: "1st", dnd: "Shield", sw: "Force Barrier / Deflector", type: "Utility", classes: ["Sor", "Wiz", "War"], cast: "1 Reaction", range: "Self", dur: "1 Round", comp: "Somatic", desc: "+5 AC reaction. Localized telekinetic wall.", fullDesc: "Invisible barrier grants +5 AC until start of next turn. Blocks Magic Missile." },
-        { lvl: "1st", dnd: "Cure Wounds", sw: "Force Heal", type: "Utility", classes: ["Brd", "Clr", "Drd", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "2d8 + Mod Healing. Channel the living Force to knit flesh.", fullDesc: "Target regains 2d8 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d8 to 2d8)." },
-        { lvl: "1st", dnd: "Healing Word", sw: "Force Revitalize", type: "Utility", classes: ["Brd", "Clr", "Drd"], cast: "1 Bonus Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "2d4 + Mod. Rapid Force surge.", fullDesc: "Target regains 2d4 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d4 to 2d4)." },
-        { lvl: "1st", dnd: "Thunderwave", sw: "Force Repulse", type: "Save", saveStat: "CON", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cube)", dur: "Instantaneous", comp: "Somatic", desc: "2d8 Thunder. 15ft cube. Violent outward burst.", fullDesc: "15-foot cube. Constitution saving throw. Fail: 2d8 thunder damage and pushed 10 feet. Success: Half damage, no push." },
+        { lvl: "1st", dnd: "Cure Wounds", sw: "Force Heal", type: "Utility", dmg: "2d8", classes: ["Brd", "Clr", "Drd", "Pal", "Rng", "Art"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "2d8 + Mod Healing. Channel the living Force to knit flesh.", fullDesc: "Target regains 2d8 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d8 to 2d8)." },
+        { lvl: "1st", dnd: "Healing Word", sw: "Force Revitalize", type: "Utility", dmg: "2d4", classes: ["Brd", "Clr", "Drd"], cast: "1 Bonus Action", range: "60 ft", dur: "Instantaneous", comp: "Verbal", desc: "2d4 + Mod. Rapid Force surge.", fullDesc: "Target regains 2d4 + your spellcasting ability modifier HP. (2024 Update: Healing increased from 1d4 to 2d4)." },
+        { lvl: "1st", dnd: "Thunderwave", sw: "Force Repulse", type: "Save", saveStat: "CON", dmg: "2d8", classes: ["Brd", "Drd", "Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cube)", dur: "Instantaneous", comp: "Somatic", desc: "2d8 Thunder. 15ft cube. Violent outward burst.", fullDesc: "15-foot cube. Constitution saving throw. Fail: 2d8 thunder damage and pushed 10 feet. Success: Half damage, no push." },
         { lvl: "1st", dnd: "Charm Person", sw: "Jedi Mind Trick", type: "Save", saveStat: "WIS", classes: ["Brd", "Drd", "Sor", "Wiz", "War"], cast: "1 Action", range: "30 ft", dur: "1 Hour", comp: "Somatic, Verbal", desc: "Wis save. Target treats you as friendly.", fullDesc: "Wisdom saving throw. Advantage if you are fighting it. If it fails, it is charmed until spell ends." },
-        { lvl: "1st", dnd: "Hunter's Mark", sw: "Bounty Tracker HUD", type: "Utility", classes: ["Rng"], cast: "1 Bonus Action", range: "90 ft", dur: "Concentration, 1 hr", comp: "None", desc: "Bonus Action. Deal extra 1d6 damage to target.", fullDesc: "Lock onto target. Deal extra 1d6 damage when you hit with weapon. (2024 Update: No longer grants advantage on tracking, but base damage remains)." },
+        { lvl: "1st", dnd: "Hunter's Mark", sw: "Bounty Tracker HUD", type: "Utility", dmg: "1d6", classes: ["Rng"], cast: "1 Bonus Action", range: "90 ft", dur: "Concentration, 1 hr", comp: "None", desc: "Bonus Action. Deal extra 1d6 damage to target.", fullDesc: "Lock onto target. Deal extra 1d6 damage when you hit with weapon. (2024 Update: No longer grants advantage on tracking, but base damage remains)." },
         { lvl: "1st", dnd: "Command", sw: "Dominate Mind", type: "Save", saveStat: "WIS", classes: ["Clr", "Pal", "Brd", "War"], cast: "1 Action", range: "60 ft", dur: "1 Round", comp: "Verbal", desc: "One-word command they must obey.", fullDesc: "Wisdom saving throw or follow the command on its next turn." },
         { lvl: "1st", dnd: "Bless", sw: "Battle Meditation (Minor)", type: "Utility", classes: ["Clr", "Pal"], cast: "1 Action", range: "30 ft", dur: "Concentration, up to 1 minute", comp: "Verbal, Somatic", desc: "+1d4 to attacks/saves for 3 allies.", fullDesc: "Up to three creatures add 1d4 to attack rolls and saving throws." },
-        { lvl: "1st", dnd: "Burning Hands", sw: "Flamethrower Burst", type: "Save", saveStat: "DEX", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "3d6 Fire. 15 ft cone. Wrist-mounted flame projector.", fullDesc: "Dexterity saving throw. 3d6 fire damage on fail, half on success." },
-        { lvl: "1st", dnd: "Guiding Bolt", sw: "Force Flare", type: "Attack", classes: ["Clr"], cast: "1 Action", range: "120 ft", dur: "1 Round", comp: "Somatic, Verbal", desc: "4d6 Radiant. Next attack has Advantage.", fullDesc: "Make a ranged spell attack. On hit, 4d6 radiant damage. The next attack roll against this target has advantage." },
-        { lvl: "1st", dnd: "Inflict Wounds", sw: "Force Rend", type: "Attack", classes: ["Clr"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "3d10 Necrotic. Telekinetically tear tissue.", fullDesc: "Make a melee spell attack. On hit, 3d10 necrotic damage. (2024 Update: Damage increased to 3d10)." },
+        { lvl: "1st", dnd: "Burning Hands", sw: "Flamethrower Burst", type: "Save", saveStat: "DEX", dmg: "3d6", classes: ["Sor", "Wiz"], cast: "1 Action", range: "Self (15ft cone)", dur: "Instantaneous", comp: "Verbal, Somatic", desc: "3d6 Fire. 15 ft cone. Wrist-mounted flame projector.", fullDesc: "Dexterity saving throw. 3d6 fire damage on fail, half on success." },
+        { lvl: "1st", dnd: "Guiding Bolt", sw: "Force Flare", type: "Attack", dmg: "4d6", classes: ["Clr"], cast: "1 Action", range: "120 ft", dur: "1 Round", comp: "Somatic, Verbal", desc: "4d6 Radiant. Next attack has Advantage.", fullDesc: "Make a ranged spell attack. On hit, 4d6 radiant damage. The next attack roll against this target has advantage." },
+        { lvl: "1st", dnd: "Inflict Wounds", sw: "Force Rend", type: "Attack", dmg: "3d10", classes: ["Clr"], cast: "1 Action", range: "Touch", dur: "Instantaneous", comp: "Somatic", desc: "3d10 Necrotic. Telekinetically tear tissue.", fullDesc: "Make a melee spell attack. On hit, 3d10 necrotic damage. (2024 Update: Damage increased to 3d10)." },
         { lvl: "1st", dnd: "Chaos Bolt", sw: "Unstable Force Bolt", type: "Attack", classes: ["Sor"], cast: "1 Action", range: "120 ft", dur: "Instantaneous", comp: "Somatic, Verbal", desc: "2d8+1d6 variable damage. Can leap.", fullDesc: "Make a ranged spell attack. Choose damage type (Acid, Cold, Fire, Force, Lightning, Poison, Psychic, or Thunder). If you roll the same number on both d8s, the bolt leaps to another target." },
         { lvl: "1st", dnd: "Entangle", sw: "Force Bind (Root)", type: "Save", saveStat: "STR", classes: ["Drd"], cast: "1 Action", range: "90 ft", dur: "Concentration, 1 min", comp: "Somatic", desc: "Str save. Restrain targets in 20ft square.", fullDesc: "Force roots sprout from the ground. Strength saving throw or be restrained." },
         
@@ -2236,9 +2236,14 @@
 
             <div class="flex justify-between items-end border-t border-slate-800 pt-2 mt-2">
                 <p class="text-xs text-slate-400 leading-snug card-desc pr-4 flex-1">${highlight(s.desc, q)}</p>
-                ${s.type === 'Attack' ? `
-                    <button onclick="event.stopPropagation(); rollSpellAttack('${s.sw}')" class="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/30 px-3 py-1 rounded text-[10px] font-bold uppercase transition-all shadow-[0_0_10px_rgba(153,27,27,0.2)]">Roll Attack</button>
-                ` : ''}
+                <div class="flex flex-col gap-1">
+                    ${s.type === 'Attack' ? `
+                        <button onclick="event.stopPropagation(); rollSpellAttack('${s.sw}')" class="bg-red-900/20 hover:bg-red-900/40 text-red-500 border border-red-900/30 px-3 py-1 rounded text-[10px] font-bold uppercase transition-all shadow-[0_0_10px_rgba(153,27,27,0.2)]">Roll Attack</button>
+                    ` : ''}
+                    ${s.dmg ? `
+                        <button onclick="event.stopPropagation(); rollDamage('${s.sw}', '${s.dmg}')" class="bg-amber-900/20 hover:bg-amber-900/40 text-amber-500 border border-amber-900/30 px-3 py-1 rounded text-[10px] font-bold uppercase transition-all">Roll Damage</button>
+                    ` : ''}
+                </div>
             </div>
         </div>`;
     }
@@ -2386,6 +2391,11 @@
                                     Roll Attack Roll
                                 </button>
                             ` : ''}
+                            ${data.dmg ? `
+                                <button onclick="rollDamage('${data.sw}', '${data.dmg}')" class="w-full bg-amber-900/20 hover:bg-amber-900/40 text-amber-500 border border-amber-900/30 py-2 rounded text-[10px] font-bold uppercase transition-all shadow-[0_0_10px_rgba(180,83,9,0.2)]">
+                                    Roll Damage (${data.dmg})
+                                </button>
+                            ` : ''}
                         </div>
                         <button onclick="toggleKnownPower(event, ${index}); openDetails('spell', ${index});" class="px-4 bg-slate-800 hover:bg-red-900/30 text-slate-400 hover:text-red-400 py-3 rounded font-bold uppercase tracking-widest text-[10px] transition-all border border-slate-700 hover:border-red-900/50">
                             Unlearn
@@ -2471,6 +2481,51 @@
         }
 
         rollDice(title, mod, noRoll);
+    }
+
+    async function rollDamage(label, dmgStr, mod = 0) {
+        const hud = document.getElementById('dice-hud');
+        const resEl = document.getElementById('dice-result');
+        if (!hud || !resEl) return;
+
+        document.getElementById('dice-label').innerText = `Rolling ${label} Damage`;
+        document.getElementById('dice-mod').innerText = dmgStr;
+        hud.classList.add('active');
+        resEl.innerText = '--';
+
+        const logRef = db.ref('shared/gamelog').push();
+        logRef.set({
+            name: state.name || "Unknown",
+            label: `${label} Damage`, mod: dmgStr, result: '...', timestamp: Date.now()
+        });
+
+        // Parse dmgStr (e.g. "2d8+3")
+        const parts = dmgStr.toLowerCase().replace(/\s/g, '').split(/[+-]/);
+        const dicePart = parts[0]; 
+        const [count, sides] = dicePart.split('d').map(n => parseInt(n) || 1);
+        const flatBonus = dmgStr.includes('+') ? parseInt(parts[1]) : (dmgStr.includes('-') ? -parseInt(parts[1]) : 0);
+
+        // Animation
+        for(let i=0; i<10; i++) {
+            let temp = 0;
+            for(let j=0; j<count; j++) temp += Math.floor(Math.random() * sides) + 1;
+            resEl.innerText = temp + flatBonus + mod;
+            await new Promise(r => setTimeout(r, 60));
+        }
+
+        let total = 0;
+        for(let j=0; j<count; j++) total += Math.floor(Math.random() * sides) + 1;
+        total += flatBonus + mod;
+
+        resEl.innerText = total;
+        resEl.classList.add('glow-text-hud');
+        
+        logRef.update({ result: total });
+        
+        setTimeout(() => {
+            closeDiceHUD();
+            resEl.classList.remove('glow-text-hud');
+        }, 4000);
     }
 
     async function rollDice(label, modifier, noRoll = false) {
