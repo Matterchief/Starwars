@@ -1556,7 +1556,11 @@
             ac: state.ac,
             speed: state.speed,
             credits: state.credits,
-            stats: state.stats
+            stats: state.stats,
+            resources: state.resources || [],
+            feats: state.feats || [],
+            knownPowers: state.knownPowers || [],
+            loadout: state.loadout || { armor: null, main: null, off: null }
         };
         try { db.ref('characters/' + state.activeSlot).set(charData); } catch(e){}
     }
@@ -5382,31 +5386,97 @@
             if (hpPct < 25) hpColor = "bg-red-500";
             
             html += `
-            <div class="data-card p-4">
-                <div class="flex justify-between items-start mb-2">
+            <div class="data-card p-5 border-l-4" style="border-color: ${hpPct < 25 ? '#ef4444' : (hpPct < 50 ? '#f59e0b' : 'var(--hud)')}">
+                <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h3 class="text-lg font-bold leading-tight display-font glow-text-hud text-white">${escapeHtml(data.name)}</h3>
+                        <h3 class="text-xl font-black leading-tight display-font glow-text-hud text-white uppercase tracking-tighter">${escapeHtml(data.name)}</h3>
                         <span class="datapad-font text-[10px] uppercase tracking-widest mt-1 block" style="color: var(--accent);">${data.customTitle ? escapeHtml(data.customTitle) + ' — ' : ''}${escapeHtml(data.cls)} // Lvl ${data.level || 1}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-500 uppercase datapad-font block">Operative Status</span>
+                        <span class="text-xs font-bold ${hpPct > 0 ? 'text-emerald-400' : 'text-red-500'} uppercase datapad-font">${hpPct > 0 ? 'Active' : 'Incapacitated'}</span>
                     </div>
                 </div>
                 
-                <div class="mt-2 mb-3">
-                    <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
-                        <span>HP</span><span>${hpCur} / ${hpMax}</span>
-                    </div>
-                    <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
-                        <div class="h-full ${hpColor} transition-all" style="width: ${hpPct}%"></div>
-                    </div>
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- LEFT COLUMN: VITALS & RESOURCES -->
+                    <div>
+                        <div class="mb-4">
+                            <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-1 uppercase tracking-widest">
+                                <span>Bio-Vitals (HP)</span><span>${hpCur} / ${hpMax}</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-700">
+                                <div class="h-full ${hpColor} transition-all shadow-[0_0_8px_rgba(16,185,129,0.4)]" style="width: ${hpPct}%"></div>
+                            </div>
+                        </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
-                        <span class="text-[9px] uppercase font-bold block mb-1 text-slate-500 datapad-font tracking-widest">Armor</span>
-                        <span class="text-sm font-bold text-white datapad-font">${data.ac || 10}</span>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                <span class="text-[9px] uppercase font-bold block mb-1 text-slate-500 datapad-font tracking-widest">Armor (AC)</span>
+                                <span class="text-sm font-bold text-white datapad-font">${data.ac || 10}</span>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                <span class="text-[9px] uppercase font-bold block mb-1 text-slate-500 datapad-font tracking-widest">Speed</span>
+                                <span class="text-sm font-bold text-white datapad-font">${data.speed || 30}ft</span>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
+                                <span class="text-[9px] uppercase font-bold block mb-1 text-slate-500 datapad-font tracking-widest">Credits</span>
+                                <span class="text-sm font-bold text-amber-400 datapad-font">${data.credits || 0}</span>
+                            </div>
+                        </div>
+
+                        <!-- RESOURCES -->
+                        <div class="space-y-2">
+                            <span class="text-[10px] uppercase font-bold block text-slate-500 datapad-font tracking-widest">Resource Pools</span>
+                            ${(data.resources || []).length > 0 ? data.resources.map(res => {
+                                const resPct = res.max > 0 ? (res.current / res.max) * 100 : 0;
+                                return `
+                                <div class="bg-slate-900/30 p-2 rounded border border-slate-800/50">
+                                    <div class="flex justify-between text-[9px] text-slate-400 mb-1">
+                                        <span class="uppercase">${escapeHtml(res.name)}</span>
+                                        <span>${res.current} / ${res.max}</span>
+                                    </div>
+                                    <div class="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                                        <div class="h-full bg-sky-500 transition-all" style="width: ${resPct}%"></div>
+                                    </div>
+                                </div>
+                                `;
+                            }).join('') : '<span class="text-[10px] text-slate-600 italic">No custom resources active.</span>'}
+                        </div>
                     </div>
-                    <div class="bg-slate-900/50 p-2 rounded border border-slate-800 text-center">
-                        <span class="text-[9px] uppercase font-bold block mb-1 text-slate-500 datapad-font tracking-widest">Credits</span>
-                        <span class="text-sm font-bold text-amber-400 datapad-font">${data.credits || 0}</span>
+
+                    <!-- RIGHT COLUMN: LOADOUT & FEATS -->
+                    <div class="space-y-4">
+                        <!-- LOADOUT -->
+                        <div>
+                            <span class="text-[10px] uppercase font-bold block mb-2 text-slate-500 datapad-font tracking-widest">Active Loadout</span>
+                            <div class="bg-slate-900/50 rounded border border-slate-800 p-3">
+                                <div class="grid grid-cols-1 gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] text-hud border border-hud/20">A</div>
+                                        <span class="text-xs text-slate-300">${data.loadout?.armor ? escapeHtml(data.loadout.armor) : 'Standard Jumpsuit'}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] text-hud border border-hud/20">W</div>
+                                        <span class="text-xs text-slate-300">${data.loadout?.main ? escapeHtml(data.loadout.main) : 'Unarmed / Improvised'}</span>
+                                    </div>
+                                    <div class="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center">
+                                        <span class="text-[9px] uppercase text-slate-500">Force Capacity</span>
+                                        <span class="text-[10px] text-hud font-bold">${(data.knownPowers || []).length} Powers Mastered</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FEATS -->
+                        <div>
+                            <span class="text-[10px] uppercase font-bold block mb-2 text-slate-500 datapad-font tracking-widest">Specializations & Feats</span>
+                            <div class="flex flex-wrap gap-1">
+                                ${(data.feats || []).length > 0 ? data.feats.map(f => `
+                                    <span class="px-2 py-0.5 bg-hud/10 border border-hud/30 text-hud text-[10px] rounded uppercase">${escapeHtml(f)}</span>
+                                `).join('') : '<span class="text-[10px] text-slate-600 italic">No unique specializations.</span>'}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>`;
