@@ -18,20 +18,7 @@
     <div class="mt-4 text-[10px] text-slate-500 opacity-50 uppercase tracking-widest text-center mt-auto absolute bottom-8 left-0 right-0">Tap anywhere to override sequence</div>
 </div>
 
-<!-- Security Gateway Overlay -->
-<div id="security-gateway" class="fixed inset-0 bg-[#020617] z-[11000] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
-    <div class="max-w-md w-full bg-slate-900 border border-red-900 p-8 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.3)] text-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent pointer-events-none"></div>
-        <svg class="w-16 h-16 text-red-500 mx-auto mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        <h2 class="display-font text-2xl font-black text-red-500 tracking-widest uppercase mb-2">Restricted Access</h2>
-        <p class="text-red-400/70 text-xs uppercase datapad-font tracking-widest mb-8">Enter authorization code to decrypt datapad</p>
-        <input type="password" id="gateway-input" placeholder="ACCESS CODE" class="w-full bg-black/50 border border-red-900 text-red-500 text-center text-xl tracking-[0.2em] p-3 rounded focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 datapad-font mb-4 transition-colors" onkeydown="if(event.key === 'Enter') checkGateway()">
-        <p id="gateway-error" class="text-red-500 text-xs datapad-font tracking-widest mb-4 opacity-0 transition-opacity">ERROR: INVALID CODE</p>
-        <button onclick="checkGateway()" class="w-full bg-red-900/30 hover:bg-red-900/60 text-red-500 border border-red-900 hover:border-red-500 p-3 rounded font-bold uppercase tracking-widest datapad-font transition-all active:scale-95">
-            Authenticate
-        </button>
-    </div>
-</div>
+
 
 <!-- Holonet Alert Overlay -->
 <div id="holonet-alert" class="fixed inset-0 bg-red-950/90 z-[12000] hidden flex-col items-center justify-center p-6 backdrop-blur-md transition-opacity duration-300 opacity-0">

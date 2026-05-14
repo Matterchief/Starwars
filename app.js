@@ -4318,51 +4318,8 @@
         location.reload();
     }
 
-    const PASSCODE = "IG-88";
-
-    function checkGateway() {
-        const inputEl = document.getElementById('gateway-input');
-        const input = inputEl.value.trim().toUpperCase();
-        const err = document.getElementById('gateway-error');
-
-        if (input === PASSCODE || input === "IG88") {
-            localStorage.setItem('sw5e_gateway_auth', 'true');
-            const gateway = document.getElementById('security-gateway');
-            gateway.style.opacity = '0';
-            setTimeout(() => {
-                gateway.style.display = 'none';
-                
-                // If we were trying to select DM profile via override
-                if (localStorage.getItem('sw5e_profile_pending') === 'dm') {
-                    localStorage.removeItem('sw5e_profile_pending');
-                    localStorage.setItem('sw5e_profile', 'dm');
-                    startApplication();
-                } else {
-                    checkProfileOnLoad();
-                }
-            }, 500);
-        } else {
-            if (err) {
-                err.style.opacity = '1';
-                setTimeout(() => { err.style.opacity = '0'; }, 2000);
-            }
-            inputEl.value = "";
-            inputEl.focus();
-        }
-    }
-
     function checkAuthOnLoad() {
-        const auth = localStorage.getItem('sw5e_gateway_auth');
-        const gateway = document.getElementById('security-gateway');
-        
-        if (auth === 'true') {
-            gateway.style.display = 'none';
-            gateway.style.opacity = '0';
-            checkProfileOnLoad();
-        } else {
-            gateway.style.display = 'flex';
-            gateway.style.opacity = '1';
-        }
+        checkProfileOnLoad();
     }
 
     function checkProfileOnLoad() {
@@ -4381,24 +4338,6 @@
     }
 
     function selectProfile(slot) {
-        if (slot === 'dm') {
-            const gateway = document.getElementById('security-gateway');
-            localStorage.setItem('sw5e_profile_pending', 'dm');
-            gateway.style.display = 'flex';
-            setTimeout(() => { gateway.style.opacity = '1'; }, 10);
-            document.getElementById('gateway-input').focus();
-            
-            if (localStorage.getItem('sw5e_gateway_auth') === 'true') {
-                 localStorage.setItem('sw5e_profile', 'dm');
-                 localStorage.removeItem('sw5e_profile_pending');
-                 const selector = document.getElementById('profile-selector');
-                 selector.style.opacity = '0';
-                 setTimeout(() => { selector.style.display = 'none'; gateway.style.display = 'none'; }, 500);
-                 startApplication();
-            }
-            return;
-        }
-        
         localStorage.setItem('sw5e_profile', slot);
         const selector = document.getElementById('profile-selector');
         selector.style.opacity = '0';
