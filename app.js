@@ -262,8 +262,12 @@
         initFirebaseListeners();
     }
     
-    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+    function escapeHtml(s) { 
+        if (s === null || s === undefined) return "";
+        return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); 
+    }
     function highlight(text, query) {
+        if (!text) return "";
         if (!query) return escapeHtml(text);
         const escaped = escapeHtml(text);
         const q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -3257,12 +3261,12 @@
     // --- SHIP ALERT SOUND SYSTEM ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    const SHIP_ALERTS = [
+        const SHIP_ALERTS = [
         {id:'red_alert', name:'Red Alert', icon:'🚨', color:'text-red-500 border-red-900 bg-red-950/50', colorHex:'#ef4444', desc:'Combat stations! All hands!', freq:[440,880], type:'square', pattern:[0.15,0.1,0.15,0.1,0.3]},
-        {id:'proximity', name:'Proximity Warning', icon:'📡', color:'text-amber-400 border-amber-900 bg-amber-950/50', colorHex:'#f59e0b', desc:'Unknown contacts detected', freq:[600,400], type:'sine', pattern:[0.3,0.2,0.3]},
+        {id:'proximity', name:'Proximity Warning', icon:'🛰️', color:'text-amber-400 border-amber-900 bg-amber-950/50', colorHex:'#f59e0b', desc:'Unknown contacts detected', freq:[600,400], type:'sine', pattern:[0.3,0.2,0.3]},
         {id:'hull_breach', name:'Hull Breach', icon:'💥', color:'text-orange-500 border-orange-900 bg-orange-950/50', colorHex:'#f97316', desc:'Structural integrity failing', freq:[200,150,100], type:'sawtooth', pattern:[0.5,0.1,0.5]},
         {id:'power_fail', name:'Power Failure', icon:'⚡', color:'text-purple-400 border-purple-900 bg-purple-950/50', colorHex:'#a855f7', desc:'Main reactor offline', freq:[300,200], type:'triangle', pattern:[0.8,0.3,0.4]},
-        {id:'hyperdrive', name:'Hyperdrive Alert', icon:'🌀', color:'text-blue-400 border-blue-900 bg-blue-950/50', colorHex:'#60a5fa', desc:'Hyperdrive malfunction', freq:[500,700,900], type:'sine', pattern:[0.2,0.1,0.2,0.1,0.2]},
+        {id:'hyperdrive', name:'Hyperdrive Alert', icon:'🌌', color:'text-blue-400 border-blue-900 bg-blue-950/50', colorHex:'#60a5fa', desc:'Hyperdrive malfunction', freq:[500,700,900], type:'sine', pattern:[0.2,0.1,0.2,0.1,0.2]},
         {id:'all_clear', name:'All Clear', icon:'✅', color:'text-emerald-400 border-emerald-900 bg-emerald-950/50', colorHex:'#34d399', desc:'Threat neutralized', freq:[523,659,784], type:'sine', pattern:[0.3,0.05,0.3,0.05,0.6]}
     ];
 
@@ -3306,6 +3310,36 @@
         } catch(e) {}
     }
 
+    
+    
+    window.triggerShipCombatRoll = function(source) {
+        const d20 = Math.floor(Math.random() * 20) + 1;
+        // Ship damage: 3d10 for a standard laser battery
+        const d1 = Math.floor(Math.random() * 10) + 1;
+        const d2 = Math.floor(Math.random() * 10) + 1;
+        const d3 = Math.floor(Math.random() * 10) + 1;
+        const dmg = d1 + d2 + d3;
+        
+        const sourceName = source === 'player' ? (state.ship.name || 'OPERATIVE SHIP') : 'ENEMY CONTACT';
+        const targetName = source === 'player' ? 'ENEMY' : (state.ship.name || 'OPERATIVE SHIP');
+        
+        const msg = `⚔️ COMBAT ENGAGEMENT: ${sourceName} attacks ${targetName}! [d20: ${d20}] >> DMG: ${dmg} (${d1}+${d2}+${d3})`;
+        const color = source === 'player' ? '#3b82f6' : '#ef4444';
+        
+        firebaseSync('shared/broadcast', { message: msg, timestamp: Date.now(), alertColor: color });
+    }
+
+    window.triggerSystemEvent = function(eventId) {
+        let msg = "";
+        let color = "#f97316"; // orange
+        if (eventId === 'hyperspace_drop') msg = "SYSTEM OVERRIDE: Emergency Hyperspace Drop Initiated!";
+        if (eventId === 'emp_blast') { msg = "CRITICAL: Electromagnetic Pulse Detected. Systems offline."; color = "#3b82f6"; }
+        if (eventId === 'comms_blackout') { msg = "WARNING: Long-range communications severed."; color = "#a855f7"; }
+        if (eventId === 'gravity_loss') { msg = "ALERT: Artificial gravity generators failing."; color = "#facc15"; }
+        
+        firebaseSync('shared/broadcast', { message: msg, timestamp: Date.now(), alertColor: color });
+    }
+
     function triggerShipAlert(alertId) {
         const alert = SHIP_ALERTS.find(a => a.id === alertId);
         if (!alert) return;
@@ -3313,7 +3347,7 @@
         const d20 = Math.floor(Math.random() * 20) + 1;
         const showRoll = document.getElementById('dm-show-roll');
         const rollStr = (showRoll && showRoll.checked) ? ` [🎲 d20: ${d20}]` : '';
-        const msg = `⚠ SHIP ALERT: ${alert.name.toUpperCase()} — ${alert.desc.toUpperCase()}${rollStr}`;
+                const msg = `⚠ SHIP ALERT: ${alert.name.toUpperCase()} — ${alert.desc.toUpperCase()}${rollStr}`;
         firebaseSync('shared/broadcast', { message: msg, timestamp: Date.now(), alertColor: alert.colorHex });
     }
 
@@ -3678,8 +3712,6 @@
             firebaseSync('characters/' + slotId, partyData[slotId]);
             inspectOperative(slotId);
         }
-    }
-
     function removeDMFeat(slotId, idx) {
         if(!partyData[slotId] || !partyData[slotId].feats) return;
         partyData[slotId].feats.splice(idx, 1);
@@ -3690,6 +3722,11 @@
     function renderDM() {
         const c = document.getElementById('dm-controls-container');
         if (!c) return;
+        
+        // Ensure other DM components are rendered initially
+        renderDMTelemetry();
+        renderDMVesselStatus();
+        renderDMEnemies();
 
         c.innerHTML = `
             <div class="space-y-6">
@@ -3722,6 +3759,18 @@
                     </div>
                 </div>
 
+                <!-- Combat Orchestration -->
+                <div>
+                    <h4 class="text-red-500 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-red-900/50 pb-1 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Combat Orchestration
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button onclick="triggerShipCombatRoll('player')" class="bg-blue-950/20 border border-blue-900/50 text-blue-400 hover:bg-blue-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Ship Attack Roll</button>
+                        <button onclick="triggerShipCombatRoll('enemy')" class="bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Enemy Attack Roll</button>
+                    </div>
+                </div>
+
                 <!-- Ship's Log -->
                 <div>
                     <h4 class="text-hud font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-hud/30 pb-1">Ship's Log Transmission</h4>
@@ -3729,6 +3778,17 @@
                     <div class="flex gap-2">
                         <button onclick="sendShipLog('all')" class="flex-1 bg-hud/10 hover:bg-hud/20 text-hud border border-hud/30 px-3 py-1.5 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Show All</button>
                         <button onclick="sendShipLog('scroll')" class="flex-1 bg-indigo-950/20 hover:bg-indigo-900/40 text-indigo-400 border border-indigo-900/30 px-3 py-1.5 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Scroll</button>
+                    </div>
+                </div>
+
+                <!-- System Events -->
+                <div>
+                    <h4 class="text-orange-400 font-bold uppercase tracking-widest text-[10px] mb-3 border-b border-orange-900/50 pb-1">Environmental & System Overrides</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="triggerSystemEvent('hyperspace_drop')" class="bg-orange-950/20 border border-orange-900/50 text-orange-400 hover:bg-orange-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Emergency Hyper-Drop</button>
+                        <button onclick="triggerSystemEvent('emp_blast')" class="bg-blue-950/20 border border-blue-900/50 text-blue-400 hover:bg-blue-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">EMP Blast</button>
+                        <button onclick="triggerSystemEvent('comms_blackout')" class="bg-purple-950/20 border border-purple-900/50 text-purple-400 hover:bg-purple-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Comms Blackout</button>
+                        <button onclick="triggerSystemEvent('gravity_loss')" class="bg-yellow-950/20 border border-yellow-900/50 text-yellow-400 hover:bg-yellow-900/40 px-3 py-2 rounded text-[9px] uppercase font-bold tracking-widest datapad-font">Zero Gravity Loss</button>
                     </div>
                 </div>
 
@@ -3776,8 +3836,8 @@
                     <div>
                         <label class="text-[9px] text-emerald-500 uppercase font-bold block mb-1">Hull Integrity</label>
                         <div class="flex gap-2 mb-1">
-                            <input type="number" value="${state.ship ? state.ship.hullCur : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullCur=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
-                            <input type="number" value="${state.ship ? state.ship.hullMax : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-800 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${(state.ship && state.ship.hullCur !== undefined) ? state.ship.hullCur : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullCur=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${(state.ship && state.ship.hullMax !== undefined) ? state.ship.hullMax : 100}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-emerald-800 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.hullMax=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
                         </div>
                         <div class="flex gap-1">
                             <button onclick="dmModifyShip('hull', -10)" class="flex-1 bg-red-950/50 border border-red-900 text-red-500 text-[10px] font-bold rounded py-0.5 hover:bg-red-900 hover:text-white transition-colors">-10</button>
@@ -3787,8 +3847,8 @@
                     <div>
                         <label class="text-[9px] text-blue-400 uppercase font-bold block mb-1">Shield Energy</label>
                         <div class="flex gap-2 mb-1">
-                            <input type="number" value="${state.ship ? state.ship.shieldsCur : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsCur=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
-                            <input type="number" value="${state.ship ? state.ship.shieldsMax : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-900 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${(state.ship && state.ship.shieldsCur !== undefined) ? state.ship.shieldsCur : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-400 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsCur=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
+                            <input type="number" value="${(state.ship && state.ship.shieldsMax !== undefined) ? state.ship.shieldsMax : 50}" class="w-1/2 bg-slate-900 border border-slate-700 rounded px-1 py-1 text-blue-900 font-mono text-center text-xs" onchange="if(state.ship) { state.ship.shieldsMax=parseInt(this.value); saveState(); firebaseSync('shared/ship', state.ship); renderShip(); renderDMVesselStatus(); }">
                         </div>
                         <div class="flex gap-1">
                             <button onclick="dmModifyShip('shields', -10)" class="flex-1 bg-red-950/50 border border-red-900 text-red-500 text-[10px] font-bold rounded py-0.5 hover:bg-red-900 hover:text-white transition-colors">-10</button>
@@ -3913,7 +3973,7 @@
             class: "Fighter",
             affiliation: "Imperial",
             stage: 1,
-            hpMax: 50, hpCur: 50,
+            hpMax: 30, hpCur: 30,
             shMax: 20, shCur: 20,
             ac: 14,
             visible: true
