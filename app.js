@@ -4115,11 +4115,7 @@
         bootSkipped = true;
         const bootScreen = document.getElementById('boot-screen');
         if (bootScreen) {
-            bootScreen.style.opacity = '0';
-            setTimeout(() => { 
-                bootScreen.style.display = 'none'; 
-                bootScreen.classList.remove('active');
-            }, 400);
+            bootScreen.classList.remove('active');
         }
     }
     async function runBootSequence() {
@@ -4241,35 +4237,26 @@
         const icon = alertDiv.querySelector('svg');
         const btn = alertDiv.querySelector('button');
         
-        // Parse Ship Alert Message if possible
-        if (msg.includes('SHIP ALERT:')) {
-            const parts = msg.replace('⚠ SHIP ALERT: ', '').split(' — ');
-            titleEl.innerText = parts[0] || 'SHIP ALERT';
-            msgEl.innerText = parts[1] || '';
-        } else {
-            titleEl.innerText = 'INCOMING ALERT';
-            msgEl.innerText = msg;
-        }
+        if (!alertDiv) return;
+
+        titleEl.innerText = 'INCOMING ALERT';
+        msgEl.innerText = msg;
         
         // Apply color theme
-        const c = alertColor || '#dc2626'; // default red
+        const c = alertColor || '#dc2626'; 
         alertDiv.style.background = `color-mix(in srgb, ${c} 15%, rgba(2,6,23,0.92))`;
         if (icon) icon.style.color = c;
         if (titleEl) { titleEl.style.color = c; titleEl.style.textShadow = `0 0 30px ${c}80`; }
         if (btn) { btn.style.borderColor = c; btn.style.color = c; }
         
-        alertDiv.classList.remove('hidden');
-        alertDiv.classList.add('flex');
-        setTimeout(() => { alertDiv.style.opacity = '1'; }, 10);
+        alertDiv.classList.add('active');
     }
 
     function dismissAlert() {
         const alertDiv = document.getElementById('holonet-alert');
-        alertDiv.style.opacity = '0';
-        setTimeout(() => {
-            alertDiv.classList.add('hidden');
-            alertDiv.classList.remove('flex');
-        }, 300);
+        if (alertDiv) {
+            alertDiv.classList.remove('active');
+        }
     }
 
     function createCustomBounty() {
@@ -4331,12 +4318,9 @@
         if (input === PASSCODE || input === "IG88" || input === "ORGY") {
             localStorage.setItem('sw5e_gateway_auth', 'true');
             const gateway = document.getElementById('security-gateway');
-            gateway.style.opacity = '0';
-            setTimeout(() => {
-                gateway.classList.add('hidden');
-                localStorage.setItem('sw5e_profile', 'dm');
-                startApplication();
-            }, 500);
+            gateway.classList.remove('active');
+            localStorage.setItem('sw5e_profile', 'dm');
+            startApplication();
         } else {
             if (err) {
                 err.style.opacity = '1';
@@ -4361,31 +4345,23 @@
             if (partyData.slot2 && partyData.slot2.name) document.getElementById('profile-btn-slot2').innerText = partyData.slot2.name;
             if (partyData.slot3 && partyData.slot3.name) document.getElementById('profile-btn-slot3').innerText = partyData.slot3.name;
             
-            selector.classList.remove('hidden');
-            selector.style.display = 'flex';
-            setTimeout(() => { selector.style.opacity = '1'; }, 10);
+            selector.classList.add('active');
         }
     }
 
     function selectProfile(slot) {
         if (slot === 'dm') {
             const gateway = document.getElementById('security-gateway');
-            gateway.classList.remove('hidden');
-            gateway.style.display = 'flex';
-            setTimeout(() => { gateway.style.opacity = '1'; }, 10);
+            gateway.classList.add('active');
             document.getElementById('gateway-input').focus();
             return;
         }
         
         localStorage.setItem('sw5e_profile', slot);
         const selector = document.getElementById('profile-selector');
-        selector.style.opacity = '0';
+        selector.classList.remove('active');
         
         startApplication();
-        setTimeout(() => { 
-            selector.style.display = 'none'; 
-            selector.classList.add('hidden');
-        }, 500);
     }
 
     function startApplication() {

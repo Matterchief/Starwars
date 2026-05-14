@@ -21,7 +21,7 @@
 
 
 <!-- Security Gateway Overlay -->
-<div id="security-gateway" class="fixed inset-0 bg-[#020617] z-[11000] hidden flex-col items-center justify-center p-6 transition-opacity duration-500">
+<div id="security-gateway" class="transition-opacity duration-500">
     <div class="max-w-md w-full bg-slate-900 border border-red-900 p-8 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.3)] text-center relative overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-transparent to-transparent pointer-events-none"></div>
         <svg class="w-16 h-16 text-red-500 mx-auto mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
@@ -36,7 +36,7 @@
 </div>
 
 <!-- Holonet Alert Overlay -->
-<div id="holonet-alert" class="fixed inset-0 bg-red-950/90 z-[12000] hidden flex-col items-center justify-center p-6 backdrop-blur-md transition-opacity duration-300 opacity-0">
+<div id="holonet-alert" class="transition-opacity duration-300">
     <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8L3N2Zz4=')] opacity-50 pointer-events-none mix-blend-overlay"></div>
     <div class="max-w-3xl w-full text-center relative z-10 animate-pulse">
         <svg class="w-32 h-32 text-red-500 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -91,7 +91,7 @@
 </div>
 
 <!-- Launch Profile Selector -->
-<div id="profile-selector" class="fixed inset-0 bg-[#020617] z-[10500] hidden flex-col items-center justify-center p-6 transition-opacity duration-500">
+<div id="profile-selector" class="transition-opacity duration-500">
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900/40 via-transparent to-transparent pointer-events-none"></div>
     <div class="max-w-md w-full relative z-10">
         <h2 class="display-font text-3xl font-black text-hud tracking-widest uppercase mb-2 text-center glow-text-hud">Select Profile</h2>
