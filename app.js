@@ -4116,7 +4116,10 @@
         const bootScreen = document.getElementById('boot-screen');
         if (bootScreen) {
             bootScreen.style.opacity = '0';
-            setTimeout(() => { bootScreen.style.display = 'none'; }, 400);
+            setTimeout(() => { 
+                bootScreen.style.display = 'none'; 
+                bootScreen.classList.remove('active');
+            }, 400);
         }
     }
     async function runBootSequence() {
@@ -4330,7 +4333,7 @@
             const gateway = document.getElementById('security-gateway');
             gateway.style.opacity = '0';
             setTimeout(() => {
-                gateway.style.display = 'none';
+                gateway.classList.add('hidden');
                 localStorage.setItem('sw5e_profile', 'dm');
                 startApplication();
             }, 500);
@@ -4358,6 +4361,7 @@
             if (partyData.slot2 && partyData.slot2.name) document.getElementById('profile-btn-slot2').innerText = partyData.slot2.name;
             if (partyData.slot3 && partyData.slot3.name) document.getElementById('profile-btn-slot3').innerText = partyData.slot3.name;
             
+            selector.classList.remove('hidden');
             selector.style.display = 'flex';
             setTimeout(() => { selector.style.opacity = '1'; }, 10);
         }
@@ -4366,6 +4370,7 @@
     function selectProfile(slot) {
         if (slot === 'dm') {
             const gateway = document.getElementById('security-gateway');
+            gateway.classList.remove('hidden');
             gateway.style.display = 'flex';
             setTimeout(() => { gateway.style.opacity = '1'; }, 10);
             document.getElementById('gateway-input').focus();
@@ -4377,15 +4382,17 @@
         selector.style.opacity = '0';
         
         startApplication();
-        setTimeout(() => { selector.style.display = 'none'; }, 500);
+        setTimeout(() => { 
+            selector.style.display = 'none'; 
+            selector.classList.add('hidden');
+        }, 500);
     }
 
     function startApplication() {
         const bootScreen = document.getElementById('boot-screen');
         if (!sessionStorage.getItem('sw5e_booted')) {
             if(bootScreen) {
-                bootScreen.style.display = 'flex';
-                bootScreen.style.opacity = '1';
+                bootScreen.classList.add('active');
             }
         }
         
