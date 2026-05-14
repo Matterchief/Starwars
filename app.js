@@ -4318,6 +4318,32 @@
         location.reload();
     }
 
+    const PASSCODE = "IG-88";
+
+    function checkGateway() {
+        const inputEl = document.getElementById('gateway-input');
+        const input = inputEl.value.trim().toUpperCase();
+        const err = document.getElementById('gateway-error');
+
+        if (input === PASSCODE || input === "IG88" || input === "ORGY") {
+            localStorage.setItem('sw5e_gateway_auth', 'true');
+            const gateway = document.getElementById('security-gateway');
+            gateway.style.opacity = '0';
+            setTimeout(() => {
+                gateway.style.display = 'none';
+                localStorage.setItem('sw5e_profile', 'dm');
+                startApplication();
+            }, 500);
+        } else {
+            if (err) {
+                err.style.opacity = '1';
+                setTimeout(() => { err.style.opacity = '0'; }, 2000);
+            }
+            inputEl.value = "";
+            inputEl.focus();
+        }
+    }
+
     function checkAuthOnLoad() {
         checkProfileOnLoad();
     }
@@ -4338,6 +4364,14 @@
     }
 
     function selectProfile(slot) {
+        if (slot === 'dm') {
+            const gateway = document.getElementById('security-gateway');
+            gateway.style.display = 'flex';
+            setTimeout(() => { gateway.style.opacity = '1'; }, 10);
+            document.getElementById('gateway-input').focus();
+            return;
+        }
+        
         localStorage.setItem('sw5e_profile', slot);
         const selector = document.getElementById('profile-selector');
         selector.style.opacity = '0';
